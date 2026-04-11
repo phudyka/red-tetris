@@ -1,0 +1,81 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// src/client/reducers/player.js
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { createEmptyBoard, addPenaltyLines } from '../../shared/gameLogic'
+import {
+  SET_PLAYER,
+  SET_BOARD,
+  NEW_PIECE,
+  SET_GHOST,
+  ADD_PENALTY,
+  PLAYER_DIED,
+  RESET_PLAYER,
+} from '../actions/player'
+import { GAME_RESET } from '../actions/game'
+
+// Constante locale — dispatché directement depuis Game.jsx pour éviter import circulaire
+const SET_PIECE = 'SET_PIECE'
+
+const initialState = {
+  name: null,
+  isHost: false,
+  isAlive: true,
+  board: createEmptyBoard(),
+  currentPiece: null, // { type, shape, x, y }
+  ghostY: null,
+}
+
+const playerReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case SET_PLAYER:
+      return { ...state, ...action.payload }
+
+    case SET_BOARD:
+      return { ...state, board: action.payload }
+
+    // Dispatché directement par Game.jsx (mouvement, rotation, descente)
+    case SET_PIECE:
+      return { ...state, currentPiece: action.payload }
+
+    case NEW_PIECE: {
+      const { piece } = action.payload
+      const newPieceState = {
+        type: piece.type,
+        shape: piece.shape || null, // la shape est fournie par le serveur ou calculée
+        x: piece.spawnX,
+        y: piece.spawnY,
+      }
+      return {
+        ...state,
+        currentPiece: newPieceState,
+        ghostY: null,
+      }
+    }
+
+    case SET_GHOST:
+      return { ...state, ghostY: action.payload }
+
+    case ADD_PENALTY: {
+      const newBoard = addPenaltyLines(state.board, action.payload)
+      return { ...state, board: newBoard }
+    }
+
+    case PLAYER_DIED:
+      return { ...state, isAlive: false }
+
+    case RESET_PLAYER:
+    case GAME_RESET:
+      return {
+        ...initialState,
+        name: state.name,
+        isHost: state.isHost,
+        board: createEmptyBoard(),
+      }
+
+    default:
+      return state
+  }
+}
+
+export default playerReducer
