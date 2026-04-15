@@ -26,6 +26,7 @@ const gameReducer = (state = initialState, action) => {
         ...state,
         room: action.payload.room,
         players: action.payload.players,
+        started: action.payload.started || false,
       }
 
     case PLAYER_JOINED:

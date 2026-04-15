@@ -35,10 +35,13 @@ const opponentsReducer = (state = initialState, action) => {
           : opp
       )
 
-    case ADD_OPPONENT:
+    case ADD_OPPONENT: {
+      const oppName = typeof action.payload === 'string' ? action.payload : action.payload.name
+      const isAlive = typeof action.payload === 'object' && action.payload.isAlive !== undefined ? action.payload.isAlive : true
       // N'ajoute pas si déjà présent
-      if (state.some(opp => opp.name === action.payload)) return state
-      return [...state, { name: action.payload, spectrum: Array(10).fill(0), isAlive: true }]
+      if (state.some(opp => opp.name === oppName)) return state
+      return [...state, { name: oppName, spectrum: Array(10).fill(0), isAlive }]
+    }
 
     case PLAYER_LEFT:
       return state.filter(opp => opp.name !== action.payload.playerName)

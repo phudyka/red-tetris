@@ -8,6 +8,8 @@ export const BOARD_HEIGHT = 20
 
 // Intervalle de chute de base en millisecondes
 export const TICK_INTERVAL = 800
+export const LOCK_DELAY = 500
+export const MAX_MOVE_RESETS = 15
 
 // Définitions des 7 tétrominos
 // shape : matrice de 0 (vide) / 1 (occupé) — rotation de base

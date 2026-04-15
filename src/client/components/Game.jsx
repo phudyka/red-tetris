@@ -33,6 +33,8 @@ import {
   SPAWN_X,
   SPAWN_Y,
   TICK_INTERVAL,
+  LOCK_DELAY,
+  MAX_MOVE_RESETS,
 } from '../../shared/constants'
 
 import {
@@ -54,10 +56,23 @@ const Game = () => {
   const canHold      = useSelector(s => s.player.canHold)
   const opponents    = useSelector(s => s.opponents)
 
+  const nextPieceType = useSelector(s => s.player.nextPieceType)
   const isPlaying = started && !over && isAlive
 
   const [clearingRows, setClearingRows] = useState([])
   const [lockingCells, setLockingCells] = useState([])
+
+  // ── Refs pour le Lock Delay (Guideline) ───────────────────────────────────
+  const lockTimeoutRef = useRef(null)
+  const moveResetsRef = useRef(0)
+  const lastYRef = useRef(0) // Pour détecter si la pièce a bougé verticalement
+
+  const clearLockTimeout = useCallback(() => {
+    if (lockTimeoutRef.current) {
+      clearTimeout(lockTimeoutRef.current)
+      lockTimeoutRef.current = null
+    }
+  }, [])
   useEffect(() => {
     if (!piece || !piece.shape || !board || !isPlaying) return
 
@@ -67,9 +82,32 @@ const Game = () => {
     }
   }, [piece, board, isPlaying, dispatch, room])
 
+  // ── Spawning Predictive ──────────────────────────────────────────────────
+  const spawnNextPiecePredictively = useCallback(() => {
+    if (!nextPieceType) return
+
+    const type = nextPieceType
+    const newPieceLocal = {
+      type,
+      shape: PIECES[type].shape,
+      x: SPAWN_X[type],
+      y: SPAWN_Y,
+    }
+    dispatch({ type: 'SET_PIECE', payload: newPieceLocal })
+    dispatch({ type: 'SET_PLAYER', payload: { canHold: true } })
+    
+    // On demande quand même au serveur pour peupler la PROCHAINE preview
+    // Note: Le serveur répondra "newPiece", on doit le gérer dans le reducer
+    // pour ne pas écraser la pièce qu'on vient de spawn.
+    emitRequestNextPiece(room)
+  }, [nextPieceType, dispatch, room])
+
   // ── Lock piece : place la pièce, efface les lignes, demande la suivante ────
   const lockPiece = useCallback((currentBoard, currentPieceArg) => {
     if (!currentPieceArg || !currentPieceArg.shape) return
+
+    clearLockTimeout()
+    moveResetsRef.current = 0
 
     // 1. Animation Lock Flash
     const pieceCells = []
@@ -89,8 +127,6 @@ const Game = () => {
     // 2. Animation Line Clear
     if (linesCleared > 0) {
       setClearingRows(clearedIndexes)
-      
-      // On affiche le plateau AVEC la pièce verrouillée mais AVANT l'effacement
       dispatch(setBoard(newBoard))
       dispatch({ type: 'SET_PIECE', payload: null })
 
@@ -101,19 +137,41 @@ const Game = () => {
         
         const spectrum = computeSpectrum(clearedBoard)
         emitUpdateSpectrum(room, spectrum)
-        dispatch({ type: 'SET_PLAYER', payload: { canHold: true } })
-        emitRequestNextPiece(room)
+        
+        spawnNextPiecePredictively()
       }, 300)
     } else {
       dispatch(setBoard(newBoard))
-      dispatch({ type: 'SET_PIECE', payload: null })
 
       const spectrum = computeSpectrum(newBoard)
       emitUpdateSpectrum(room, spectrum)
-      dispatch({ type: 'SET_PLAYER', payload: { canHold: true } })
-      emitRequestNextPiece(room)
+      
+      spawnNextPiecePredictively()
     }
-  }, [dispatch, room])
+  }, [dispatch, room, spawnNextPiecePredictively, clearLockTimeout])
+
+  const requestLock = useCallback(() => {
+    if (lockTimeoutRef.current) return
+    lockTimeoutRef.current = setTimeout(() => {
+      lockPiece(board, piece)
+    }, LOCK_DELAY)
+  }, [board, piece, lockPiece])
+
+  const handleMoveReset = useCallback((newPieceState) => {
+    const isNowGrounded = !isValidPosition(board, newPieceState.shape, newPieceState.x, newPieceState.y + 1)
+    
+    if (isNowGrounded) {
+      if (moveResetsRef.current < MAX_MOVE_RESETS) {
+        moveResetsRef.current++
+        clearLockTimeout()
+        requestLock()
+      }
+    } else {
+      // Si on n'est plus au sol (merci au move/kick), on annule le lock timer
+      clearLockTimeout()
+      moveResetsRef.current = 0
+    }
+  }, [board, clearLockTimeout, requestLock])
 
   // ── Tick de la boucle de jeu ───────────────────────────────────────────────
   const onTick = useCallback(() => {
@@ -124,11 +182,13 @@ const Game = () => {
     if (isValidPosition(board, piece.shape, piece.x, nextY)) {
       // La pièce peut descendre
       dispatch({ type: 'SET_PIECE', payload: { ...piece, y: nextY } })
+      clearLockTimeout()
+      moveResetsRef.current = 0
     } else {
-      // La pièce touche quelque chose, on la verrouille au prochain tick naturel
-      lockPiece(board, piece)
+      // La pièce touche quelque chose, on lance le timer de lock (Guideline)
+      requestLock()
     }
-  }, [piece, board, dispatch, lockPiece])
+  }, [piece, board, dispatch, requestLock, clearLockTimeout])
 
   useGameLoop(isPlaying, TICK_INTERVAL, onTick)
 
@@ -138,16 +198,18 @@ const Game = () => {
     if (isValidPosition(board, piece.shape, piece.x - 1, piece.y)) {
       const updated = { ...piece, x: piece.x - 1 }
       dispatch({ type: 'SET_PIECE', payload: updated })
+      handleMoveReset(updated)
     }
-  }, [piece, board, dispatch])
+  }, [piece, board, dispatch, handleMoveReset])
 
   const moveRight = useCallback(() => {
     if (!piece) return
     if (isValidPosition(board, piece.shape, piece.x + 1, piece.y)) {
       const updated = { ...piece, x: piece.x + 1 }
       dispatch({ type: 'SET_PIECE', payload: updated })
+      handleMoveReset(updated)
     }
-  }, [piece, board, dispatch])
+  }, [piece, board, dispatch, handleMoveReset])
 
   const rotate = useCallback(() => {
     if (!piece) return
@@ -164,10 +226,11 @@ const Game = () => {
       if (isValidPosition(board, rotated, piece.x + kick, piece.y)) {
         const updated = { ...piece, shape: rotated, x: piece.x + kick }
         dispatch({ type: 'SET_PIECE', payload: updated })
+        handleMoveReset(updated)
         break
       }
     }
-  }, [piece, board, dispatch])
+  }, [piece, board, dispatch, handleMoveReset])
 
   const softDrop = useCallback(() => {
     if (!piece) return
@@ -175,8 +238,9 @@ const Game = () => {
     if (isValidPosition(board, piece.shape, piece.x, nextY)) {
       const updated = { ...piece, y: nextY }
       dispatch({ type: 'SET_PIECE', payload: updated })
+      clearLockTimeout()
     }
-  }, [piece, board, dispatch])
+  }, [piece, board, dispatch, clearLockTimeout])
 
   const hardDrop = useCallback(() => {
     if (!piece) return

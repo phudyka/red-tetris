@@ -40,11 +40,8 @@ io.on('connection', (socket) => {
   socket.on('joinGame', ({ room, playerName }) => {
     const game = manager.getOrCreate(room)
 
-    // Partie déjà lancée → refus
-    if (game.started && !game.over) {
-      socket.emit('error', { message: 'Game already started' })
-      return
-    }
+    // Partie déjà lancée : le joueur rejoint en tant que spectateur (isAlive = false)
+    const isLateJoin = game.started && !game.over
 
     // Nom déjà pris dans cette room
     const nameTaken = game.players.some(p => p.name === playerName)
@@ -54,6 +51,9 @@ io.on('connection', (socket) => {
     }
 
     const player = new Player(socket.id, playerName, room)
+    if (isLateJoin) {
+      player.isAlive = false
+    }
     game.addPlayer(player)
     socket.join(room)
 
@@ -62,13 +62,19 @@ io.on('connection', (socket) => {
       room,
       playerName,
       isHost: player.isHost,
-      players: game.players.map(p => ({ name: p.name, isHost: p.isHost })),
+      started: game.started,
+      players: game.players.map(p => ({ 
+        name: p.name, 
+        isHost: p.isHost,
+        isAlive: p.isAlive 
+      })),
     })
 
     // Annoncer aux autres
     socket.to(room).emit('playerJoined', {
       playerName,
       isHost: player.isHost,
+      isAlive: player.isAlive,
     })
   })
 

@@ -15,13 +15,23 @@ const OpponentView = ({ name, spectrum, isAlive }) => {
   return (
     <div className={`opponent${isAlive ? '' : ' opponent--dead'}`}>
       <div className="opponent__name" title={name}>{name}</div>
-      <div className="opponent__spectrum" role="img" aria-label={`spectrum of ${name}`}>
-        {spectrum.map((height, col) => (
-          <div
-            key={col}
-            className="opponent__bar"
-            style={{ height: `${(height / 20) * maxHeight}px` }}
-          />
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(10, 1fr)',
+        alignItems: 'end',
+        height: '40px',
+        width: '100%',
+        gap: '2px',
+        filter: 'drop-shadow(0 0 8px #ff000066)',
+        marginTop: '8px'
+      }} role="img" aria-label={`spectrum of ${name}`}>
+        {spectrum.map((h, i) => (
+          <div key={i} style={{
+            height: `${(h / 20) * 100}%`,
+            background: 'linear-gradient(to top, #ff4444, #ff444400)',
+            transition: 'height 0.1s ease-out',
+            borderRadius: '2px 2px 0 0',
+          }} />
         ))}
       </div>
     </div>

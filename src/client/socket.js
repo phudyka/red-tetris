@@ -37,18 +37,19 @@ export const initSocket = (dispatch) => {
 
   socket.on('gameJoined', (payload) => {
     dispatch(gameJoined(payload))
-    dispatch(setPlayer({ name: payload.playerName, isHost: payload.isHost }))
+    const me = payload.players.find(p => p.name === payload.playerName)
+    dispatch(setPlayer({ name: payload.playerName, isHost: payload.isHost, isAlive: me ? me.isAlive : true }))
     dispatch(setOpponents(
       payload.players
         .filter(p => p.name !== payload.playerName)
-        .map(p => ({ name: p.name, spectrum: Array(10).fill(0), isAlive: true }))
+        .map(p => ({ name: p.name, spectrum: Array(10).fill(0), isAlive: p.isAlive }))
     ))
   })
 
   socket.on('playerJoined', (payload) => {
     dispatch(playerJoined(payload))
     // Ajouter l'adversaire dans la liste opponents sans écraser les existants
-    dispatch(addOpponent(payload.playerName))
+    dispatch(addOpponent({ name: payload.playerName, isAlive: payload.isAlive }))
   })
 
   socket.on('playerLeft', (payload) => {

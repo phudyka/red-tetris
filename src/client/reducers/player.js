@@ -41,9 +41,20 @@ const playerReducer = (state = initialState, action) => {
     // Dispatché directement par Game.jsx (mouvement, rotation, descente)
     case SET_PIECE:
       return { ...state, currentPiece: action.payload }
-
     case NEW_PIECE: {
-      const { piece } = action.payload
+      const { piece, nextPiece } = action.payload
+      const nextPieceState = nextPiece ? { type: nextPiece.type } : null
+      
+      // Si on a déjà une pièce (Predictive spawning / Fast move), on n'écrase pas.
+      // Mais on met TOUJOURS à jour la preview (nextPieceType).
+      if (state.currentPiece) {
+        return {
+          ...state,
+          nextPieceType: nextPieceState ? nextPieceState.type : null,
+          ghostY: null,
+        }
+      }
+
       const newPieceState = {
         type: piece.type,
         shape: piece.shape || (PIECES[piece.type] ? PIECES[piece.type].shape : null),
@@ -53,7 +64,7 @@ const playerReducer = (state = initialState, action) => {
       return {
         ...state,
         currentPiece: newPieceState,
-        nextPieceType: action.payload.nextPiece ? action.payload.nextPiece.type : null,
+        nextPieceType: nextPieceState ? nextPieceState.type : null,
         ghostY: null,
       }
     }
