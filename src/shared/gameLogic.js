@@ -74,13 +74,29 @@ export const placePiece = (board, shape, x, y, colorIndex) => {
  * @returns {{ newBoard: number[][], linesCleared: number }}
  */
 export const clearLines = (board) => {
-  // Une ligne est conservée si elle contient une case vide OU si c'est une ligne de pénalité (contient 8)
-  const keptRows = board.filter(row => row.some(cell => cell === 0) || row.includes(8))
-  const linesCleared = BOARD_HEIGHT - keptRows.length
+  const clearedIndexes = []
+  const keptRows = []
+
+  for (let i = 0; i < board.length; i++) {
+    const row = board[i]
+    // Une ligne est effacée si elle est complète ET ne contient pas de pénalité (8)
+    const isFull = row.every(cell => cell !== 0)
+    const hasPenalty = row.includes(8)
+
+    if (isFull && !hasPenalty) {
+      clearedIndexes.push(i)
+    } else {
+      keptRows.push(row)
+    }
+  }
+
+  const linesCleared = clearedIndexes.length
   const emptyRows = Array.from({ length: linesCleared }, () => Array(BOARD_WIDTH).fill(0))
+
   return {
     newBoard: [...emptyRows, ...keptRows],
     linesCleared,
+    clearedIndexes,
   }
 }
 

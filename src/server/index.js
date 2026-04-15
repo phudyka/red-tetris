@@ -94,11 +94,14 @@ io.on('connection', (socket) => {
     game.players.forEach(p => {
       const typeIndex = game.getNextPiece(p)
       const type = PIECE_TYPES[typeIndex]
+      const nextTypeIndex = game.pieces[p.pieceIndex] 
+      const nextType = nextTypeIndex !== undefined ? PIECE_TYPES[nextTypeIndex] : null
       const spawnX = SPAWN_X[type]
 
       io.to(p.id).emit('gameStarted', {
         pieceIndex: typeIndex,
         piece: { type, spawnX, spawnY: SPAWN_Y },
+        nextPiece: { type: nextType },
       })
     })
   })
@@ -180,11 +183,14 @@ io.on('connection', (socket) => {
 
     const typeIndex = game.getNextPiece(player)
     const type = PIECE_TYPES[typeIndex]
+    const nextTypeIndex = game.pieces[player.pieceIndex]
+    const nextType = nextTypeIndex !== undefined ? PIECE_TYPES[nextTypeIndex] : null
     const spawnX = SPAWN_X[type]
 
     socket.emit('newPiece', {
       pieceIndex: typeIndex,
       piece: { type, spawnX, spawnY: SPAWN_Y },
+      nextPiece: { type: nextType },
     })
   })
 

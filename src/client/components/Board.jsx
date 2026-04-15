@@ -15,7 +15,7 @@ import { placePiece, getHardDropPosition } from '../../shared/gameLogic'
  * Retourne un tableau plat de BOARD_HEIGHT * BOARD_WIDTH cellules.
  */
 const buildDisplayBoard = (board, currentPiece) => {
-  if (!currentPiece || !currentPiece.shape) return board.flat()
+  if (!currentPiece || !currentPiece.shape) return board
 
   const { shape, x, y, type } = currentPiece
   const colorIndex = TYPE_TO_COLOR_INDEX[type]
@@ -40,26 +40,36 @@ const buildDisplayBoard = (board, currentPiece) => {
   // 2. Placer la pièce active par-dessus
   const boardWithPiece = placePiece(displayBoard, shape, x, y, colorIndex)
 
-  return boardWithPiece.flat()
+  return boardWithPiece
 }
 
-const Board = () => {
+const Board = ({ clearingRows = [], lockingCells = [] }) => {
   const board        = useSelector(s => s.player.board)
   const currentPiece = useSelector(s => s.player.currentPiece)
 
-  const cells = useMemo(
+  const board2D = useMemo(
     () => buildDisplayBoard(board, currentPiece),
     [board, currentPiece]
   )
 
   return (
     <div className="board" role="grid" aria-label="Tetris board">
-      {cells.map((value, idx) => (
-        <Cell
-          key={idx}
-          value={value === -1 ? 0 : value}
-          isGhost={value === -1}
-        />
+      {board2D.map((row, y) => (
+        <React.Fragment key={y}>
+          {row.map((value, x) => {
+            const isLocking = lockingCells.some(c => c.x === x && c.y === y)
+            const isClearing = clearingRows.includes(y)
+            return (
+              <Cell
+                key={`${y}-${x}`}
+                value={value === -1 ? 0 : value}
+                isGhost={value === -1}
+                isLocking={isLocking}
+                isClearing={isClearing}
+              />
+            )
+          })}
+        </React.Fragment>
       ))}
     </div>
   )

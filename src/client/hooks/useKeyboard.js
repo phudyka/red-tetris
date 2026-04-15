@@ -43,6 +43,11 @@ const useKeyboard = (isPlaying, handlers) => {
           e.preventDefault()
           handlers.hardDrop()
           break
+        case 'c':
+        case 'C':
+          e.preventDefault()
+          handlers.holdPiece()
+          break
         default:
           break
       }

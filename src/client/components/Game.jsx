@@ -4,12 +4,14 @@
 // Zéro `this` — logique via fonctions pures de shared/gameLogic
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useCallback, useEffect, useRef, useMemo } from 'react'
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import Board from './Board'
 import OpponentView from './OpponentView'
 import GameOver from './GameOver'
+import NextPiecePreview from './NextPiecePreview'
+import HoldPieceView from './HoldPieceView'
 
 import useGameLoop from '../hooks/useGameLoop'
 import useKeyboard from '../hooks/useKeyboard'
@@ -48,14 +50,14 @@ const Game = () => {
   const isAlive    = useSelector(s => s.player.isAlive)
   const board      = useSelector(s => s.player.board)
   const piece      = useSelector(s => s.player.currentPiece)
-  const opponents  = useSelector(s => s.opponents)
-
-  // Flag last-frame : si la pièce est en train d'atterrir
-  const isLandingRef = useRef(false)
+  const holdPieceType = useSelector(s => s.player.holdPieceType)
+  const canHold      = useSelector(s => s.player.canHold)
+  const opponents    = useSelector(s => s.opponents)
 
   const isPlaying = started && !over && isAlive
 
-  // Détection Game Over
+  const [clearingRows, setClearingRows] = useState([])
+  const [lockingCells, setLockingCells] = useState([])
   useEffect(() => {
     if (!piece || !piece.shape || !board || !isPlaying) return
 
@@ -69,23 +71,48 @@ const Game = () => {
   const lockPiece = useCallback((currentBoard, currentPieceArg) => {
     if (!currentPieceArg || !currentPieceArg.shape) return
 
-    const colorIndex = TYPE_TO_COLOR_INDEX[currentPieceArg.type]
-    const newBoard = placePiece(currentBoard, currentPieceArg.shape, currentPieceArg.x, currentPieceArg.y, colorIndex)
-    const { newBoard: clearedBoard, linesCleared } = clearLines(newBoard)
+    // 1. Animation Lock Flash
+    const pieceCells = []
+    const { shape, x, y, type } = currentPieceArg
+    shape.forEach((row, ri) => {
+      row.forEach((cell, ci) => {
+        if (cell !== 0) pieceCells.push({ x: x + ci, y: y + ri })
+      })
+    })
+    setLockingCells(pieceCells)
+    setTimeout(() => setLockingCells([]), 150)
 
-    dispatch(setBoard(clearedBoard))
-    dispatch({ type: 'SET_PIECE', payload: null })
+    const colorIndex = TYPE_TO_COLOR_INDEX[type]
+    const newBoard = placePiece(currentBoard, shape, x, y, colorIndex)
+    const { newBoard: clearedBoard, linesCleared, clearedIndexes } = clearLines(newBoard)
 
+    // 2. Animation Line Clear
     if (linesCleared > 0) {
-      emitLinesCleared(room, linesCleared)
+      setClearingRows(clearedIndexes)
+      
+      // On affiche le plateau AVEC la pièce verrouillée mais AVANT l'effacement
+      dispatch(setBoard(newBoard))
+      dispatch({ type: 'SET_PIECE', payload: null })
+
+      setTimeout(() => {
+        setClearingRows([])
+        dispatch(setBoard(clearedBoard))
+        emitLinesCleared(room, linesCleared)
+        
+        const spectrum = computeSpectrum(clearedBoard)
+        emitUpdateSpectrum(room, spectrum)
+        dispatch({ type: 'SET_PLAYER', payload: { canHold: true } })
+        emitRequestNextPiece(room)
+      }, 300)
+    } else {
+      dispatch(setBoard(newBoard))
+      dispatch({ type: 'SET_PIECE', payload: null })
+
+      const spectrum = computeSpectrum(newBoard)
+      emitUpdateSpectrum(room, spectrum)
+      dispatch({ type: 'SET_PLAYER', payload: { canHold: true } })
+      emitRequestNextPiece(room)
     }
-
-    // Envoyer le spectrum mis à jour aux adversaires
-    const spectrum = computeSpectrum(clearedBoard)
-    emitUpdateSpectrum(room, spectrum)
-
-    isLandingRef.current = false
-    emitRequestNextPiece(room)
   }, [dispatch, room])
 
   // ── Tick de la boucle de jeu ───────────────────────────────────────────────
@@ -96,17 +123,10 @@ const Game = () => {
 
     if (isValidPosition(board, piece.shape, piece.x, nextY)) {
       // La pièce peut descendre
-      isLandingRef.current = false
       dispatch({ type: 'SET_PIECE', payload: { ...piece, y: nextY } })
     } else {
-      // La pièce touche quelque chose
-      if (isLandingRef.current) {
-        // Deuxième tick consécutif bloqué → placement définitif (last-frame rule)
-        lockPiece(board, piece)
-      } else {
-        // Premier tick bloqué → on accorde un tick de grâce
-        isLandingRef.current = true
-      }
+      // La pièce touche quelque chose, on la verrouille au prochain tick naturel
+      lockPiece(board, piece)
     }
   }, [piece, board, dispatch, lockPiece])
 
@@ -155,15 +175,8 @@ const Game = () => {
     if (isValidPosition(board, piece.shape, piece.x, nextY)) {
       const updated = { ...piece, y: nextY }
       dispatch({ type: 'SET_PIECE', payload: updated })
-      isLandingRef.current = false
-    } else {
-      if (isLandingRef.current) {
-        lockPiece(board, piece)
-      } else {
-        isLandingRef.current = true
-      }
     }
-  }, [piece, board, dispatch, lockPiece])
+  }, [piece, board, dispatch])
 
   const hardDrop = useCallback(() => {
     if (!piece) return
@@ -173,9 +186,33 @@ const Game = () => {
     lockPiece(board, landed)
   }, [piece, board, dispatch, lockPiece])
 
+  const holdPiece = useCallback(() => {
+    if (!piece || !canHold) return
+
+    if (!holdPieceType) {
+      // Premier hold : on stocke et on demande la suivante
+      dispatch({ type: 'SET_PLAYER', payload: { holdPieceType: piece.type, canHold: false } })
+      dispatch({ type: 'SET_PIECE', payload: null })
+      emitRequestNextPiece(room)
+    } else {
+      // Swap : on échange la pièce courante avec celle en hold
+      const nextType = holdPieceType
+      const newHoldType = piece.type
+      dispatch({ type: 'SET_PLAYER', payload: { holdPieceType: newHoldType, canHold: false } })
+      
+      const newPieceState = {
+        type: nextType,
+        shape: PIECES[nextType].shape,
+        x: SPAWN_X[nextType],
+        y: SPAWN_Y,
+      }
+      dispatch({ type: 'SET_PIECE', payload: newPieceState })
+    }
+  }, [piece, canHold, holdPieceType, dispatch, room])
+
   const handlers = useMemo(
-    () => ({ moveLeft, moveRight, rotate, softDrop, hardDrop }),
-    [moveLeft, moveRight, rotate, softDrop, hardDrop]
+    () => ({ moveLeft, moveRight, rotate, softDrop, hardDrop, holdPiece }),
+    [moveLeft, moveRight, rotate, softDrop, hardDrop, holdPiece]
   )
 
   useKeyboard(isPlaying, handlers)
@@ -185,26 +222,32 @@ const Game = () => {
 
   return (
     <div className="game-layout">
-      {/* Sidebar gauche — adversaires */}
-      {opponents.length > 0 && (
-        <aside className="game-sidebar">
-          <p className="game-sidebar__title">Opponents</p>
-          {opponents.map(opp => (
-            <OpponentView
-              key={opp.name}
-              name={opp.name}
-              spectrum={opp.spectrum}
-              isAlive={opp.isAlive}
-            />
-          ))}
-        </aside>
-      )}
+      {/* Sidebar gauche — adversaires + Hold */}
+      <aside className="game-sidebar">
+        <HoldPieceView />
+        
+        {opponents.length > 0 && (
+          <>
+            <p className="game-sidebar__title">Opponents</p>
+            {opponents.map(opp => (
+              <OpponentView
+                key={opp.name}
+                name={opp.name}
+                spectrum={opp.spectrum}
+                isAlive={opp.isAlive}
+              />
+            ))}
+          </>
+        )}
+      </aside>
 
       {/* Plateau principal */}
-      <Board />
+      <Board clearingRows={clearingRows} lockingCells={lockingCells} />
 
       {/* Sidebar droite — infos */}
       <aside className="game-sidebar">
+        <NextPiecePreview />
+        
         <p className="game-sidebar__title">Room</p>
         <p style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.75rem', color: 'var(--accent)' }}>
           {room}

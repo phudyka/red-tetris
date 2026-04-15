@@ -24,6 +24,9 @@ const initialState = {
   isAlive: true,
   board: createEmptyBoard(),
   currentPiece: null, // { type, shape, x, y }
+  nextPieceType: null,
+  holdPieceType: null,
+  canHold: true,
   ghostY: null,
 }
 
@@ -50,6 +53,7 @@ const playerReducer = (state = initialState, action) => {
       return {
         ...state,
         currentPiece: newPieceState,
+        nextPieceType: action.payload.nextPiece ? action.payload.nextPiece.type : null,
         ghostY: null,
       }
     }
@@ -72,6 +76,7 @@ const playerReducer = (state = initialState, action) => {
         name: state.name,
         isHost: state.isHost,
         board: createEmptyBoard(),
+        canHold: true,
       }
 
     default:

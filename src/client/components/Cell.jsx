@@ -8,17 +8,30 @@ import { COLOR_INDEX } from '../../shared/constants'
 
 /**
  * Cellule individuelle du plateau.
- * @param {{ value: number, isGhost?: boolean }} props
- *   value    — 0=vide, 1-7=pièce (voir COLOR_INDEX), 8=pénalité
- *   isGhost  — true si c'est la ghost piece (preview de hard drop)
+ * @param {{ value: number, isGhost?: boolean, isLocking?: boolean, isClearing?: boolean }} props
+ *   value      — 0=vide, 1-7=pièce (voir COLOR_INDEX), 8=pénalité
+ *   isGhost    — true si c'est la ghost piece (preview de hard drop)
+ *   isLocking  — true pour l'animation de flash au verrouillage
+ *   isClearing — true pour l'animation de flash lors d'un effacement de ligne
  */
-const Cell = ({ value, isGhost }) => {
+const Cell = ({ value, isGhost, isLocking, isClearing }) => {
   const getCellClass = () => {
-    if (isGhost) return 'cell cell--ghost'
-    if (value === 0) return 'cell cell--empty'
-    if (value === 8) return 'cell cell--penalty'
-    const type = COLOR_INDEX[value]
-    return `cell cell--${type}`
+    let classes = 'cell'
+    if (isGhost) {
+      classes += ' cell--ghost'
+    } else if (value === 0) {
+      classes += ' cell--empty'
+    } else if (value === 8) {
+      classes += ' cell--penalty'
+    } else {
+      const type = COLOR_INDEX[value]
+      classes += ` cell--${type}`
+    }
+
+    if (isLocking) classes += ' cell--lock-flash'
+    if (isClearing) classes += ' cell--clearing' // J'utilise cell--clearing pour être sûr mais je vais adapter le CSS si besoin
+
+    return classes
   }
 
   return <div className={getCellClass()} />

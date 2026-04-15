@@ -16,18 +16,20 @@
   --text-primary:  #f1faee;
   --text-muted:    #8a8aa0;
 
-  /* Couleurs des pièces */
-  --color-I:       #00e5ff;
-  --color-O:       #ffd600;
-  --color-T:       #ce93d8;
-  --color-S:       #69f0ae;
-  --color-Z:       #ef5350;
-  --color-J:       #1565c0;
-  --color-L:       #ff9800;
+  /* Couleurs des pièces Guideline */
+  --color-I:       #00FFFF;
+  --color-O:       #FFFF00;
+  --color-T:       #9C27B0;
+  --color-S:       #4CAF50;
+  --color-Z:       #F44336;
+  --color-J:       #2196F3;
+  --color-L:       #FF9800;
   --color-penalty: #37474f;
   --color-ghost:   rgba(255,255,255,0.12);
 
-  --cell-size:     30px;
+  --cell-size:     min(4.2vh, 8vw);
+  --board-width:   calc(var(--cell-size) * 10);
+  --board-height:  calc(var(--cell-size) * 20);
   --radius:        6px;
   --transition:    0.15s ease;
 }
@@ -153,30 +155,59 @@ h1, h2, h3 { font-family: 'Orbitron', monospace; letter-spacing: 0.04em; }
   display: grid;
   grid-template-columns: repeat(10, var(--cell-size));
   grid-template-rows: repeat(20, var(--cell-size));
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
+  border: 4px solid var(--border);
+  border-radius: calc(var(--radius) * 1.5);
   overflow: hidden;
-  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 20px var(--accent-glow);
+  background: var(--bg-card);
 }
 
 /* ── Cellules ────────────────────────────────────────────────────────────────── */
 .cell {
   width: var(--cell-size);
   height: var(--cell-size);
-  border: 1px solid rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.02);
+  background: rgba(255,255,255,0.01);
+  transition: all 0.1s ease;
 }
 
 .cell--empty   { background: rgba(255,255,255,0.02); }
 .cell--ghost   { background: var(--color-ghost); border-color: rgba(255,255,255,0.1); }
 .cell--penalty { background: var(--color-penalty); }
 
-.cell--I { background: var(--color-I); box-shadow: inset 0 0 8px rgba(255,255,255,0.2); }
-.cell--O { background: var(--color-O); box-shadow: inset 0 0 8px rgba(255,255,255,0.2); }
-.cell--T { background: var(--color-T); box-shadow: inset 0 0 8px rgba(255,255,255,0.2); }
-.cell--S { background: var(--color-S); box-shadow: inset 0 0 8px rgba(255,255,255,0.2); }
-.cell--Z { background: var(--color-Z); box-shadow: inset 0 0 8px rgba(255,255,255,0.2); }
-.cell--J { background: var(--color-J); box-shadow: inset 0 0 8px rgba(255,255,255,0.2); }
-.cell--L { background: var(--color-L); box-shadow: inset 0 0 8px rgba(255,255,255,0.2); }
+.cell--I { background: var(--color-I); box-shadow: inset 0 0 12px rgba(255,255,255,0.4), inset 0 0 2px rgba(0,0,0,0.5); }
+.cell--O { background: var(--color-O); box-shadow: inset 0 0 12px rgba(255,255,255,0.4), inset 0 0 2px rgba(0,0,0,0.5); }
+.cell--T { background: var(--color-T); box-shadow: inset 0 0 12px rgba(255,255,255,0.4), inset 0 0 2px rgba(0,0,0,0.5); }
+.cell--S { background: var(--color-S); box-shadow: inset 0 0 12px rgba(255,255,255,0.4), inset 0 0 2px rgba(0,0,0,0.5); }
+.cell--Z { background: var(--color-Z); box-shadow: inset 0 0 12px rgba(255,255,255,0.4), inset 0 0 2px rgba(0,0,0,0.5); }
+.cell--J { background: var(--color-J); box-shadow: inset 0 0 12px rgba(255,255,255,0.4), inset 0 0 2px rgba(0,0,0,0.5); }
+.cell--L { background: var(--color-L); box-shadow: inset 0 0 12px rgba(255,255,255,0.4), inset 0 0 2px rgba(0,0,0,0.5); }
+
+/* ── FX / Animations ─────────────────────────────────────────────────────────── */
+.cell--lock-flash {
+  position: relative;
+}
+.cell--lock-flash::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: white;
+  animation: pieceFlash 0.15s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes pieceFlash {
+  0% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+.cell--clearing {
+  background: white !important;
+  box-shadow: 0 0 16px white !important;
+  border-color: white !important;
+  z-index: 10;
+  transition: all 0.1s ease;
+}
 
 /* ── Lobby ───────────────────────────────────────────────────────────────────── */
 .lobby {
@@ -232,19 +263,21 @@ h1, h2, h3 { font-family: 'Orbitron', monospace; letter-spacing: 0.04em; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  padding: 24px;
+  gap: 40px;
+  padding: 2vw;
   min-height: 100vh;
+  width: 100vw;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(230,57,70,0.05) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(230,57,70,0.07) 0%, transparent 70%),
     var(--bg-deep);
 }
 
 .game-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  min-width: 140px;
+  gap: 24px;
+  min-width: 180px;
+  /* Masquer sur les tout petits écrans si nécessaire, mais ici on veut de l'espace */
 }
 
 .game-sidebar__title {
