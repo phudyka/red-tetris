@@ -14,14 +14,15 @@ import { placePiece, getHardDropPosition } from '../../shared/gameLogic'
  * Fusionne le board persistant avec la pièce active et la ghost piece.
  * Retourne un tableau plat de BOARD_HEIGHT * BOARD_WIDTH cellules.
  */
-const buildDisplayBoard = (board, currentPiece, ghostY) => {
+const buildDisplayBoard = (board, currentPiece) => {
   if (!currentPiece || !currentPiece.shape) return board.flat()
 
   const { shape, x, y, type } = currentPiece
   const colorIndex = TYPE_TO_COLOR_INDEX[type]
 
-  // 1. Placer la ghost piece (si ghostY différent de y)
+  // 1. Placer la ghost piece
   let displayBoard = board
+  const ghostY = getHardDropPosition(board, shape, x, y)
   if (ghostY !== null && ghostY !== undefined && ghostY !== y) {
     displayBoard = board.map(row => [...row])
     for (let row = 0; row < shape.length; row++) {
@@ -45,11 +46,10 @@ const buildDisplayBoard = (board, currentPiece, ghostY) => {
 const Board = () => {
   const board        = useSelector(s => s.player.board)
   const currentPiece = useSelector(s => s.player.currentPiece)
-  const ghostY       = useSelector(s => s.player.ghostY)
 
   const cells = useMemo(
-    () => buildDisplayBoard(board, currentPiece, ghostY),
-    [board, currentPiece, ghostY]
+    () => buildDisplayBoard(board, currentPiece),
+    [board, currentPiece]
   )
 
   return (

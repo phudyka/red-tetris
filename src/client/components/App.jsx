@@ -61,7 +61,7 @@ const Home = () => (
 
 // ── App root ─────────────────────────────────────────────────────────────────
 const App = () => (
-  <BrowserRouter>
+  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
     <Routes>
       <Route path="/:room/:playerName" element={<RoomEntry />} />
       <Route path="/"                  element={<Home />} />

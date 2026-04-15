@@ -41,7 +41,7 @@ io.on('connection', (socket) => {
     const game = manager.getOrCreate(room)
 
     // Partie déjà lancée → refus
-    if (game.started) {
+    if (game.started && !game.over) {
       socket.emit('error', { message: 'Game already started' })
       return
     }
@@ -83,7 +83,7 @@ io.on('connection', (socket) => {
       return
     }
 
-    if (game.started) {
+    if (game.started && !game.over) {
       socket.emit('error', { message: 'Game already started' })
       return
     }

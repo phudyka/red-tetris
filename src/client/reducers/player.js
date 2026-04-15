@@ -3,6 +3,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { createEmptyBoard, addPenaltyLines } from '../../shared/gameLogic'
+import { PIECES } from '../../shared/constants'
 import {
   SET_PLAYER,
   SET_BOARD,
@@ -42,7 +43,7 @@ const playerReducer = (state = initialState, action) => {
       const { piece } = action.payload
       const newPieceState = {
         type: piece.type,
-        shape: piece.shape || null, // la shape est fournie par le serveur ou calculée
+        shape: piece.shape || (PIECES[piece.type] ? PIECES[piece.type].shape : null),
         x: piece.spawnX,
         y: piece.spawnY,
       }

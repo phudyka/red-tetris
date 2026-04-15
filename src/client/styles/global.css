@@ -230,7 +230,7 @@ h1, h2, h3 { font-family: 'Orbitron', monospace; letter-spacing: 0.04em; }
 /* ── Game layout ─────────────────────────────────────────────────────────────── */
 .game-layout {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   gap: 24px;
   padding: 24px;

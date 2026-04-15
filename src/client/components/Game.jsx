@@ -4,9 +4,8 @@
 // Zéro `this` — logique via fonctions pures de shared/gameLogic
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useRef, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useRef } from 'react'
 
 import Board from './Board'
 import OpponentView from './OpponentView'
@@ -15,7 +14,7 @@ import GameOver from './GameOver'
 import useGameLoop from '../hooks/useGameLoop'
 import useKeyboard from '../hooks/useKeyboard'
 
-import { setBoard, setGhost, playerDied, newPiece as newPieceAction } from '../actions/player'
+import { setBoard, playerDied, newPiece as newPieceAction } from '../actions/player'
 import { opponentDied } from '../actions/opponents'
 
 import {
@@ -56,12 +55,15 @@ const Game = () => {
 
   const isPlaying = started && !over && isAlive
 
-  // ── Calcul du ghost ────────────────────────────────────────────────────────
-  const computeGhost = useCallback((currentBoard, currentPiece) => {
-    if (!currentPiece || !currentPiece.shape) return
-    const ghostY = getHardDropPosition(currentBoard, currentPiece.shape, currentPiece.x, currentPiece.y)
-    dispatch(setGhost(ghostY))
-  }, [dispatch])
+  // Détection Game Over
+  useEffect(() => {
+    if (!piece || !piece.shape || !board || !isPlaying) return
+
+    if (!isValidPosition(board, piece.shape, piece.x, piece.y)) {
+      dispatch(playerDied())
+      emitPlayerDead(room)
+    }
+  }, [piece, board, isPlaying, dispatch, room])
 
   // ── Lock piece : place la pièce, efface les lignes, demande la suivante ────
   const lockPiece = useCallback((currentBoard, currentPieceArg) => {
@@ -72,6 +74,7 @@ const Game = () => {
     const { newBoard: clearedBoard, linesCleared } = clearLines(newBoard)
 
     dispatch(setBoard(clearedBoard))
+    dispatch({ type: 'SET_PIECE', payload: null })
 
     if (linesCleared > 0) {
       emitLinesCleared(room, linesCleared)
@@ -95,7 +98,6 @@ const Game = () => {
       // La pièce peut descendre
       isLandingRef.current = false
       dispatch({ type: 'SET_PIECE', payload: { ...piece, y: nextY } })
-      computeGhost(board, { ...piece, y: nextY })
     } else {
       // La pièce touche quelque chose
       if (isLandingRef.current) {
@@ -106,61 +108,30 @@ const Game = () => {
         isLandingRef.current = true
       }
     }
-  }, [piece, board, dispatch, computeGhost, lockPiece])
+  }, [piece, board, dispatch, lockPiece])
 
   useGameLoop(isPlaying, TICK_INTERVAL, onTick)
 
-  // ── Gestion des nouvelles pièces (via Redux) ──────────────────────────────
-  // Quand une newPiece arrive du serveur, on met à jour la shape locale.
-  // Si la pièce ne peut pas spawner → le joueur est mort (détection mort)
-  const pieceWithShape = useMemo(() => {
-    if (!piece) return null
-    if (piece.shape) {
-      // Vérification de mort : si la pièce avec sa shape ne peut pas spawner
-      if (!isValidPosition(board, piece.shape, piece.x, piece.y)) {
-        dispatch(playerDied())
-        emitPlayerDead(room)
-        return piece // on retourne quand même pour éviter NPE
-      }
-      computeGhost(board, piece)
-      return piece
-    }
-    if (!piece.type || !PIECES[piece.type]) return piece
-    // Enrichir avec la rotation initiale
-    const shape = PIECES[piece.type].shape
-    const enriched = { ...piece, shape }
-    // Vérification de mort au spawn
-    if (!isValidPosition(board, shape, piece.x, piece.y)) {
-      dispatch(playerDied())
-      emitPlayerDead(room)
-      return enriched
-    }
-    computeGhost(board, enriched)
-    return enriched
-  }, [piece, board, dispatch, room, computeGhost])
-
   // ── Handlers clavier ─────────────────────────────────────────────────────
   const moveLeft = useCallback(() => {
-    if (!pieceWithShape) return
-    if (isValidPosition(board, pieceWithShape.shape, pieceWithShape.x - 1, pieceWithShape.y)) {
-      const updated = { ...pieceWithShape, x: pieceWithShape.x - 1 }
+    if (!piece) return
+    if (isValidPosition(board, piece.shape, piece.x - 1, piece.y)) {
+      const updated = { ...piece, x: piece.x - 1 }
       dispatch({ type: 'SET_PIECE', payload: updated })
-      computeGhost(board, updated)
     }
-  }, [pieceWithShape, board, dispatch, computeGhost])
+  }, [piece, board, dispatch])
 
   const moveRight = useCallback(() => {
-    if (!pieceWithShape) return
-    if (isValidPosition(board, pieceWithShape.shape, pieceWithShape.x + 1, pieceWithShape.y)) {
-      const updated = { ...pieceWithShape, x: pieceWithShape.x + 1 }
+    if (!piece) return
+    if (isValidPosition(board, piece.shape, piece.x + 1, piece.y)) {
+      const updated = { ...piece, x: piece.x + 1 }
       dispatch({ type: 'SET_PIECE', payload: updated })
-      computeGhost(board, updated)
     }
-  }, [pieceWithShape, board, dispatch, computeGhost])
+  }, [piece, board, dispatch])
 
   const rotate = useCallback(() => {
-    if (!pieceWithShape) return
-    const { shape } = pieceWithShape
+    if (!piece) return
+    const { shape } = piece
     // Rotation 90° clockwise
     const cols = shape[0].length
     const rows = shape.length
@@ -170,39 +141,37 @@ const Game = () => {
     // Wall kick : essayer x, x-1, x+1
     const kicks = [0, -1, 1, -2, 2]
     for (const kick of kicks) {
-      if (isValidPosition(board, rotated, pieceWithShape.x + kick, pieceWithShape.y)) {
-        const updated = { ...pieceWithShape, shape: rotated, x: pieceWithShape.x + kick }
+      if (isValidPosition(board, rotated, piece.x + kick, piece.y)) {
+        const updated = { ...piece, shape: rotated, x: piece.x + kick }
         dispatch({ type: 'SET_PIECE', payload: updated })
-        computeGhost(board, updated)
         break
       }
     }
-  }, [pieceWithShape, board, dispatch, computeGhost])
+  }, [piece, board, dispatch])
 
   const softDrop = useCallback(() => {
-    if (!pieceWithShape) return
-    const nextY = pieceWithShape.y + 1
-    if (isValidPosition(board, pieceWithShape.shape, pieceWithShape.x, nextY)) {
-      const updated = { ...pieceWithShape, y: nextY }
+    if (!piece) return
+    const nextY = piece.y + 1
+    if (isValidPosition(board, piece.shape, piece.x, nextY)) {
+      const updated = { ...piece, y: nextY }
       dispatch({ type: 'SET_PIECE', payload: updated })
-      computeGhost(board, updated)
       isLandingRef.current = false
     } else {
       if (isLandingRef.current) {
-        lockPiece(board, pieceWithShape)
+        lockPiece(board, piece)
       } else {
         isLandingRef.current = true
       }
     }
-  }, [pieceWithShape, board, dispatch, computeGhost, lockPiece])
+  }, [piece, board, dispatch, lockPiece])
 
   const hardDrop = useCallback(() => {
-    if (!pieceWithShape) return
-    const finalY = getHardDropPosition(board, pieceWithShape.shape, pieceWithShape.x, pieceWithShape.y)
-    const landed = { ...pieceWithShape, y: finalY }
+    if (!piece) return
+    const finalY = getHardDropPosition(board, piece.shape, piece.x, piece.y)
+    const landed = { ...piece, y: finalY }
     dispatch({ type: 'SET_PIECE', payload: landed })
     lockPiece(board, landed)
-  }, [pieceWithShape, board, dispatch, lockPiece])
+  }, [piece, board, dispatch, lockPiece])
 
   const handlers = useMemo(
     () => ({ moveLeft, moveRight, rotate, softDrop, hardDrop }),
