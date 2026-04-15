@@ -34,7 +34,7 @@ const animateLineClear = (rowElements) => {
       { transform: 'scaleX(1) translateZ(8px)', opacity: 1, filter: 'brightness(1)' },
       { transform: 'scaleX(1.1) translateZ(8px)', opacity: 1, filter: 'brightness(3)' },
       { transform: 'scaleX(0) translateZ(8px)', opacity: 0, filter: 'brightness(0)' },
-    ], { duration: 300, easing: 'ease-in', fill: 'forwards' })
+    ], { duration: 250, easing: 'ease-in', fill: 'none' })
   })
 }
 
