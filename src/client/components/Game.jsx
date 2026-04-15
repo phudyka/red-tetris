@@ -14,9 +14,8 @@ import NextPiecePreview from './NextPiecePreview'
 import HoldPieceView from './HoldPieceView'
 
 import useGameLoop from '../hooks/useGameLoop'
-import useKeyboard from '../hooks/useKeyboard'
 
-import { setBoard, playerDied, newPiece as newPieceAction } from '../actions/player'
+import { setBoard, playerDied } from '../actions/player'
 import { opponentDied } from '../actions/opponents'
 
 import {
@@ -44,28 +43,50 @@ import {
   emitUpdateSpectrum,
 } from '../socket'
 
+// ── DAS constants (Delayed Auto Shift) ───────────────────────────────────────
+const DAS_DELAY = 167  // ms avant répétition
+const DAS_RATE  = 33   // ms entre chaque répétition (~30/s)
+
 const Game = () => {
   const dispatch   = useDispatch()
   const room       = useSelector(s => s.game.room)
   const started    = useSelector(s => s.game.started)
   const over       = useSelector(s => s.game.over)
   const isAlive    = useSelector(s => s.player.isAlive)
-  const board      = useSelector(s => s.player.board)
-  const piece      = useSelector(s => s.player.currentPiece)
-  const holdPieceType = useSelector(s => s.player.holdPieceType)
-  const canHold      = useSelector(s => s.player.canHold)
-  const opponents    = useSelector(s => s.opponents)
+  const opponents  = useSelector(s => s.opponents)
 
   const nextPieceType = useSelector(s => s.player.nextPieceType)
+  const holdPieceType = useSelector(s => s.player.holdPieceType)
+  const canHold       = useSelector(s => s.player.canHold)
+
   const isPlaying = started && !over && isAlive
 
   const [clearingRows, setClearingRows] = useState([])
   const [lockingCells, setLockingCells] = useState([])
 
+  // ── Refs "live" pour éviter les stale closures dans les timers ────────────
+  // Ces refs permettent aux callbacks setTimeout/setInterval d'accéder
+  // toujours à la version la plus récente du board et de la pièce.
+  const boardRef      = useRef(null)
+  const pieceRef      = useRef(null)
+  const nextTypeRef   = useRef(null)
+  const holdTypeRef   = useRef(null)
+  const canHoldRef    = useRef(true)
+  const roomRef       = useRef(room)
+
+  // Sync de l'état Redux vers les refs à chaque render
+  const board = useSelector(s => s.player.board)
+  const piece  = useSelector(s => s.player.currentPiece)
+  useEffect(() => { boardRef.current = board }, [board])
+  useEffect(() => { pieceRef.current = piece }, [piece])
+  useEffect(() => { nextTypeRef.current = nextPieceType }, [nextPieceType])
+  useEffect(() => { holdTypeRef.current = holdPieceType }, [holdPieceType])
+  useEffect(() => { canHoldRef.current = canHold }, [canHold])
+  useEffect(() => { roomRef.current = room }, [room])
+
   // ── Refs pour le Lock Delay (Guideline) ───────────────────────────────────
   const lockTimeoutRef = useRef(null)
-  const moveResetsRef = useRef(0)
-  const lastYRef = useRef(0) // Pour détecter si la pièce a bougé verticalement
+  const moveResetsRef  = useRef(0)
 
   const clearLockTimeout = useCallback(() => {
     if (lockTimeoutRef.current) {
@@ -73,20 +94,20 @@ const Game = () => {
       lockTimeoutRef.current = null
     }
   }, [])
+
+  // ── Death check ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (!piece || !piece.shape || !board || !isPlaying) return
-
     if (!isValidPosition(board, piece.shape, piece.x, piece.y)) {
       dispatch(playerDied())
-      emitPlayerDead(room)
+      emitPlayerDead(roomRef.current)
     }
-  }, [piece, board, isPlaying, dispatch, room])
+  }, [piece, board, isPlaying, dispatch])
 
-  // ── Spawning Predictive ──────────────────────────────────────────────────
-  const spawnNextPiecePredictively = useCallback(() => {
-    if (!nextPieceType) return
-
-    const type = nextPieceType
+  // ── Spawning Prédictif ──────────────────────────────────────────────────
+  const spawnNextPiece = useCallback(() => {
+    const type = nextTypeRef.current
+    if (!type) return
     const newPieceLocal = {
       type,
       shape: PIECES[type].shape,
@@ -95,23 +116,23 @@ const Game = () => {
     }
     dispatch({ type: 'SET_PIECE', payload: newPieceLocal })
     dispatch({ type: 'SET_PLAYER', payload: { canHold: true } })
-    
-    // On demande quand même au serveur pour peupler la PROCHAINE preview
-    // Note: Le serveur répondra "newPiece", on doit le gérer dans le reducer
-    // pour ne pas écraser la pièce qu'on vient de spawn.
-    emitRequestNextPiece(room)
-  }, [nextPieceType, dispatch, room])
+    emitRequestNextPiece(roomRef.current)
+  }, [dispatch])
 
-  // ── Lock piece : place la pièce, efface les lignes, demande la suivante ────
-  const lockPiece = useCallback((currentBoard, currentPieceArg) => {
-    if (!currentPieceArg || !currentPieceArg.shape) return
+  // ── Lock piece ────────────────────────────────────────────────────────────
+  // Utilise les refs pour lire l'état actuel au moment du lock,
+  // pas l'état au moment où le callback a été créé.
+  const lockPiece = useCallback(() => {
+    const currentPiece = pieceRef.current
+    const currentBoard = boardRef.current
+    if (!currentPiece || !currentPiece.shape || !currentBoard) return
 
     clearLockTimeout()
     moveResetsRef.current = 0
 
-    // 1. Animation Lock Flash
+    // Animation Lock Flash
     const pieceCells = []
-    const { shape, x, y, type } = currentPieceArg
+    const { shape, x, y, type } = currentPiece
     shape.forEach((row, ri) => {
       row.forEach((cell, ci) => {
         if (cell !== 0) pieceCells.push({ x: x + ci, y: y + ri })
@@ -124,42 +145,40 @@ const Game = () => {
     const newBoard = placePiece(currentBoard, shape, x, y, colorIndex)
     const { newBoard: clearedBoard, linesCleared, clearedIndexes } = clearLines(newBoard)
 
-    // 2. Animation Line Clear
     if (linesCleared > 0) {
       setClearingRows(clearedIndexes)
       dispatch(setBoard(newBoard))
       dispatch({ type: 'SET_PIECE', payload: null })
-
       setTimeout(() => {
         setClearingRows([])
         dispatch(setBoard(clearedBoard))
-        emitLinesCleared(room, linesCleared)
-        
-        const spectrum = computeSpectrum(clearedBoard)
-        emitUpdateSpectrum(room, spectrum)
-        
-        spawnNextPiecePredictively()
+        emitLinesCleared(roomRef.current, linesCleared)
+        emitUpdateSpectrum(roomRef.current, computeSpectrum(clearedBoard))
+        spawnNextPiece()
       }, 300)
     } else {
       dispatch(setBoard(newBoard))
-
-      const spectrum = computeSpectrum(newBoard)
-      emitUpdateSpectrum(room, spectrum)
-      
-      spawnNextPiecePredictively()
+      emitUpdateSpectrum(roomRef.current, computeSpectrum(newBoard))
+      spawnNextPiece()
     }
-  }, [dispatch, room, spawnNextPiecePredictively, clearLockTimeout])
+  }, [dispatch, clearLockTimeout, spawnNextPiece])
 
+  // ── requestLock : démarre le timer de verrouillage ────────────────────────
   const requestLock = useCallback(() => {
     if (lockTimeoutRef.current) return
     lockTimeoutRef.current = setTimeout(() => {
-      lockPiece(board, piece)
+      lockTimeoutRef.current = null
+      lockPiece()
     }, LOCK_DELAY)
-  }, [board, piece, lockPiece])
+  }, [lockPiece])
 
+  // ── handleMoveReset : reset le timer si on bouge/rotationne au sol ────────
   const handleMoveReset = useCallback((newPieceState) => {
-    const isNowGrounded = !isValidPosition(board, newPieceState.shape, newPieceState.x, newPieceState.y + 1)
-    
+    const currentBoard = boardRef.current
+    if (!currentBoard) return
+    const isNowGrounded = !isValidPosition(
+      currentBoard, newPieceState.shape, newPieceState.x, newPieceState.y + 1
+    )
     if (isNowGrounded) {
       if (moveResetsRef.current < MAX_MOVE_RESETS) {
         moveResetsRef.current++
@@ -167,119 +186,180 @@ const Game = () => {
         requestLock()
       }
     } else {
-      // Si on n'est plus au sol (merci au move/kick), on annule le lock timer
       clearLockTimeout()
       moveResetsRef.current = 0
     }
-  }, [board, clearLockTimeout, requestLock])
+  }, [clearLockTimeout, requestLock])
 
   // ── Tick de la boucle de jeu ───────────────────────────────────────────────
   const onTick = useCallback(() => {
-    if (!piece || !piece.shape || !board) return
+    const currentPiece = pieceRef.current
+    const currentBoard = boardRef.current
+    if (!currentPiece || !currentPiece.shape || !currentBoard) return
 
-    const nextY = piece.y + 1
-
-    if (isValidPosition(board, piece.shape, piece.x, nextY)) {
-      // La pièce peut descendre
-      dispatch({ type: 'SET_PIECE', payload: { ...piece, y: nextY } })
+    const nextY = currentPiece.y + 1
+    if (isValidPosition(currentBoard, currentPiece.shape, currentPiece.x, nextY)) {
+      dispatch({ type: 'SET_PIECE', payload: { ...currentPiece, y: nextY } })
       clearLockTimeout()
       moveResetsRef.current = 0
     } else {
-      // La pièce touche quelque chose, on lance le timer de lock (Guideline)
       requestLock()
     }
-  }, [piece, board, dispatch, requestLock, clearLockTimeout])
+  }, [dispatch, requestLock, clearLockTimeout])
 
   useGameLoop(isPlaying, TICK_INTERVAL, onTick)
 
   // ── Handlers clavier ─────────────────────────────────────────────────────
   const moveLeft = useCallback(() => {
-    if (!piece) return
-    if (isValidPosition(board, piece.shape, piece.x - 1, piece.y)) {
-      const updated = { ...piece, x: piece.x - 1 }
+    const p = pieceRef.current
+    const b = boardRef.current
+    if (!p || !b) return
+    if (isValidPosition(b, p.shape, p.x - 1, p.y)) {
+      const updated = { ...p, x: p.x - 1 }
       dispatch({ type: 'SET_PIECE', payload: updated })
       handleMoveReset(updated)
     }
-  }, [piece, board, dispatch, handleMoveReset])
+  }, [dispatch, handleMoveReset])
 
   const moveRight = useCallback(() => {
-    if (!piece) return
-    if (isValidPosition(board, piece.shape, piece.x + 1, piece.y)) {
-      const updated = { ...piece, x: piece.x + 1 }
+    const p = pieceRef.current
+    const b = boardRef.current
+    if (!p || !b) return
+    if (isValidPosition(b, p.shape, p.x + 1, p.y)) {
+      const updated = { ...p, x: p.x + 1 }
       dispatch({ type: 'SET_PIECE', payload: updated })
       handleMoveReset(updated)
     }
-  }, [piece, board, dispatch, handleMoveReset])
+  }, [dispatch, handleMoveReset])
 
   const rotate = useCallback(() => {
-    if (!piece) return
-    const { shape } = piece
-    // Rotation 90° clockwise
+    const p = pieceRef.current
+    const b = boardRef.current
+    if (!p || !b) return
+    const { shape } = p
     const cols = shape[0].length
     const rows = shape.length
     const rotated = Array.from({ length: cols }, (_, c) =>
       Array.from({ length: rows }, (_, r) => shape[rows - 1 - r][c])
     )
-    // Wall kick : essayer x, x-1, x+1
     const kicks = [0, -1, 1, -2, 2]
     for (const kick of kicks) {
-      if (isValidPosition(board, rotated, piece.x + kick, piece.y)) {
-        const updated = { ...piece, shape: rotated, x: piece.x + kick }
+      if (isValidPosition(b, rotated, p.x + kick, p.y)) {
+        const updated = { ...p, shape: rotated, x: p.x + kick }
         dispatch({ type: 'SET_PIECE', payload: updated })
         handleMoveReset(updated)
         break
       }
     }
-  }, [piece, board, dispatch, handleMoveReset])
+  }, [dispatch, handleMoveReset])
 
   const softDrop = useCallback(() => {
-    if (!piece) return
-    const nextY = piece.y + 1
-    if (isValidPosition(board, piece.shape, piece.x, nextY)) {
-      const updated = { ...piece, y: nextY }
-      dispatch({ type: 'SET_PIECE', payload: updated })
+    const p = pieceRef.current
+    const b = boardRef.current
+    if (!p || !b) return
+    const nextY = p.y + 1
+    if (isValidPosition(b, p.shape, p.x, nextY)) {
+      dispatch({ type: 'SET_PIECE', payload: { ...p, y: nextY } })
       clearLockTimeout()
+    } else {
+      requestLock()
     }
-  }, [piece, board, dispatch, clearLockTimeout])
+  }, [dispatch, clearLockTimeout, requestLock])
 
   const hardDrop = useCallback(() => {
-    if (!piece) return
-    const finalY = getHardDropPosition(board, piece.shape, piece.x, piece.y)
-    const landed = { ...piece, y: finalY }
-    dispatch({ type: 'SET_PIECE', payload: landed })
-    lockPiece(board, landed)
-  }, [piece, board, dispatch, lockPiece])
+    const p = pieceRef.current
+    const b = boardRef.current
+    if (!p || !b) return
+    const finalY = getHardDropPosition(b, p.shape, p.x, p.y)
+    dispatch({ type: 'SET_PIECE', payload: { ...p, y: finalY } })
+    // Donne un tick pour que le state se mette à jour, puis lock
+    setTimeout(() => lockPiece(), 0)
+  }, [dispatch, lockPiece])
 
   const holdPiece = useCallback(() => {
-    if (!piece || !canHold) return
-
-    if (!holdPieceType) {
-      // Premier hold : on stocke et on demande la suivante
-      dispatch({ type: 'SET_PLAYER', payload: { holdPieceType: piece.type, canHold: false } })
+    const p = pieceRef.current
+    if (!p || !canHoldRef.current) return
+    if (!holdTypeRef.current) {
+      dispatch({ type: 'SET_PLAYER', payload: { holdPieceType: p.type, canHold: false } })
       dispatch({ type: 'SET_PIECE', payload: null })
-      emitRequestNextPiece(room)
+      emitRequestNextPiece(roomRef.current)
     } else {
-      // Swap : on échange la pièce courante avec celle en hold
-      const nextType = holdPieceType
-      const newHoldType = piece.type
-      dispatch({ type: 'SET_PLAYER', payload: { holdPieceType: newHoldType, canHold: false } })
-      
-      const newPieceState = {
+      const nextType = holdTypeRef.current
+      dispatch({ type: 'SET_PLAYER', payload: { holdPieceType: p.type, canHold: false } })
+      dispatch({ type: 'SET_PIECE', payload: {
         type: nextType,
         shape: PIECES[nextType].shape,
         x: SPAWN_X[nextType],
         y: SPAWN_Y,
-      }
-      dispatch({ type: 'SET_PIECE', payload: newPieceState })
+      }})
     }
-  }, [piece, canHold, holdPieceType, dispatch, room])
+  }, [dispatch])
 
-  const handlers = useMemo(
-    () => ({ moveLeft, moveRight, rotate, softDrop, hardDrop, holdPiece }),
-    [moveLeft, moveRight, rotate, softDrop, hardDrop, holdPiece]
-  )
+  // ── Clavier avec DAS ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isPlaying) return
 
-  useKeyboard(isPlaying, handlers)
+    const dasTimers = {}
+
+    const startDAS = (key, fn) => {
+      fn()
+      dasTimers[key] = setTimeout(() => {
+        dasTimers[`${key}_repeat`] = setInterval(fn, DAS_RATE)
+      }, DAS_DELAY)
+    }
+
+    const stopDAS = (key) => {
+      clearTimeout(dasTimers[key])
+      clearInterval(dasTimers[`${key}_repeat`])
+      delete dasTimers[key]
+      delete dasTimers[`${key}_repeat`]
+    }
+
+    const onKeyDown = (e) => {
+      if (e.repeat) return  // ignorer la répétition native navigateur
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault()
+          startDAS('left', moveLeft)
+          break
+        case 'ArrowRight':
+          e.preventDefault()
+          startDAS('right', moveRight)
+          break
+        case 'ArrowDown':
+          e.preventDefault()
+          startDAS('down', softDrop)
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          rotate()
+          break
+        case ' ':
+          e.preventDefault()
+          hardDrop()
+          break
+        case 'c': case 'C':
+          e.preventDefault()
+          holdPiece()
+          break
+        default: break
+      }
+    }
+
+    const onKeyUp = (e) => {
+      if (e.key === 'ArrowLeft')  stopDAS('left')
+      if (e.key === 'ArrowRight') stopDAS('right')
+      if (e.key === 'ArrowDown')  stopDAS('down')
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup',   onKeyUp)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup',   onKeyUp)
+      Object.values(dasTimers).forEach(t => { clearTimeout(t); clearInterval(t) })
+    }
+  }, [isPlaying, moveLeft, moveRight, rotate, softDrop, hardDrop, holdPiece])
 
   // ── Rendu ─────────────────────────────────────────────────────────────────
   if (over) return <GameOver />
@@ -289,7 +369,7 @@ const Game = () => {
       {/* Sidebar gauche — adversaires + Hold */}
       <aside className="game-sidebar">
         <HoldPieceView />
-        
+
         {opponents.length > 0 && (
           <>
             <p className="game-sidebar__title">Opponents</p>
@@ -311,7 +391,7 @@ const Game = () => {
       {/* Sidebar droite — infos */}
       <aside className="game-sidebar">
         <NextPiecePreview />
-        
+
         <p className="game-sidebar__title">Room</p>
         <p style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.75rem', color: 'var(--accent)' }}>
           {room}

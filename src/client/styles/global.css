@@ -180,7 +180,7 @@ h1, h2, h3 { font-family: 'Orbitron', monospace; letter-spacing: 0.04em; }
 /* ── Board ───────────────────────────────────────────────────────────────────── */
 .game-layout {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
   gap: 32px;
   perspective: 1200px;
@@ -197,7 +197,6 @@ h1, h2, h3 { font-family: 'Orbitron', monospace; letter-spacing: 0.04em; }
   box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 20px var(--accent-glow);
   background: rgba(26, 26, 40, 0.8);
   transform-style: preserve-3d;
-  transform: rotateX(4deg) rotateY(-2deg);
 }
 
 /* ── Cellules ────────────────────────────────────────────────────────────────── */
