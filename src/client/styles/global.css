@@ -196,7 +196,6 @@ h1, h2, h3 { font-family: 'Orbitron', monospace; letter-spacing: 0.04em; }
   border-radius: calc(var(--radius) * 1.5);
   box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 20px var(--accent-glow);
   background: rgba(26, 26, 40, 0.8);
-  transform-style: preserve-3d;
 }
 
 /* ── Cellules ────────────────────────────────────────────────────────────────── */
@@ -204,16 +203,15 @@ h1, h2, h3 { font-family: 'Orbitron', monospace; letter-spacing: 0.04em; }
   width: var(--cell-size);
   height: var(--cell-size);
   border: 1px solid rgba(255,255,255,0.02);
-  transition: transform 0.1s ease-out, background 0.1s ease-out;
+  transition: background 0.1s ease-out;
 }
 
 .cell--empty   { background: rgba(255,255,255,0.02); }
 .cell--ghost   { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.4); backdrop-filter: blur(4px); }
-.cell--active  { 
-  transform: translateZ(16px); 
-  animation: pulseGlow 1.5s infinite alternate ease-in-out;
-}
-.cell--stacked { transform: translateZ(8px); }
+.cell--penalty { background: var(--color-penalty); }
+
+.cell--active  { animation: pulseGlow 1.5s infinite alternate ease-in-out; }
+.cell--stacked { /* rendu standard */ }
 
 @keyframes pulseGlow {
   from { --glow-intensity: 0.3; }
