@@ -22,16 +22,10 @@ const { emitPlayerDead, emitLinesCleared, emitRequestNextPiece, emitUpdateSpectr
 
 // Capture des callbacks passés aux hooks pour les appeler dans les tests
 let capturedOnTick    = null
-let capturedHandlers  = null
 
 jest.mock('../../src/client/hooks/useGameLoop', () => (isPlaying, _interval, onTick) => {
   if (isPlaying) capturedOnTick = onTick
   else capturedOnTick = null
-})
-
-jest.mock('../../src/client/hooks/useKeyboard', () => (isPlaying, handlers) => {
-  if (isPlaying) capturedHandlers = handlers
-  else capturedHandlers = null
 })
 
 const mockStore = configureStore([thunk])
@@ -51,6 +45,7 @@ const makeState = (overrides = {}) => ({
       x: 3,
       y: 0,
     },
+    nextPieceType: 'J',
     ghostY: 18,
   },
   opponents: [],
@@ -72,7 +67,6 @@ const renderGame = (state) => {
 
 beforeEach(() => {
   capturedOnTick   = null
-  capturedHandlers = null
   jest.clearAllMocks()
 })
 
@@ -137,7 +131,8 @@ describe('Game Component', () => {
       expect(emitRequestNextPiece).not.toHaveBeenCalled()
     })
 
-    it('locks piece on second consecutive blocked tick (last-frame rule)', () => {
+    it('locks piece after LOCK_DELAY on blocked tick (last-frame rule)', async () => {
+      jest.useFakeTimers()
       const board = createEmptyBoard()
       const state = makeState()
       state.player.currentPiece = { type: 'O', shape: [[1,1],[1,1]], x: 4, y: 18 }
@@ -145,11 +140,13 @@ describe('Game Component', () => {
 
       const { store } = renderGame(state)
 
-      act(() => { capturedOnTick() }) // tick 1 → isLanding = true
-      act(() => { capturedOnTick() }) // tick 2 → lockPiece
+      act(() => { capturedOnTick() }) // déclenche requestLock
+      
+      act(() => { jest.advanceTimersByTime(1000) }) // passe le LOCK_DELAY
 
       expect(emitRequestNextPiece).toHaveBeenCalledWith('room1')
       expect(emitUpdateSpectrum).toHaveBeenCalledWith('room1', expect.any(Array))
+      jest.useRealTimers()
     })
 
     it('does not tick when piece or board is missing', () => {
@@ -171,7 +168,7 @@ describe('Game Component', () => {
       state.player.currentPiece = { type: 'T', shape: [[0,1,0],[1,1,1]], x: 4, y: 0 }
       const { store } = renderGame(state)
 
-      act(() => { capturedHandlers.moveLeft() })
+      act(() => { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' })) })
 
       const dispatched = store.dispatch.mock.calls.map(c => c[0])
       const setPiece = dispatched.find(a => a.type === 'SET_PIECE')
@@ -183,7 +180,7 @@ describe('Game Component', () => {
       state.player.currentPiece = { type: 'I', shape: [[1,1,1,1]], x: 0, y: 0 }
       const { store } = renderGame(state)
 
-      act(() => { capturedHandlers.moveLeft() })
+      act(() => { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' })) })
 
       const dispatched = store.dispatch.mock.calls.map(c => c[0])
       expect(dispatched.some(a => a.type === 'SET_PIECE')).toBe(false)
@@ -194,7 +191,7 @@ describe('Game Component', () => {
       state.player.currentPiece = { type: 'T', shape: [[0,1,0],[1,1,1]], x: 3, y: 0 }
       const { store } = renderGame(state)
 
-      act(() => { capturedHandlers.moveRight() })
+      act(() => { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' })) })
 
       const dispatched = store.dispatch.mock.calls.map(c => c[0])
       const setPiece = dispatched.find(a => a.type === 'SET_PIECE')
@@ -207,7 +204,7 @@ describe('Game Component', () => {
       state.player.currentPiece = { type: 'T', shape: [[0,1,0],[1,1,1]], x: 3, y: 0 }
       const { store } = renderGame(state)
 
-      act(() => { capturedHandlers.rotate() })
+      act(() => { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' })) })
 
       const dispatched = store.dispatch.mock.calls.map(c => c[0])
       const setPiece = dispatched.find(a => a.type === 'SET_PIECE')
@@ -221,21 +218,26 @@ describe('Game Component', () => {
       state.player.currentPiece = { type: 'T', shape: [[0,1,0],[1,1,1]], x: 3, y: 5 }
       const { store } = renderGame(state)
 
-      act(() => { capturedHandlers.softDrop() })
+      act(() => { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' })) })
 
       const dispatched = store.dispatch.mock.calls.map(c => c[0])
       const setPiece = dispatched.find(a => a.type === 'SET_PIECE')
       expect(setPiece.payload.y).toBe(6)
     })
 
-    it('hardDrop: locks piece immediately at bottom', () => {
+    it('hardDrop: locks piece immediately at bottom', async () => {
+      jest.useFakeTimers()
       const state = makeState()
       state.player.currentPiece = { type: 'O', shape: [[1,1],[1,1]], x: 4, y: 0 }
       const { store } = renderGame(state)
 
-      act(() => { capturedHandlers.hardDrop() })
+      act(() => { window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' })) })
+      
+      // hardDrop does setTimeout(() => lockPiece(), 0)
+      act(() => { jest.advanceTimersByTime(500) })
 
       expect(emitRequestNextPiece).toHaveBeenCalledWith('room1')
+      jest.useRealTimers()
     })
 
     it('handlers do nothing when piece is null', () => {
@@ -244,11 +246,11 @@ describe('Game Component', () => {
       const { store } = renderGame(state)
 
       act(() => {
-        capturedHandlers.moveLeft()
-        capturedHandlers.moveRight()
-        capturedHandlers.rotate()
-        capturedHandlers.softDrop()
-        capturedHandlers.hardDrop()
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }))
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }))
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }))
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))
       })
 
       const dispatched = store.dispatch.mock.calls.map(c => c[0])
@@ -280,7 +282,8 @@ describe('Game Component', () => {
 
   // ── Penalty lines ───────────────────────────────────────────────────────
   describe('Lock piece with lines cleared', () => {
-    it('emits linesCleared when piece clears rows', () => {
+    it('emits linesCleared when piece clears rows', async () => {
+      jest.useFakeTimers()
       const board = createEmptyBoard()
       // Remplir la dernière ligne sauf 2 cases (pièce O viendra combler)
       for (let c = 0; c < 10; c++) {
@@ -289,14 +292,18 @@ describe('Game Component', () => {
 
       const state = makeState()
       state.player.board = board
-      state.player.currentPiece = { type: 'O', shape: [[1,1],[1,1]], x: 4, y: 17 }
+      state.player.currentPiece = { type: 'O', shape: [[1,1],[1,1]], x: 4, y: 18 }
 
       renderGame(state)
 
-      // Déclencher le hard drop pour locker immédiatement
-      act(() => { capturedHandlers.hardDrop() })
+      // Déclencher le requestLock (la pièce est déjà au fond, y=18 et board[19] est rempli)
+      act(() => { capturedOnTick() })
+      
+      // On avance le temps pour passer le LOCK_DELAY (500) et l'animation clearLines (300)
+      act(() => { jest.advanceTimersByTime(1000) })
 
       expect(emitLinesCleared).toHaveBeenCalledWith('room1', expect.any(Number))
+      jest.useRealTimers()
     })
   })
 })

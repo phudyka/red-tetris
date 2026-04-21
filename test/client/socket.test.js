@@ -132,7 +132,7 @@ describe('socket.js — Event Listeners → Redux dispatch', () => {
     expect(types).toContain('PLAYER_JOINED')
     expect(types).toContain('ADD_OPPONENT')
     const addOpp = dispatch.mock.calls.find(c => c[0].type === 'ADD_OPPONENT')
-    expect(addOpp[0].payload).toBe('Bob')
+    expect(addOpp[0].payload).toEqual({ name: 'Bob', isAlive: undefined })
   })
 
   it('playerLeft → PLAYER_LEFT', () => {

@@ -33,8 +33,8 @@ describe('React Components', () => {
       expect(container.firstChild).toHaveClass('cell', 'cell--T')
     })
 
-    it('should render a ghost cell exclusively when isGhost is true', () => {
-      const { container } = render(<Cell value={3} isGhost={true} />)
+    it('should render a ghost cell exclusively when state is ghost', () => {
+      const { container } = render(<Cell value={3} state="ghost" />)
       expect(container.firstChild).toHaveClass('cell', 'cell--ghost')
       expect(container.firstChild).not.toHaveClass('cell--T')
     })
@@ -54,12 +54,13 @@ describe('React Components', () => {
       expect(screen.getByText('Bob')).toBeInTheDocument()
       
       // Verification des barres
-      const bars = document.querySelectorAll('.opponent__bar')
+      const spectrumContainer = screen.getByRole('img', { name: `spectrum of Bob` })
+      const bars = spectrumContainer.children
       expect(bars.length).toBe(10)
       
-      // La hauteur est calculée en px (height / 20 * 40)
-      // Ex: 5 -> (5/20)*40 = 10px
-      expect(bars[1]).toHaveStyle({ height: '10px' })
+      // La hauteur est calculée en % (height / 20 * 100%)
+      // Ex: 5 -> (5/20)*100 = 25%
+      expect(bars[1]).toHaveStyle({ height: '25%' })
     })
 
     it('should apply dead class when isAlive is false', () => {
