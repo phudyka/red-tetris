@@ -4,7 +4,7 @@
 // Zéro `this` — logique via fonctions pures de shared/gameLogic
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import Board from './Board'
@@ -12,11 +12,13 @@ import OpponentView from './OpponentView'
 import GameOver from './GameOver'
 import NextPiecePreview from './NextPiecePreview'
 import HoldPieceView from './HoldPieceView'
+import ScorePanel from './ScorePanel'
+import MiniBoard from './MiniBoard'
 
 import useGameLoop from '../hooks/useGameLoop'
 
 import { setBoard, playerDied } from '../actions/player'
-import { opponentDied } from '../actions/opponents'
+
 
 import {
   isValidPosition,
@@ -41,6 +43,7 @@ import {
   emitLinesCleared,
   emitRequestNextPiece,
   emitUpdateSpectrum,
+  emitUpdateBoard,
 } from '../socket'
 
 // ── DAS constants (Delayed Auto Shift) ───────────────────────────────────────
@@ -65,8 +68,6 @@ const Game = () => {
   const [lockingCells, setLockingCells] = useState([])
 
   // ── Refs "live" pour éviter les stale closures dans les timers ────────────
-  // Ces refs permettent aux callbacks setTimeout/setInterval d'accéder
-  // toujours à la version la plus récente du board et de la pièce.
   const boardRef      = useRef(null)
   const pieceRef      = useRef(null)
   const nextTypeRef   = useRef(null)
@@ -83,6 +84,13 @@ const Game = () => {
   useEffect(() => { holdTypeRef.current = holdPieceType }, [holdPieceType])
   useEffect(() => { canHoldRef.current = canHold }, [canHold])
   useEffect(() => { roomRef.current = room }, [room])
+
+  // ── Emit Board Snapshot (Throttled by server) ─────────────────────────────
+  useEffect(() => {
+    if (isPlaying && board) {
+      emitUpdateBoard(room, board)
+    }
+  }, [board, isPlaying, room])
 
   // ── Refs pour le Lock Delay (Guideline) ───────────────────────────────────
   const lockTimeoutRef = useRef(null)
@@ -120,8 +128,6 @@ const Game = () => {
   }, [dispatch])
 
   // ── Lock piece ────────────────────────────────────────────────────────────
-  // Utilise les refs pour lire l'état actuel au moment du lock,
-  // pas l'état au moment où le callback a été créé.
   const lockPiece = useCallback(() => {
     const currentPiece = pieceRef.current
     const currentBoard = boardRef.current
@@ -316,7 +322,7 @@ const Game = () => {
     }
 
     const onKeyDown = (e) => {
-      if (e.repeat) return  // ignorer la répétition native navigateur
+      if (e.repeat) return
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault()
@@ -366,39 +372,53 @@ const Game = () => {
 
   return (
     <div className="game-layout">
-      {/* Sidebar gauche — adversaires + Hold */}
+      {/* Sidebar gauche — Hold + Score (solo) */}
       <aside className="game-sidebar">
         <HoldPieceView />
-
-        {opponents.length > 0 && (
-          <>
-            <p className="game-sidebar__title">Opponents</p>
-            {opponents.map(opp => (
-              <OpponentView
-                key={opp.name}
-                name={opp.name}
-                spectrum={opp.spectrum}
-                isAlive={opp.isAlive}
-              />
-            ))}
-          </>
-        )}
+        {opponents.length === 0 && <ScorePanel />}
+        
+        <div style={{ marginTop: 'auto' }}>
+          <p className="game-sidebar__title">Room</p>
+          <p style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.85rem', color: 'var(--block-T)', fontWeight: 800 }}>
+            {room}
+          </p>
+        </div>
       </aside>
 
-      {/* Plateau principal */}
-      <Board clearingRows={clearingRows} lockingCells={lockingCells} />
+      {/* Centre — Board + Score (multi) */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+        {opponents.length > 0 && <ScorePanel />}
+        <Board clearingRows={clearingRows} lockingCells={lockingCells} />
+        {opponents.length === 0 && (
+           <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontStyle: 'italic' }}>
+             Solo Mode
+           </p>
+        )}
+      </div>
 
-      {/* Sidebar droite — infos */}
+      {/* Sidebar droite — Next + Opponents/MiniBoards */}
       <aside className="game-sidebar">
         <NextPiecePreview />
 
-        <p className="game-sidebar__title">Room</p>
-        <p style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.75rem', color: 'var(--accent)' }}>
-          {room}
-        </p>
+        {opponents.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <p className="game-sidebar__title">Opponents</p>
+            {opponents.map(opp => (
+              <div key={opp.name} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <MiniBoard playerName={opp.name} />
+                <OpponentView
+                  name={opp.name}
+                  spectrum={opp.spectrum}
+                  isAlive={opp.isAlive}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
         {!isAlive && (
-          <div style={{ marginTop: 16 }}>
-            <p style={{ color: 'var(--accent)', fontFamily: 'Orbitron, monospace', fontSize: '0.8rem' }}>
+          <div className="panel" style={{ marginTop: 16, textAlign: 'center', background: 'rgba(245,72,72,0.1)' }}>
+            <p style={{ color: 'var(--block-Z)', fontWeight: 800, fontSize: '0.9rem' }}>
               ELIMINATED
             </p>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: 4 }}>

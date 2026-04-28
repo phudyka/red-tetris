@@ -16,6 +16,8 @@ const GameOver = () => {
   const room      = useSelector(s => s.game.room)
   const isHost    = useSelector(s => s.player.isHost)
   const opponents = useSelector(s => s.opponents)
+  const scores    = useSelector(s => s.scores)
+  const myName    = useSelector(s => s.player.name)
 
   const handleRestart = () => {
     dispatch(gameReset())
@@ -26,15 +28,29 @@ const GameOver = () => {
     emitStartGame(room)
   }
 
+  const myScore = scores[myName] || 0
+  const isWinner = winner === myName
+
   return (
     <div className="screen">
       <div className="panel gameover">
         <h1 className="gameover__title">GAME OVER</h1>
-        <p className="gameover__winner">
-          {winner
-            ? <><span>{winner}</span> wins!</>
-            : 'No winner this round.'}
-        </p>
+        
+        <div style={{ marginBottom: '20px' }}>
+          <p className="gameover__winner">
+            {winner
+              ? <><span>{winner}</span> wins!</>
+              : 'No winner this round.'}
+          </p>
+          
+          <div style={{ marginTop: '24px' }}>
+            <p className="game-sidebar__title">YOUR FINAL SCORE</p>
+            <p className={isWinner ? 'gameover__score--winner' : 'gameover__score--loser'}>
+              {myScore.toLocaleString()}
+            </p>
+          </div>
+        </div>
+
         {isHost && (
           <button
             id="btn-restart"

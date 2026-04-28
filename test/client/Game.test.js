@@ -15,9 +15,10 @@ jest.mock('../../src/client/socket', () => ({
   emitLinesCleared:    jest.fn(),
   emitRequestNextPiece: jest.fn(),
   emitUpdateSpectrum:  jest.fn(),
+  emitUpdateBoard:     jest.fn(),
 }))
 
-const { emitPlayerDead, emitLinesCleared, emitRequestNextPiece, emitUpdateSpectrum } =
+const { emitPlayerDead, emitLinesCleared, emitRequestNextPiece, emitUpdateSpectrum, emitUpdateBoard } =
   require('../../src/client/socket')
 
 // Capture des callbacks passés aux hooks pour les appeler dans les tests
@@ -49,6 +50,8 @@ const makeState = (overrides = {}) => ({
     ghostY: 18,
   },
   opponents: [],
+  scores: {},
+  leaderboard: [],
   ...overrides,
 })
 
@@ -91,8 +94,8 @@ describe('Game Component', () => {
       const state = makeState({
         opponents: [{ name: 'Bob', spectrum: Array(10).fill(0), isAlive: true }],
       })
-      const { getByText } = renderGame(state)
-      expect(getByText('Bob')).toBeInTheDocument()
+      const { getAllByText } = renderGame(state)
+      expect(getAllByText('Bob')[0]).toBeInTheDocument()
     })
 
     it('shows ELIMINATED when player is dead but game continues', () => {

@@ -73,7 +73,9 @@ describe('React Components', () => {
   describe('Lobby', () => {
     const initialState = {
       game: { room: 'roomA', players: [{ name: 'Alice', isHost: true }] },
-      player: { name: 'Alice', isHost: true }
+      player: { name: 'Alice', isHost: true },
+      scores: {},
+      leaderboard: []
     }
 
     it('should render room name and active player', () => {
@@ -125,8 +127,10 @@ describe('React Components', () => {
     beforeEach(() => {
       store = mockStore({
         game: { room: 'r1', winner: 'Alice' },
-        player: { isHost: true },
-        opponents: []
+        player: { isHost: true, name: 'Alice' },
+        opponents: [],
+        scores: { Alice: 1000 },
+        leaderboard: []
       })
       store.dispatch = jest.fn()
     })

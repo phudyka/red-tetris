@@ -16,6 +16,8 @@ class Player {
     this.pieceIndex = 0    // index dans game.pieces[]
     this.x = 0
     this.y = SPAWN_Y
+    this.score = 0         // score in-memory, reset à chaque partie
+    this.lastBoardSnapshot = null  // pour le throttle de snapshot
   }
 
   reset() {
@@ -24,6 +26,8 @@ class Player {
     this.pieceIndex = 0
     this.x = 0
     this.y = SPAWN_Y
+    this.score = 0
+    this.lastBoardSnapshot = null
     return this
   }
 }

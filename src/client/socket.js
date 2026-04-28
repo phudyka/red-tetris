@@ -20,6 +20,8 @@ import {
   playerDied,
 } from './actions/player'
 import { setOpponents, updateSpectrum, opponentDied, addOpponent } from './actions/opponents'
+import { scoreUpdate } from './actions/scores'
+import { leaderboardUpdate } from './actions/leaderboard'
 
 let socket = null
 
@@ -77,6 +79,25 @@ export const initSocket = (dispatch) => {
     dispatch(gameOver(payload))
   })
 
+  socket.on('score:update', (payload) => {
+    dispatch(scoreUpdate(payload))
+  })
+
+  socket.on('leaderboard:update', (payload) => {
+    dispatch(leaderboardUpdate(payload))
+  })
+
+  // Le payload est géré par un reducer specifique ou composant React
+  // Mais ici on n'a pas mis le board complet des adversaires dans redux
+  // On va dispatcher un event DOM ou l'ajouter au state Redux.
+  // Plus simple : stocker les mini-boards dans un reducer spécifique,
+  // OU enrichir le reducer opponents.
+  socket.on('board:snapshot', (payload) => {
+    // Custom DOM event pour le composant MiniBoard afin d'éviter de spammer Redux
+    const event = new CustomEvent('board:snapshot', { detail: payload })
+    window.dispatchEvent(event)
+  })
+
   socket.on('error', ({ message }) => {
     console.error('[socket] Server error:', message)
   })
@@ -116,6 +137,10 @@ export const emitRequestNextPiece = (room) => {
 
 export const emitUpdateSpectrum = (room, spectrum) => {
   if (socket) socket.emit('updateSpectrum', { room, spectrum })
+}
+
+export const emitUpdateBoard = (room, board) => {
+  if (socket) socket.emit('updateBoard', { room, board })
 }
 
 export const getSocket = () => socket

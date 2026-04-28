@@ -13,9 +13,14 @@ const GameManager = require('./GameManager')
 const Player = require('./Player')
 const { SPAWN_X, SPAWN_Y, PIECE_TYPES } = require('./constants.cjs')
 const { isValidPosition } = require('./gameLogic.cjs')
+const { calcScore, updateLeaderboard, getLeaderboardArray, boardHasChanged } = require('./scoreLogic')
 
 const PORT = process.env.PORT || 3000
 const HOST = process.env.HOST || 'localhost'
+
+// ── Leaderboard global (survit aux parties) ───────────────────────────────────
+const leaderboardMap = new Map()
+
 
 const app = express()
 const server = http.createServer(app)
@@ -56,6 +61,9 @@ io.on('connection', (socket) => {
     }
     game.addPlayer(player)
     socket.join(room)
+
+    // Send global leaderboard to the new player
+    socket.emit('leaderboard:update', getLeaderboardArray(leaderboardMap))
 
     // Confirmer au nouveau joueur
     socket.emit('gameJoined', {
@@ -141,6 +149,13 @@ io.on('connection', (socket) => {
     const winner = game.checkWinCondition()
     if (winner !== null || game.getAlivePlayers().length === 0) {
       game.over = true
+
+      // Update leaderboard for all players in this game
+      game.players.forEach(p => {
+        updateLeaderboard(leaderboardMap, p.name, p.score)
+      })
+      io.emit('leaderboard:update', getLeaderboardArray(leaderboardMap))
+
       io.to(room).emit('gameOver', {
         winner: winner ? winner.name : null,
       })
@@ -160,6 +175,30 @@ io.on('connection', (socket) => {
     })
   })
 
+  // ── updateBoard (client → serveur → autres joueurs avec throttle) ───────────
+  socket.on('updateBoard', ({ room, board }) => {
+    const game = manager.get(room)
+    if (!game) return
+    const player = game.getPlayer(socket.id)
+    if (!player) return
+
+    const now = Date.now()
+    if (!player.lastBoardSnapshotTime) {
+      player.lastBoardSnapshotTime = 0
+    }
+
+    if (now - player.lastBoardSnapshotTime >= 200) {
+      if (boardHasChanged(player.lastBoardSnapshot, board)) {
+        player.lastBoardSnapshot = board
+        player.lastBoardSnapshotTime = now
+        socket.to(room).emit('board:snapshot', {
+          playerName: player.name,
+          board
+        })
+      }
+    }
+  })
+
   // ── linesCleared (pénalités) ──────────────────────────────────────────────
   socket.on('linesCleared', ({ room, linesCleared }) => {
     const game = manager.get(room)
@@ -167,6 +206,16 @@ io.on('connection', (socket) => {
 
     const player = game.getPlayer(socket.id)
     if (!player || !player.isAlive) return
+
+    // Update score
+    const scoreEarned = calcScore(linesCleared)
+    if (scoreEarned > 0) {
+      player.score += scoreEarned
+      io.to(room).emit('score:update', {
+        playerName: player.name,
+        score: player.score
+      })
+    }
 
     const penaltyLines = linesCleared - 1
     if (penaltyLines <= 0) return
@@ -246,6 +295,13 @@ function handlePlayerLeave(socket, room) {
     const winner = game.checkWinCondition()
     if (winner !== null || game.getAlivePlayers().length === 0) {
       game.over = true
+
+      // Update leaderboard
+      game.players.forEach(p => {
+        updateLeaderboard(leaderboardMap, p.name, p.score)
+      })
+      io.emit('leaderboard:update', getLeaderboardArray(leaderboardMap))
+
       io.to(room).emit('gameOver', {
         winner: winner ? winner.name : null,
       })

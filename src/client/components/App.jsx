@@ -59,14 +59,19 @@ const Home = () => (
   </div>
 )
 
+// ── App routes ──────────────────────────────────────────────────────────────
+export const Main = () => (
+  <Routes>
+    <Route path="/:room/:playerName" element={<RoomEntry />} />
+    <Route path="/"                  element={<Home />} />
+    <Route path="*"                  element={<Navigate to="/" replace />} />
+  </Routes>
+)
+
 // ── App root ─────────────────────────────────────────────────────────────────
 const App = () => (
   <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-    <Routes>
-      <Route path="/:room/:playerName" element={<RoomEntry />} />
-      <Route path="/"                  element={<Home />} />
-      <Route path="*"                  element={<Navigate to="/" replace />} />
-    </Routes>
+    <Main />
   </BrowserRouter>
 )
 
