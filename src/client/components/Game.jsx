@@ -103,25 +103,37 @@ const Game = () => {
     }
   }, [])
 
-  // ── Death check ───────────────────────────────────────────────────────────
+  // ── Death check on Board change (Penalty) ──────────────────────────────────
+  // Si le board change (pénalité reçue), on vérifie si la pièce actuelle
+  // entre en collision. Si oui, c'est Game Over.
   useEffect(() => {
-    if (!piece || !piece.shape || !board || !isPlaying) return
+    if (!isPlaying || !piece || !board) return
     if (!isValidPosition(board, piece.shape, piece.x, piece.y)) {
       dispatch(playerDied())
       emitPlayerDead(roomRef.current)
     }
-  }, [piece, board, isPlaying, dispatch])
+  }, [board]) // Uniquement quand le board change (pénalités)
 
   // ── Spawning Prédictif ──────────────────────────────────────────────────
   const spawnNextPiece = useCallback(() => {
     const type = nextTypeRef.current
-    if (!type) return
+    const currentBoard = boardRef.current
+    if (!type || !currentBoard) return
+
     const newPieceLocal = {
       type,
       shape: PIECES[type].shape,
       x: SPAWN_X[type],
       y: SPAWN_Y,
     }
+
+    // Check death on spawn
+    if (!isValidPosition(currentBoard, newPieceLocal.shape, newPieceLocal.x, newPieceLocal.y)) {
+      dispatch(playerDied())
+      emitPlayerDead(roomRef.current)
+      return
+    }
+
     dispatch({ type: 'SET_PIECE', payload: newPieceLocal })
     dispatch({ type: 'SET_PLAYER', payload: { canHold: true } })
     emitRequestNextPiece(roomRef.current)
@@ -284,20 +296,31 @@ const Game = () => {
 
   const holdPiece = useCallback(() => {
     const p = pieceRef.current
-    if (!p || !canHoldRef.current) return
+    const b = boardRef.current
+    if (!p || !b || !canHoldRef.current) return
+    
     if (!holdTypeRef.current) {
       dispatch({ type: 'SET_PLAYER', payload: { holdPieceType: p.type, canHold: false } })
       dispatch({ type: 'SET_PIECE', payload: null })
       emitRequestNextPiece(roomRef.current)
     } else {
       const nextType = holdTypeRef.current
-      dispatch({ type: 'SET_PLAYER', payload: { holdPieceType: p.type, canHold: false } })
-      dispatch({ type: 'SET_PIECE', payload: {
+      const newPieceLocal = {
         type: nextType,
         shape: PIECES[nextType].shape,
         x: SPAWN_X[nextType],
         y: SPAWN_Y,
-      }})
+      }
+
+      // Check death on hold swap
+      if (!isValidPosition(b, newPieceLocal.shape, newPieceLocal.x, newPieceLocal.y)) {
+        dispatch(playerDied())
+        emitPlayerDead(roomRef.current)
+        return
+      }
+
+      dispatch({ type: 'SET_PLAYER', payload: { holdPieceType: p.type, canHold: false } })
+      dispatch({ type: 'SET_PIECE', payload: newPieceLocal })
     }
   }, [dispatch])
 
