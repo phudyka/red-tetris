@@ -7,7 +7,7 @@ import {
 } from '../../src/client/actions/game'
 
 import {
-  setPlayer, setBoard, newPiece, setGhost, addPenalty, playerDied, resetPlayer
+  setPlayer, setBoard, newPiece, addPenalty, playerDied, resetPlayer
 } from '../../src/client/actions/player'
 
 import {
@@ -97,14 +97,12 @@ describe('Redux Reducers', () => {
       expect(state.board[0][0]).toBe(1)
     })
 
-    it('should handle NEW_PIECE and reset ghost', () => {
+    it('should handle NEW_PIECE', () => {
       const pieceData = { type: 'T', shape: [[1]], spawnX: 3, spawnY: 0 }
-      let state = playerReducer(initPlayer, setGhost(18)) // Add fake ghost first
-      state = playerReducer(state, newPiece({ piece: pieceData }))
-      
+      const state = playerReducer(initPlayer, newPiece({ piece: pieceData }))
+
       expect(state.currentPiece.type).toBe('T')
       expect(state.currentPiece.x).toBe(3)
-      expect(state.ghostY).toBe(null) // Ghost is cleared!
     })
 
     it('should handle ADD_PENALTY', () => {
@@ -112,6 +110,16 @@ describe('Redux Reducers', () => {
       expect(state.board[17][0]).toBe(8) // 3 penalty lines from the bottom
       expect(state.board[18][0]).toBe(8)
       expect(state.board[19][0]).toBe(8)
+    })
+
+    it('should track the last penalty for the live region', () => {
+      let state = playerReducer(initPlayer, addPenalty(2))
+      expect(state.penaltyLines).toBe(2)
+      expect(state.penaltySeq).toBe(1)
+
+      // Deux pénalités identiques doivent rester distinguables
+      state = playerReducer(state, addPenalty(2))
+      expect(state.penaltySeq).toBe(2)
     })
 
     it('should handle PLAYER_DIED and RESET_PLAYER', () => {

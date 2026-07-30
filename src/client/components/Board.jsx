@@ -18,6 +18,15 @@ import { getHardDropPosition } from "../../shared/gameLogic";
 // Décélération exponentielle — pas de rebond.
 const EASE_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
 
+/**
+ * Les animations ci-dessous passent par la Web Animations API : le bloc
+ * @media (prefers-reduced-motion) du CSS ne les atteint pas, il faut le lire ici.
+ */
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 /** jsdom (tests) n'implémente pas la Web Animations API. */
 const canAnimate = (el) => el && typeof el.animate === "function";
 
@@ -26,7 +35,7 @@ const canAnimate = (el) => el && typeof el.animate === "function";
  */
 const animatePieceLock = (cells) => {
   cells.forEach((el, i) => {
-    if (!canAnimate(el)) return;
+    if (!canAnimate(el) || prefersReducedMotion()) return;
     el.animate([
       { transform: "scale(1.12)", filter: "brightness(1.9)" },
       { transform: "scale(1)", filter: "brightness(1)" },
@@ -39,7 +48,7 @@ const animatePieceLock = (cells) => {
  */
 const animateLineClear = (rowElements) => {
   rowElements.forEach((el) => {
-    if (!canAnimate(el)) return;
+    if (!canAnimate(el) || prefersReducedMotion()) return;
     el.animate([
       { transform: "scaleX(1)", opacity: 1, filter: "brightness(1)" },
       { transform: "scaleX(1.1)", opacity: 1, filter: "brightness(3)" },

@@ -47,7 +47,6 @@ const makeState = (overrides = {}) => ({
       y: 0,
     },
     nextPieceType: 'J',
-    ghostY: 18,
   },
   opponents: [],
   scores: {},

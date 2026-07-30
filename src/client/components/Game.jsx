@@ -75,6 +75,52 @@ const Game = () => {
   const [clearingRows, setClearingRows] = useState([]);
   const [lockingCells, setLockingCells] = useState([]);
 
+  // ── Annonces lecteur d'écran ──────────────────────────────────────────────
+  // Le plateau est muet pour une synthèse vocale : ces trois événements sont
+  // les seuls qui changent la situation du joueur, et ils sont assez rares
+  // (au plus un par pièce posée) pour tenir dans une région "polite".
+  const myName = useSelector((s) => s.player.name);
+  const myScore = useSelector((s) => s.scores[s.player.name] || 0);
+  const penaltyLines = useSelector((s) => s.player.penaltyLines);
+  const penaltySeq = useSelector((s) => s.player.penaltySeq);
+
+  const [announcement, setAnnouncement] = useState("");
+  const prevScoreRef = useRef(myScore);
+  const prevSeqRef = useRef(penaltySeq);
+  const prevDeadRef = useRef("");
+
+  useEffect(() => {
+    if (myScore > prevScoreRef.current) {
+      setAnnouncement(`Score ${myScore.toLocaleString()}`);
+    }
+    prevScoreRef.current = myScore;
+  }, [myScore]);
+
+  useEffect(() => {
+    if (penaltySeq > prevSeqRef.current) {
+      // Un texte identique n'est pas relu par les lecteurs d'écran. Le score et
+      // la liste des éliminés changent toujours, deux pénalités de 2 lignes non :
+      // on alterne une espace insécable pour rendre le message unique.
+      const text = `${penaltyLines} penalty ${
+        penaltyLines > 1 ? "lines" : "line"
+      } added`;
+      setAnnouncement(penaltySeq % 2 ? text : `${text} `);
+    }
+    prevSeqRef.current = penaltySeq;
+  }, [penaltySeq, penaltyLines]);
+
+  const deadOpponents = opponents
+    .filter((o) => !o.isAlive)
+    .map((o) => o.name)
+    .join(", ");
+
+  useEffect(() => {
+    if (deadOpponents.length > prevDeadRef.current.length) {
+      setAnnouncement(`${deadOpponents} eliminated`);
+    }
+    prevDeadRef.current = deadOpponents;
+  }, [deadOpponents]);
+
   // ── Refs "live" pour éviter les stale closures dans les timers ────────────
   const boardRef = useRef(null);
   const pieceRef = useRef(null);
@@ -448,6 +494,10 @@ const Game = () => {
 
   return (
     <div className="game-layout">
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </p>
+
       {/* Sidebar gauche — Hold + Score (solo) */}
       <aside className="game-sidebar">
         <HoldPieceView />

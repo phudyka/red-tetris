@@ -160,6 +160,13 @@ describe('socket.js — Event Listeners → Redux dispatch', () => {
     expect(types).toContain('UPDATE_SPECTRUM')
   })
 
+  it('opponentDead → OPPONENT_DIED avec le nom du joueur', () => {
+    mockListeners['opponentDead']({ playerName: 'Bob' })
+    const action = dispatch.mock.calls.find(c => c[0].type === 'OPPONENT_DIED')
+    expect(action).toBeDefined()
+    expect(action[0].payload).toBe('Bob')
+  })
+
   it('addPenalty → ADD_PENALTY avec le bon count', () => {
     mockListeners['addPenalty']({ lines: 2 })
     const action = dispatch.mock.calls.find(c => c[0].type === 'ADD_PENALTY')

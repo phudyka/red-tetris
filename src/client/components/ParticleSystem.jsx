@@ -10,7 +10,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { BOARD_HEIGHT, BOARD_WIDTH, PIECE_TYPES } from "../../shared/constants";
 
 const PER_ROW = 14;
-const LIFETIME = 620; // ms — doit couvrir la plus longue durée tirée ci-dessous
+// Doit couvrir le pire cas : délai max (60) + durée max (600).
+const LIFETIME = 700;
 
 /**
  * Fabrique les particules d'une ligne — fonction pure hormis Math.random.

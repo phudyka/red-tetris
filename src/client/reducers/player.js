@@ -8,7 +8,6 @@ import {
   SET_PLAYER,
   SET_BOARD,
   NEW_PIECE,
-  SET_GHOST,
   ADD_PENALTY,
   PLAYER_DIED,
   RESET_PLAYER,
@@ -27,7 +26,10 @@ const initialState = {
   nextPieceType: null,
   holdPieceType: null,
   canHold: true,
-  ghostY: null,
+  // Dernière pénalité reçue — lue par la région live de Game.jsx.
+  // penaltySeq incrémente à chaque pénalité pour distinguer deux fois "2 lignes".
+  penaltyLines: 0,
+  penaltySeq: 0,
 }
 
 const playerReducer = (state = initialState, action) => {
@@ -51,7 +53,6 @@ const playerReducer = (state = initialState, action) => {
         return {
           ...state,
           nextPieceType: nextPieceState ? nextPieceState.type : null,
-          ghostY: null,
         }
       }
 
@@ -65,16 +66,17 @@ const playerReducer = (state = initialState, action) => {
         ...state,
         currentPiece: newPieceState,
         nextPieceType: nextPieceState ? nextPieceState.type : null,
-        ghostY: null,
       }
     }
 
-    case SET_GHOST:
-      return { ...state, ghostY: action.payload }
-
     case ADD_PENALTY: {
       const newBoard = addPenaltyLines(state.board, action.payload)
-      return { ...state, board: newBoard }
+      return {
+        ...state,
+        board: newBoard,
+        penaltyLines: action.payload,
+        penaltySeq: state.penaltySeq + 1,
+      }
     }
 
     case PLAYER_DIED:

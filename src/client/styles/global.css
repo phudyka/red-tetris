@@ -96,6 +96,19 @@ h1, h2, h3 {
   flex-direction: column;
 }
 
+/* Visible pour les lecteurs d'écran uniquement (régions live). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ── Écran plein ─────────────────────────────────────────────────────────────── */
 .screen {
   flex: 1;
@@ -132,7 +145,9 @@ h1, h2, h3 {
   letter-spacing: 0.04em;
   min-height: var(--tap);
   padding: 12px 28px;
-  border: none;
+  /* Bordure transparente en base : l'état désactivé en ajoute une, sans elle
+     le bouton changeait de taille de 3px en basculant host / non-host. */
+  border: 1.5px solid transparent;
   border-radius: 12px;
   cursor: pointer;
   transition:
@@ -207,14 +222,16 @@ h1, h2, h3 {
   font-style: italic;
 }
 
+/* Pas de backdrop-filter ici, contrairement aux autres panneaux : c'est
+   l'élément qui repeint le plus (200 cellules, chaque descente de pièce) et
+   son arrière-plan est un dégradé lisse et statique — le flouter ne change
+   rien à l'œil mais impose une passe de composition à chaque frame. */
 .board {
   position: relative;
   display: grid;
   grid-template-columns: repeat(10, var(--cell-size));
   grid-template-rows: repeat(20, var(--cell-size));
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.18);
   border: 2px solid rgba(255, 255, 255, 0.45);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(100, 50, 180, 0.25);
@@ -473,11 +490,15 @@ h1, h2, h3 {
 /* ── Preview Next / Hold ─────────────────────────────────────────────────────── */
 .preview {
   margin-bottom: 8px;
+}
+
+.preview__grid {
   transition: opacity 0.2s;
 }
 
-.preview--spent {
-  opacity: 0.55;
+/* Hold déjà consommé : on grise la pièce, jamais son libellé. */
+.preview--spent .preview__grid {
+  opacity: 0.5;
 }
 
 .preview__grid {
@@ -513,8 +534,10 @@ h1, h2, h3 {
   -webkit-backdrop-filter: blur(6px);
 }
 
+/* Éliminé : on éteint le spectrum, pas le texte. Baisser l'opacité du bloc
+   entier faisait tomber le nom à 3.0:1. */
 .opponent--dead {
-  opacity: 0.55;
+  border-style: dashed;
 }
 
 .opponent__name {
@@ -541,8 +564,13 @@ h1, h2, h3 {
   min-height: 2px;
 }
 
+.opponent--dead .opponent__name {
+  color: var(--text-muted); /* 5.8:1 */
+}
+
 .opponent--dead .opponent__bar {
   background: var(--text-muted);
+  opacity: 0.45;
 }
 
 .opponents-stack {
@@ -558,15 +586,16 @@ h1, h2, h3 {
 }
 
 /* ── État éliminé ────────────────────────────────────────────────────────────── */
+/* Le signal d'alerte passe par la bordure et le titre, pas par un fond teinté :
+   un fond rouge translucide faisait tomber le texte sous 4.5:1. */
 .eliminated {
   margin-top: 16px;
   text-align: center;
-  background: rgba(245, 72, 72, 0.14);
-  border-color: rgba(184, 24, 24, 0.4);
+  border: 1.5px solid #b81818;
 }
 
 .eliminated__title {
-  color: #a01414;
+  color: #a01414; /* 4.9:1 sur --panel-bg */
   font-weight: 800;
   font-size: 0.9rem;
   letter-spacing: 0.08em;
@@ -769,6 +798,7 @@ h1, h2, h3 {
 
 .lobby__player-name {
   color: var(--text-muted);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -977,7 +1007,7 @@ h1, h2, h3 {
 }
 
 .lb-row--gold .lb-row__rank {
-  color: #8a5a05;
+  color: #6b4504; /* 5.1:1 sur la ligne dorée */
   font-size: 1rem;
 }
 
@@ -1050,6 +1080,12 @@ h1, h2, h3 {
     margin-top: 0;
   }
 
+  /* En colonne empilée la sidebar devient une rangée : sans ça le panneau de
+     score prend toute la largeur et écrase Hold et l'aide-mémoire. */
+  .score-panel {
+    width: auto;
+  }
+
   .opponents-stack {
     flex-direction: row;
     flex-wrap: wrap;
@@ -1069,11 +1105,17 @@ h1, h2, h3 {
    d'information de jeu. On supprime les déplacements, les mises à l'échelle
    et les particules. ───────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.12s !important;
-    scroll-behavior: auto !important;
+  /* Les quatre animations du fichier, nommées une par une plutôt qu'un
+     `animation-duration: 0.01ms` global qui écraserait aussi les retours utiles. */
+  .lobby,
+  .gameover,
+  .lb-overlay,
+  .lb-modal,
+  .lb-row,
+  .score-panel,
+  .gameover__title,
+  .score-panel__value--flash {
+    animation: none;
   }
 
   .btn:hover,
@@ -1084,5 +1126,12 @@ h1, h2, h3 {
 
   .particles {
     display: none;
+  }
+
+  /* Les transitions d'opacité et de couleur restent : ce sont des changements
+     d'état du jeu, pas de la décoration. On les raccourcit simplement. */
+  *, *::before, *::after {
+    transition-duration: 0.12s !important;
+    scroll-behavior: auto !important;
   }
 }

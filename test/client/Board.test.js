@@ -14,7 +14,6 @@ describe('Board Component', () => {
       player: {
         board: createEmptyBoard(),
         currentPiece: null,
-        ghostY: null,
       }
     })
 
@@ -40,7 +39,6 @@ describe('Board Component', () => {
           x: 4,
           y: 0
         },
-        ghostY: null,
       }
     })
 
@@ -69,7 +67,6 @@ describe('Board Component', () => {
           x: 4,
           y: 0
         },
-        ghostY: 18, // Hard drop index pos
       }
     })
 

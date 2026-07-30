@@ -38,7 +38,7 @@ const GameOver = () => {
 
   return (
     <div className="screen">
-      <div className="panel gameover">
+      <div className="panel gameover" role="status">
         <h1 className="gameover__title">GAME OVER</h1>
 
         <div>

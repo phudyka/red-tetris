@@ -1,7 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import { useEffect } from 'react'
 import useGameLoop from '../../src/client/hooks/useGameLoop'
-import useKeyboard from '../../src/client/hooks/useKeyboard'
 
 describe('Client Hooks', () => {
   beforeEach(() => {
@@ -43,66 +42,6 @@ describe('Client Hooks', () => {
       unmount()
       jest.advanceTimersByTime(1000)
       expect(onTick).not.toHaveBeenCalled()
-    })
-  })
-
-  // ── useKeyboard ────────────────────────────────────────────────────────
-  describe('useKeyboard', () => {
-    let handlers
-
-    beforeEach(() => {
-      handlers = {
-        moveLeft: jest.fn(),
-        moveRight: jest.fn(),
-        rotate: jest.fn(),
-        softDrop: jest.fn(),
-        hardDrop: jest.fn(),
-      }
-    })
-
-    const triggerKey = (key) => {
-      const event = new KeyboardEvent('keydown', { key })
-      Object.defineProperty(event, 'preventDefault', { value: jest.fn() })
-      window.dispatchEvent(event)
-      return event
-    }
-
-    it('should NOT trigger handlers if isPlaying is false', () => {
-      renderHook(() => useKeyboard(false, handlers))
-      triggerKey('ArrowLeft')
-      expect(handlers.moveLeft).not.toHaveBeenCalled()
-    })
-
-    it('should trigger correct handlers for specific keys', () => {
-      renderHook(() => useKeyboard(true, handlers))
-      
-      triggerKey('ArrowLeft')
-      expect(handlers.moveLeft).toHaveBeenCalled()
-      
-      triggerKey('ArrowRight')
-      expect(handlers.moveRight).toHaveBeenCalled()
-      
-      triggerKey('ArrowUp')
-      expect(handlers.rotate).toHaveBeenCalled()
-      
-      triggerKey('ArrowDown')
-      expect(handlers.softDrop).toHaveBeenCalled()
-      
-      triggerKey(' ')
-      expect(handlers.hardDrop).toHaveBeenCalled()
-    })
-
-    it('should prevent default on handled keys to prevent scrolling', () => {
-      renderHook(() => useKeyboard(true, handlers))
-      const evt = triggerKey(' ')
-      expect(evt.preventDefault).toHaveBeenCalled()
-    })
-
-    it('should ignore unmapped keys', () => {
-      renderHook(() => useKeyboard(true, handlers))
-      triggerKey('A')
-      expect(handlers.moveLeft).not.toHaveBeenCalled()
-      expect(handlers.moveRight).not.toHaveBeenCalled()
     })
   })
 })

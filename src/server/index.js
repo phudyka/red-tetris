@@ -146,6 +146,9 @@ io.on('connection', (socket) => {
 
     player.isAlive = false
 
+    // Prévenir les autres joueurs : leur vue adversaire passe en "éliminé"
+    socket.to(room).emit('opponentDead', { playerName: player.name })
+
     const winner = game.checkWinCondition()
     if (winner !== null || game.getAlivePlayers().length === 0) {
       game.over = true

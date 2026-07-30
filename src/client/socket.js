@@ -71,6 +71,10 @@ export const initSocket = (dispatch) => {
     dispatch(updateSpectrum(payload))
   })
 
+  socket.on('opponentDead', ({ playerName }) => {
+    dispatch(opponentDied(playerName))
+  })
+
   socket.on('addPenalty', ({ lines }) => {
     dispatch(addPenalty(lines))
   })
