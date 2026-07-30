@@ -1,76 +1,77 @@
-import React, { useEffect, useState, useRef } from 'react'
+// ─────────────────────────────────────────────────────────────────────────────
+// src/client/components/ParticleSystem.jsx
+// Éclat de particules à la destruction d'une ligne.
+// Le mouvement est délégué au compositeur (keyframes CSS + custom properties) :
+// React ne rend chaque salve qu'une fois, jamais image par image.
+// Zéro `this`
+// ─────────────────────────────────────────────────────────────────────────────
 
-const PIECE_COLORS = ['#00FFFF','#FFFF00','#9C27B0','#4CAF50','#F44336','#2196F3','#FF9800']
+import React, { useEffect, useRef, useState } from "react";
+import { BOARD_HEIGHT, BOARD_WIDTH, PIECE_TYPES } from "../../shared/constants";
 
-const createParticles = (rowY, count = 20) =>
-  Array.from({ length: count }, (_, i) => ({
-    id: `${rowY}-${i}-${Date.now()}-${Math.random()}`,
-    x: Math.random() * 100, // percentage string
-    y: (rowY / 20) * 100,   // percentage within board
-    vx: (Math.random() - 0.5) * 1,
-    vy: -Math.random() * 1.5 - 0.5,
-    color: PIECE_COLORS[Math.floor(Math.random() * PIECE_COLORS.length)],
-    life: 1,
-    size: Math.random() * 6 + 4,
-  }))
+const PER_ROW = 14;
+const LIFETIME = 620; // ms — doit couvrir la plus longue durée tirée ci-dessous
+
+/**
+ * Fabrique les particules d'une ligne — fonction pure hormis Math.random.
+ * Les valeurs sont figées à la création : l'animation CSS fait le reste.
+ * @param {number} row    index de ligne effacée (0 = haut du plateau)
+ * @param {string} burst  identifiant de salve, pour des clés React stables
+ * @returns {object[]}
+ */
+const createParticles = (row, burst) =>
+  Array.from({ length: PER_ROW }, (_, i) => ({
+    id: `${burst}-${row}-${i}`,
+    left: ((i + 0.5) / PER_ROW) * 100 + (Math.random() - 0.5) * (100 / PER_ROW),
+    top: ((row + 0.5) / BOARD_HEIGHT) * 100,
+    dx: `${(Math.random() - 0.5) * 2.2 * BOARD_WIDTH}px`,
+    dy: `${-Math.random() * 70 - 18}px`,
+    size: `${Math.random() * 6 + 4}px`,
+    tint: `var(--block-${
+      PIECE_TYPES[Math.floor(Math.random() * PIECE_TYPES.length)]
+    })`,
+    duration: `${Math.round(Math.random() * 180 + 420)}ms`,
+    delay: `${Math.round(Math.random() * 60)}ms`,
+  }));
 
 const ParticleSystem = ({ clearingRows }) => {
-  const [particles, setParticles] = useState([])
-  const requestRef = useRef()
-  const lastTimeRef = useRef()
+  const [particles, setParticles] = useState([]);
+  const burstRef = useRef(0);
 
   useEffect(() => {
-    if (clearingRows && clearingRows.length > 0) {
-      const newParticles = clearingRows.flatMap(y => createParticles(y, 40))
-      setParticles(p => [...p, ...newParticles])
-    }
-  }, [clearingRows])
+    if (!clearingRows || clearingRows.length === 0) return;
 
-  const updateParticles = time => {
-    if (lastTimeRef.current != null) {
-      const deltaTime = time - lastTimeRef.current
-      setParticles(prev => prev.map(p => ({
-        ...p,
-        x: p.x + p.vx * (deltaTime / 16),
-        y: p.y + p.vy * (deltaTime / 16),
-        life: p.life - deltaTime * 0.002,
-      })).filter(p => p.life > 0))
-    }
-    lastTimeRef.current = time
-    requestRef.current = requestAnimationFrame(updateParticles)
-  }
+    burstRef.current += 1;
+    const burst = `b${burstRef.current}`;
+    setParticles(clearingRows.flatMap((row) => createParticles(row, burst)));
 
-  useEffect(() => {
-    requestRef.current = requestAnimationFrame(updateParticles)
-    return () => { if (requestRef.current) cancelAnimationFrame(requestRef.current) }
-  }, [])
+    // Une seule mise à jour d'état pour éteindre la salve entière.
+    const timer = setTimeout(() => setParticles([]), LIFETIME);
+    return () => clearTimeout(timer);
+  }, [clearingRows]);
 
-  if (particles.length === 0) return null
+  if (particles.length === 0) return null;
 
   return (
-    <div style={{
-      position: 'absolute',
-      pointerEvents: 'none',
-      top: 0, left: 0, right: 0, bottom: 0,
-      zIndex: 50,
-      overflow: 'hidden'
-    }}>
-      {particles.map(p => (
-        <div key={p.id} style={{
-          position: 'absolute',
-          left: `${p.x}%`,
-          top: `${p.y}%`,
-          width: `${p.size}px`,
-          height: `${p.size}px`,
-          background: p.color,
-          opacity: p.life,
-          borderRadius: '50%',
-          boxShadow: `0 0 10px ${p.color}`,
-          transform: `translateZ(30px) scale(${p.life})`
-        }} />
+    <div className="particles" aria-hidden="true">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="particle"
+          style={{
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            "--dx": p.dx,
+            "--dy": p.dy,
+            "--size": p.size,
+            "--tint": p.tint,
+            "--dur": p.duration,
+            animationDelay: p.delay,
+          }}
+        />
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default React.memo(ParticleSystem)
+export default React.memo(ParticleSystem);

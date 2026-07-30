@@ -3,39 +3,31 @@
 // Zéro `this` — composant fonctionnel
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React from 'react'
+import React from "react";
+import { BOARD_HEIGHT } from "../../shared/constants";
 
 /**
  * Affiche le nom + spectrum d'un adversaire.
+ * Le spectrum donne la hauteur de la colonne la plus haute, colonne par colonne.
  * @param {{ name: string, spectrum: number[], isAlive: boolean }} props
  */
-const OpponentView = ({ name, spectrum, isAlive }) => {
-  const maxHeight = 40 // px — hauteur max des barres de spectrum
-
-  return (
-    <div className={`opponent${isAlive ? '' : ' opponent--dead'}`}>
-      <div className="opponent__name" title={name}>{name}</div>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(10, 1fr)',
-        alignItems: 'end',
-        height: '40px',
-        width: '100%',
-        gap: '2px',
-        filter: 'drop-shadow(0 0 8px #ff000066)',
-        marginTop: '8px'
-      }} role="img" aria-label={`spectrum of ${name}`}>
-        {spectrum.map((h, i) => (
-          <div key={i} style={{
-            height: `${(h / 20) * 100}%`,
-            background: 'linear-gradient(to top, #ff4444, #ff444400)',
-            transition: 'height 0.1s ease-out',
-            borderRadius: '2px 2px 0 0',
-          }} />
-        ))}
-      </div>
+const OpponentView = ({ name, spectrum, isAlive }) => (
+  <div className={`opponent${isAlive ? "" : " opponent--dead"}`}>
+    <div className="opponent__name" title={name}>{name}</div>
+    <div
+      className="opponent__spectrum"
+      role="img"
+      aria-label={`spectrum of ${name}`}
+    >
+      {spectrum.map((h, i) => (
+        <div
+          key={i}
+          className="opponent__bar"
+          style={{ height: `${(h / BOARD_HEIGHT) * 100}%` }}
+        />
+      ))}
     </div>
-  )
-}
+  </div>
+);
 
-export default React.memo(OpponentView)
+export default React.memo(OpponentView);

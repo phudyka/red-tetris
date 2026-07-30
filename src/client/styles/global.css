@@ -2,74 +2,71 @@
    src/client/styles/global.css
    Direction artistique : "3D plastique lumineux"
    Palette pastel violet → rose, blocs Tetris 3D brillants, glassmorphisme
+   Les polices sont chargées depuis public/index.html (pas d'@import : évite
+   une requête chaînée bloquante bundle → css → css → woff2).
    ───────────────────────────────────────────────────────────────────────────── */
-
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Orbitron:wght@700;900&display=swap');
 
 /* ── Design tokens ──────────────────────────────────────────────────────────── */
 :root {
   --bg-gradient-start: #c9aaff;
-  --bg-gradient-end:   #f7aaee;
+  --bg-gradient-end: #f7aaee;
 
-  /* Pièces Tetris */
-  --block-I:       #3fe8e8;
-  --block-O:       #f5a623;
-  --block-T:       #9b3fe8;
-  --block-S:       #5ae87a;
-  --block-Z:       #f54848;
-  --block-J:       #f548a0;
-  --block-L:       #c8c8d4;
-  --block-penalty: #aaa8b8;
+  /* Pièces Tetris — couleurs d'objet, jamais de texte */
+  --block-I: #3fe8e8;
+  --block-O: #f5a623;
+  --block-T: #9b3fe8;
+  --block-S: #5ae87a;
+  --block-Z: #f54848;
+  --block-J: #f548a0;
+  --block-L: #c8c8d4;
+  --block-penalty: #9a98a8;
+  --block-penalty-light: #c8c8d4;
 
-  /* Compatibilité cellules existantes */
-  --color-I:       var(--block-I);
-  --color-O:       var(--block-O);
-  --color-T:       var(--block-T);
-  --color-S:       var(--block-S);
-  --color-Z:       var(--block-Z);
-  --color-J:       var(--block-J);
-  --color-L:       var(--block-L);
-  --color-penalty: var(--block-penalty);
-  --color-ghost:   rgba(155,63,232,0.18);
+  /* Texte — valeurs vérifiées ≥ 4.5:1 sur les deux extrémités du dégradé,
+     panneau ou pas de panneau (le pire cas est le violet #c9aaff nu). */
+  --text-primary: #2a1a4a; /* 7.9:1 mini  */
+  --text-muted: #4c3f68; /* 4.8:1 mini  */
+  --ink-accent: #5f11a3; /* 5.1:1 mini — équivalent texte de --block-T */
 
-  /* Texte */
-  --text-primary:  #2a1a4a;
-  --text-muted:    #7a6a9a;
-  --accent:        var(--block-T);
-  --accent-glow:   rgba(155,63,232,0.4);
-  --accent2:       #9b3fe8;
-
-  /* Panneaux */
-  --panel-bg:     rgba(255,255,255,0.25);
-  --panel-border: rgba(255,255,255,0.5);
+  /* Surfaces */
+  --panel-bg: rgba(255, 255, 255, 0.25);
+  --panel-border: rgba(255, 255, 255, 0.5);
+  --bg-card: rgba(255, 255, 255, 0.18);
+  --border: rgba(255, 255, 255, 0.35);
 
   /* Board */
-  --bg-deep:      rgba(255,255,255,0.10);
-  --bg-panel:     var(--panel-bg);
-  --bg-card:      rgba(255,255,255,0.18);
-  --border:       rgba(255,255,255,0.35);
+  --cell-size: 30px;
+  --mini-cell: 12px;
+  --radius: 6px;
+  --transition: 0.15s ease;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --cell-size:    30px;
-  --board-width:  calc(var(--cell-size) * 10);
-  --board-height: calc(var(--cell-size) * 20);
-  --radius:       6px;
-  --transition:   0.15s ease;
+  /* Cible tactile minimale (WCAG 2.5.5) */
+  --tap: 44px;
 }
 
 /* ── Reset ──────────────────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 html, body {
   height: 100%;
   color: var(--text-primary);
-  font-family: 'Nunito', system-ui, sans-serif;
+  font-family: "Nunito", system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.5;
-  overflow-x: hidden;
 }
 
 body, #root {
-  background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  background: linear-gradient(
+    135deg,
+    var(--bg-gradient-start),
+    var(--bg-gradient-end)
+  );
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
@@ -80,18 +77,24 @@ body, #root {
 }
 
 /* ── Typography ─────────────────────────────────────────────────────────────── */
-h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03em; }
-
-/* ── Utilitaires ─────────────────────────────────────────────────────────────── */
-.flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+h1, h2, h3 {
+  font-family: "Nunito", system-ui, sans-serif;
+  letter-spacing: 0.03em;
 }
-.flex-col { flex-direction: column; }
-.gap-sm   { gap: 8px; }
-.gap-md   { gap: 16px; }
-.gap-lg   { gap: 24px; }
+
+/* ── Focus visible ──────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 3px solid var(--ink-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Structure ───────────────────────────────────────────────────────────────── */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 
 /* ── Écran plein ─────────────────────────────────────────────────────────────── */
 .screen {
@@ -100,7 +103,14 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  padding: 24px 16px;
   position: relative;
+}
+
+.screen__hint {
+  font-family: "Orbitron", "Nunito", monospace;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
 }
 
 /* ── Panel glassmorphisme ────────────────────────────────────────────────────── */
@@ -111,71 +121,65 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 1rem 1.25rem;
-  box-shadow: 0 4px 24px rgba(100,50,180,0.12);
+  box-shadow: 0 4px 24px rgba(100, 50, 180, 0.12);
 }
 
 /* ── Boutons ─────────────────────────────────────────────────────────────────── */
 .btn {
-  font-family: 'Nunito', system-ui, sans-serif;
+  font-family: "Nunito", system-ui, sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.04em;
+  min-height: var(--tap);
   padding: 12px 28px;
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  transition: transform var(--transition), box-shadow var(--transition);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    background var(--transition);
 }
 
-.btn:active { transform: scale(0.97) !important; }
+.btn:active {
+  transform: scale(0.97);
+}
 
 .btn--primary {
   background: var(--block-T);
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(155,63,232,0.4);
+  color: #fff; /* 4.9:1 sur --block-T */
+  box-shadow: 0 4px 16px rgba(155, 63, 232, 0.4);
 }
 
 .btn--primary:hover {
-  box-shadow: 0 6px 24px rgba(155,63,232,0.55);
+  box-shadow: 0 6px 24px rgba(155, 63, 232, 0.55);
   transform: translateY(-2px) scale(1.03);
 }
 
 .btn--secondary {
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.35);
   color: var(--text-primary);
-  border: 1.5px solid rgba(255,255,255,0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
 }
 
 .btn--secondary:hover {
-  background: rgba(255,255,255,0.45);
+  background: rgba(255, 255, 255, 0.5);
   transform: translateY(-1px);
 }
 
+/* Désactivé : lisible (WCAG n'exempte pas l'information portée par ce bouton). */
 .btn:disabled {
-  opacity: 0.35;
+  background: rgba(255, 255, 255, 0.28);
+  color: var(--text-muted);
+  border: 1.5px dashed rgba(95, 17, 163, 0.35);
+  box-shadow: none;
   cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
+  transform: none;
 }
 
-/* ── Input ───────────────────────────────────────────────────────────────────── */
-.input {
-  background: rgba(255,255,255,0.5);
-  border: 2px solid rgba(255,255,255,0.7);
-  border-radius: 10px;
-  color: var(--text-primary);
-  font-family: 'Nunito', system-ui, sans-serif;
-  font-size: 1rem;
-  padding: 10px 14px;
-  width: 100%;
-  transition: border-color var(--transition), box-shadow var(--transition);
-  outline: none;
-}
-
-.input::placeholder { color: var(--text-muted); }
-.input:focus {
-  border-color: var(--block-T);
-  box-shadow: 0 0 0 3px rgba(155,63,232,0.2);
+.btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 /* ── Board principal ──────────────────────────────────────────────────────────── */
@@ -186,8 +190,21 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   gap: 24px;
   padding: 2vw 1vw;
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
   flex-wrap: wrap;
+}
+
+.game-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.game-mode-hint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-style: italic;
 }
 
 .board {
@@ -195,12 +212,12 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   display: grid;
   grid-template-columns: repeat(10, var(--cell-size));
   grid-template-rows: repeat(20, var(--cell-size));
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 2px solid rgba(255,255,255,0.45);
+  border: 2px solid rgba(255, 255, 255, 0.45);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(100,50,180,0.25);
+  box-shadow: 0 8px 32px rgba(100, 50, 180, 0.25);
   padding: 8px;
 }
 
@@ -212,24 +229,25 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 
 .cell--empty {
   border-radius: 4px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .cell--ghost {
   border-radius: 4px;
-  background: rgba(155,63,232,0.12);
-  border: 2px solid rgba(155,63,232,0.5);
+  background: rgba(95, 17, 163, 0.12);
+  border: 2px solid rgba(95, 17, 163, 0.55);
 }
 
 .cell--penalty {
   background: repeating-linear-gradient(
     45deg,
-    #aaa8b8 0px, #aaa8b8 4px,
-    #c8c8d4 4px, #c8c8d4 10px
+    var(--block-penalty) 0px,
+    var(--block-penalty) 4px,
+    var(--block-penalty-light) 4px,
+    var(--block-penalty-light) 10px
   );
   border-radius: 4px;
-  opacity: 0.8;
 }
 
 /* Effet 3D plastique sur tous les blocs colorés */
@@ -241,77 +259,144 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 .cell--J,
 .cell--L {
   border-radius: 6px;
-  border: 2px solid rgba(255,255,255,0.35);
+  border: 2px solid rgba(255, 255, 255, 0.35);
   box-shadow:
-    inset -4px -4px 8px rgba(0,0,0,0.25),
-    inset  4px  4px 8px rgba(255,255,255,0.55),
-    0 4px 8px rgba(0,0,0,0.18);
+    inset -4px -4px 8px rgba(0, 0, 0, 0.25),
+    inset 4px 4px 8px rgba(255, 255, 255, 0.55),
+    0 4px 8px rgba(0, 0, 0, 0.18);
 }
 
-.cell--I { background: radial-gradient(circle at 35% 35%, #7bf5f5, var(--block-I) 60%, #1db8b8); }
-.cell--O { background: radial-gradient(circle at 35% 35%, #fdd07a, var(--block-O) 60%, #c97e0a); }
-.cell--T { background: radial-gradient(circle at 35% 35%, #cc7fff, var(--block-T) 60%, #6a18b0); }
-.cell--S { background: radial-gradient(circle at 35% 35%, #90f5a8, var(--block-S) 60%, #28a045); }
-.cell--Z { background: radial-gradient(circle at 35% 35%, #ff9292, var(--block-Z) 60%, #b81818); }
-.cell--J { background: radial-gradient(circle at 35% 35%, #ff8fcb, var(--block-J) 60%, #b81878); }
-.cell--L { background: radial-gradient(circle at 35% 35%, #e8e8f0, var(--block-L) 60%, #8888a0); }
+.cell--I {
+  background: radial-gradient(
+    circle at 35% 35%,
+    #7bf5f5,
+    var(--block-I) 60%,
+    #1db8b8
+  );
+}
+.cell--O {
+  background: radial-gradient(
+    circle at 35% 35%,
+    #fdd07a,
+    var(--block-O) 60%,
+    #c97e0a
+  );
+}
+.cell--T {
+  background: radial-gradient(
+    circle at 35% 35%,
+    #cc7fff,
+    var(--block-T) 60%,
+    #6a18b0
+  );
+}
+.cell--S {
+  background: radial-gradient(
+    circle at 35% 35%,
+    #90f5a8,
+    var(--block-S) 60%,
+    #28a045
+  );
+}
+.cell--Z {
+  background: radial-gradient(
+    circle at 35% 35%,
+    #ff9292,
+    var(--block-Z) 60%,
+    #b81818
+  );
+}
+.cell--J {
+  background: radial-gradient(
+    circle at 35% 35%,
+    #ff8fcb,
+    var(--block-J) 60%,
+    #b81878
+  );
+}
+.cell--L {
+  background: radial-gradient(
+    circle at 35% 35%,
+    #e8e8f0,
+    var(--block-L) 60%,
+    #8888a0
+  );
+}
 
 /* État "stacked" — légèrement plus sombre */
-.cell--stacked { filter: brightness(0.9); }
+.cell--stacked {
+  filter: brightness(0.9);
+}
 /* État "active" — brillant */
-.cell--active  { filter: brightness(1.08); }
+.cell--active {
+  filter: brightness(1.08);
+}
+
+/* ── Particules de destruction de ligne ─────────────────────────────────────── */
+.particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.particle {
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  border-radius: 50%;
+  background: var(--tint);
+  box-shadow: 0 0 10px var(--tint);
+  animation: burst var(--dur) var(--ease-out) both;
+  will-change: transform, opacity;
+}
+
+@keyframes burst {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.95;
+  }
+  to {
+    transform: translate3d(var(--dx), var(--dy), 0) scale(0.2);
+    opacity: 0;
+  }
+}
 
 /* ── Animations ─────────────────────────────────────────────────────────────── */
-@keyframes lineFlash {
-  0%   { background: white; transform: scaleY(1); opacity: 1; }
-  100% { background: white; transform: scaleY(0); opacity: 0; }
-}
-
-@keyframes lockPiece {
-  0%   { transform: scale(0.95); }
-  100% { transform: scale(1); }
-}
-
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scoreFlash {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.15); color: var(--block-S); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.7; }
-}
-
-@keyframes pieceFlash {
-  0% { opacity: 0.8; }
-  100% { opacity: 0; }
-}
-
-/* ── Lock flash (Web Animations API) ────────────────────────────────────────── */
-.cell--lock-flash {
-  position: relative;
-}
-.cell--lock-flash::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: white;
-  animation: pieceFlash 0.15s ease-out forwards;
-  pointer-events: none;
-}
-
-.cell--clearing {
-  background: white !important;
-  box-shadow: 0 0 16px white !important;
-  border-color: white !important;
-  z-index: 10;
-  transition: all 0.1s ease;
+@keyframes titleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ── Game sidebar ────────────────────────────────────────────────────────────── */
@@ -324,12 +409,94 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 }
 
 .game-sidebar__title {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 700;
   margin-bottom: 4px;
+}
+
+.game-sidebar__footer {
+  margin-top: auto;
+}
+
+/* ── Aide-mémoire clavier ────────────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.controls__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controls__keys {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.controls__key {
+  font-family: "Nunito", system-ui, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 4px 6px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.controls__action {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.game-sidebar__footer-name {
+  font-family: "Orbitron", "Nunito", monospace;
+  font-size: 0.85rem;
+  color: var(--ink-accent);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+/* ── Preview Next / Hold ─────────────────────────────────────────────────────── */
+.preview {
+  margin-bottom: 8px;
+  transition: opacity 0.2s;
+}
+
+.preview--spent {
+  opacity: 0.55;
+}
+
+.preview__grid {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  width: fit-content;
+}
+
+.preview__row {
+  display: flex;
+}
+
+.preview__grid .cell {
+  width: 20px;
+  height: 20px;
 }
 
 /* ── OpponentView ────────────────────────────────────────────────────────────── */
@@ -343,9 +510,12 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   gap: 6px;
   transition: opacity 0.3s;
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
-.opponent--dead { opacity: 0.35; }
+.opponent--dead {
+  opacity: 0.55;
+}
 
 .opponent__name {
   font-size: 0.75rem;
@@ -357,25 +527,60 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 }
 
 .opponent__spectrum {
-  display: flex;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  align-items: end;
   gap: 2px;
   height: 40px;
+  margin-top: 8px;
 }
 
 .opponent__bar {
-  flex: 1;
-  background: linear-gradient(to top, var(--block-T), var(--block-J));
+  background: linear-gradient(to top, var(--ink-accent), var(--block-J));
   border-radius: 2px 2px 0 0;
-  transition: height 0.1s ease;
   min-height: 2px;
 }
 
-.opponent--dead .opponent__bar { background: var(--text-muted); }
+.opponent--dead .opponent__bar {
+  background: var(--text-muted);
+}
+
+.opponents-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.opponent-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── État éliminé ────────────────────────────────────────────────────────────── */
+.eliminated {
+  margin-top: 16px;
+  text-align: center;
+  background: rgba(245, 72, 72, 0.14);
+  border-color: rgba(184, 24, 24, 0.4);
+}
+
+.eliminated__title {
+  color: #a01414;
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+}
+
+.eliminated__hint {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
 
 /* ── MiniBoard (adversaire) ─────────────────────────────────────────────────── */
 .mini-board-panel {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   padding: 10px;
@@ -395,42 +600,44 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 
 .mini-board {
   display: grid;
-  grid-template-columns: repeat(10, 12px);
-  grid-template-rows: repeat(20, 12px);
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.3);
+  grid-template-columns: repeat(10, var(--mini-cell));
+  grid-template-rows: repeat(20, var(--mini-cell));
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 8px;
   padding: 4px;
   gap: 1px;
 }
 
+.mini-cell--empty,
+.mini-cell--filled,
+.mini-cell--penalty {
+  width: var(--mini-cell);
+  height: var(--mini-cell);
+}
+
 .mini-cell--empty {
-  width: 12px;
-  height: 12px;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 2px;
 }
 
 .mini-cell--filled {
-  width: 12px;
-  height: 12px;
   border-radius: 3px;
   box-shadow:
-    inset -2px -2px 4px rgba(0,0,0,0.25),
-    inset  2px  2px 4px rgba(255,255,255,0.45);
-  border: 1px solid rgba(255,255,255,0.3);
+    inset -2px -2px 4px rgba(0, 0, 0, 0.25),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .mini-cell--penalty {
-  width: 12px;
-  height: 12px;
   background: repeating-linear-gradient(
     45deg,
-    #aaa8b8 0px, #aaa8b8 2px,
-    #c8c8d4 2px, #c8c8d4 5px
+    var(--block-penalty) 0px,
+    var(--block-penalty) 2px,
+    var(--block-penalty-light) 2px,
+    var(--block-penalty-light) 5px
   );
   border-radius: 2px;
-  opacity: 0.8;
 }
 
 /* ── Score Panel ─────────────────────────────────────────────────────────────── */
@@ -442,7 +649,7 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   padding: 0.75rem 1.25rem;
   width: 100%;
   max-width: calc(var(--cell-size) * 10 + 20px); /* board width + padding */
-  animation: fadeIn 0.4s ease;
+  animation: fadeIn 0.4s var(--ease-out);
 }
 
 .score-panel--solo {
@@ -452,24 +659,28 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 }
 
 .score-panel__label {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-muted);
   margin-bottom: 4px;
+  max-width: 12ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .score-panel__value {
   font-size: 2rem;
   font-weight: 800;
-  color: var(--block-T);
+  color: var(--ink-accent);
   line-height: 1;
-  transition: transform 0.2s ease;
+  font-variant-numeric: tabular-nums;
 }
 
 .score-panel__value--flash {
-  animation: scoreFlash 0.2s ease;
+  animation: scoreFlash 0.2s var(--ease-out);
 }
 
 .score-panel__vs {
@@ -486,6 +697,7 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 
 .score-panel__side--right {
   text-align: right;
+  align-items: flex-end;
 }
 
 /* ── Lobby ───────────────────────────────────────────────────────────────────── */
@@ -495,30 +707,44 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   align-items: center;
   gap: 24px;
   width: 440px;
-  max-width: 95vw;
-  padding: 2rem 2rem;
-  background: rgba(255,255,255,0.3);
-  border: 1.5px solid rgba(255,255,255,0.6);
+  max-width: 100%;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
   border-radius: 20px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 8px 40px rgba(100,50,180,0.18);
-  animation: fadeIn 0.5s ease;
+  box-shadow: 0 8px 40px rgba(100, 50, 180, 0.18);
+  animation: fadeIn 0.5s var(--ease-out);
 }
 
 .lobby__title {
   font-size: clamp(2rem, 6vw, 4rem);
   font-weight: 800;
-  color: var(--block-T);
-  text-shadow: 0 4px 16px rgba(155,63,232,0.4);
+  color: var(--ink-accent);
   letter-spacing: 0.05em;
   text-align: center;
+  text-wrap: balance;
 }
 
 .lobby__subtitle {
   color: var(--text-muted);
   font-size: 0.9rem;
   text-align: center;
+  max-width: 46ch;
+}
+
+.lobby__room {
+  text-align: center;
+}
+
+.lobby__room-name {
+  font-family: "Orbitron", "Nunito", monospace;
+  font-size: 1.2rem;
+  color: var(--ink-accent);
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .lobby__player-list {
@@ -532,22 +758,34 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding: 10px 14px;
-  background: rgba(255,255,255,0.35);
+  background: rgba(255, 255, 255, 0.35);
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.6);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   font-size: 0.9rem;
   font-weight: 600;
 }
 
+.lobby__player-name {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lobby__player-name--self {
+  color: var(--text-primary);
+}
+
 .lobby__badge {
   font-size: 0.7rem;
-  background: var(--block-T);
-  color: white;
-  padding: 2px 10px;
+  background: var(--ink-accent);
+  color: #fff; /* 10:1 */
+  padding: 3px 10px;
   border-radius: 999px;
   font-weight: 700;
   letter-spacing: 0.05em;
+  flex-shrink: 0;
 }
 
 .lobby__actions {
@@ -559,6 +797,26 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   flex-wrap: wrap;
 }
 
+/* ── Home (URL invalide) ─────────────────────────────────────────────────────── */
+.home {
+  width: 480px;
+  max-width: 100%;
+}
+
+.home__example {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.home__link {
+  color: var(--ink-accent);
+  font-weight: 700;
+}
+
+.home__link:hover {
+  text-decoration: underline;
+}
+
 /* ── GameOver ────────────────────────────────────────────────────────────────── */
 .gameover {
   display: flex;
@@ -566,22 +824,22 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   align-items: center;
   gap: 24px;
   text-align: center;
-  animation: fadeIn 0.4s ease;
-  background: rgba(255,255,255,0.3);
-  border: 1.5px solid rgba(255,255,255,0.6);
+  animation: fadeIn 0.4s var(--ease-out);
+  background: rgba(255, 255, 255, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
   border-radius: 20px;
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   padding: 2.5rem 3rem;
-  box-shadow: 0 8px 40px rgba(100,50,180,0.2);
+  box-shadow: 0 8px 40px rgba(100, 50, 180, 0.2);
 }
 
 .gameover__title {
-  font-size: 3rem;
+  font-size: clamp(2rem, 8vw, 3rem);
   font-weight: 900;
-  color: var(--block-T);
-  text-shadow: 0 0 40px rgba(155,63,232,0.5);
-  animation: pulse 1.5s ease-in-out infinite;
+  color: var(--ink-accent);
   letter-spacing: 0.05em;
+  animation: titleIn 0.45s var(--ease-out) both;
 }
 
 .gameover__winner {
@@ -590,51 +848,63 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   font-weight: 600;
 }
 
-.gameover__winner span {
-  color: var(--block-T);
+.gameover__winner strong {
+  color: var(--ink-accent);
   font-weight: 800;
+}
+
+.gameover__scoreblock {
+  margin-top: 24px;
+}
+
+.gameover__score {
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .gameover__score--winner {
   font-size: 3rem;
   font-weight: 800;
-  color: var(--block-S);
-  text-shadow: 0 0 20px rgba(90,232,122,0.6);
-  line-height: 1;
+  color: #1f7a35; /* vert lisible, pas --block-S */
 }
 
 .gameover__score--loser {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-muted);
-  opacity: 0.6;
+}
+
+.gameover__wait {
+  color: var(--text-muted);
+  font-size: 0.85rem;
 }
 
 /* ── Leaderboard modal ───────────────────────────────────────────────────────── */
 .lb-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(180,140,255,0.35);
+  background: rgba(120, 80, 180, 0.4);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 16px;
   z-index: 1000;
-  animation: fadeIn 0.25s ease;
+  animation: fadeIn 0.25s var(--ease-out);
 }
 
 .lb-modal {
-  background: rgba(255,255,255,0.35);
-  border: 1.5px solid rgba(255,255,255,0.65);
+  background: rgba(255, 255, 255, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.65);
   border-radius: 20px;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   padding: 2rem 2.5rem;
-  width: min(480px, 92vw);
-  box-shadow: 0 12px 48px rgba(100,50,180,0.25);
+  width: min(480px, 100%);
+  box-shadow: 0 12px 48px rgba(100, 50, 180, 0.25);
   position: relative;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.3s var(--ease-out);
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -642,7 +912,7 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 .lb-modal__title {
   font-size: 1.6rem;
   font-weight: 800;
-  color: var(--block-T);
+  color: var(--ink-accent);
   margin-bottom: 1.25rem;
   text-align: center;
   letter-spacing: 0.04em;
@@ -650,15 +920,16 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 
 .lb-modal__close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(255,255,255,0.4);
-  border: 1px solid rgba(255,255,255,0.6);
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: var(--tap);
+  height: var(--tap);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.25rem;
+  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -667,8 +938,8 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 }
 
 .lb-modal__close:hover {
-  background: rgba(255,255,255,0.65);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.75);
+  transform: scale(1.08);
 }
 
 .lb-modal__empty {
@@ -685,15 +956,14 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   padding: 10px 8px;
   border-radius: 10px;
   margin-bottom: 6px;
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.35);
-  transition: background var(--transition);
-  animation: fadeIn 0.3s ease;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  animation: fadeIn 0.3s var(--ease-out);
 }
 
 .lb-row--gold {
-  background: rgba(245,166,35,0.18);
-  border-color: rgba(245,166,35,0.5);
+  background: rgba(245, 166, 35, 0.22);
+  border-color: rgba(180, 110, 10, 0.55);
 }
 
 .lb-row__rank {
@@ -703,10 +973,11 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
   width: 28px;
   text-align: center;
   flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .lb-row--gold .lb-row__rank {
-  color: var(--block-O);
+  color: #8a5a05;
   font-size: 1rem;
 }
 
@@ -726,18 +997,37 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 
 .lb-row__score {
   font-weight: 800;
-  color: var(--block-T);
+  color: var(--ink-accent);
   font-size: 0.95rem;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
-::-webkit-scrollbar-thumb { background: rgba(155,63,232,0.3); border-radius: 3px; }
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.15);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(95, 17, 163, 0.45);
+  border-radius: 4px;
+}
 
-/* ── Responsive < 700px ──────────────────────────────────────────────────────── */
+/* ── Responsive ──────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .game-sidebar {
+    max-width: 240px;
+  }
+}
+
 @media (max-width: 700px) {
+  :root {
+    --cell-size: min(8.5vw, 30px);
+    --mini-cell: min(3.2vw, 12px);
+  }
+
   .game-layout {
     flex-direction: column;
     align-items: center;
@@ -747,14 +1037,52 @@ h1, h2, h3 { font-family: 'Nunito', system-ui, sans-serif; letter-spacing: 0.03e
 
   .game-sidebar {
     flex-direction: row;
-    min-width: unset;
-    max-width: unset;
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
     width: 100%;
     justify-content: center;
+    align-items: flex-start;
     gap: 12px;
   }
 
-  :root {
-    --cell-size: min(8.5vw, 30px);
+  .game-sidebar__footer {
+    margin-top: 0;
+  }
+
+  .opponents-stack {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .gameover {
+    padding: 2rem 1.5rem;
+  }
+  .lb-modal {
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+/* ── Mouvement réduit ────────────────────────────────────────────────────────
+   On garde les changements d'état (opacité, couleur) : ce sont des retours
+   d'information de jeu. On supprime les déplacements, les mises à l'échelle
+   et les particules. ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.12s !important;
+    scroll-behavior: auto !important;
+  }
+
+  .btn:hover,
+  .btn:active,
+  .lb-modal__close:hover {
+    transform: none;
+  }
+
+  .particles {
+    display: none;
   }
 }
