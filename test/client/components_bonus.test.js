@@ -13,7 +13,7 @@ const mockStore = configureStore(middlewares);
 
 describe("Bonus Components", () => {
   describe("ScorePanel", () => {
-    it("ScorePanel should render player score in solo", () => {
+    it("ScorePanel should render score, lines and level in solo", () => {
       const store = mockStore({
         scores: { Alice: 1200 },
         player: { name: "Alice" },
@@ -21,14 +21,16 @@ describe("Bonus Components", () => {
       });
       render(
         <Provider store={store}>
-          <ScorePanel />
+          <ScorePanel level={4} lines={37} />
         </Provider>,
       );
       expect(screen.getByText(/1.*200/)).toBeInTheDocument();
-      expect(screen.getByText("YOUR SCORE")).toBeInTheDocument();
+      expect(screen.getByText("Score")).toBeInTheDocument();
+      expect(screen.getByText("37")).toBeInTheDocument();
+      expect(screen.getByText("4")).toBeInTheDocument();
     });
 
-    it("ScorePanel should render VS scores in multi", () => {
+    it("ScorePanel should render the top opponent score in multi", () => {
       const store = mockStore({
         scores: { Alice: 1200, Bob: 800 },
         player: { name: "Alice" },
@@ -36,12 +38,12 @@ describe("Bonus Components", () => {
       });
       render(
         <Provider store={store}>
-          <ScorePanel />
+          <ScorePanel level={1} lines={0} />
         </Provider>,
       );
       expect(screen.getByText(/1.*200/)).toBeInTheDocument();
-      expect(screen.getByText(/800/)).toBeInTheDocument();
-      expect(screen.getByText("VS")).toBeInTheDocument();
+      expect(screen.getByText("800")).toBeInTheDocument();
+      expect(screen.getByText("Bob")).toBeInTheDocument();
     });
   });
 

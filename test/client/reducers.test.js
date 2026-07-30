@@ -178,6 +178,24 @@ describe("Redux Reducers", () => {
       expect(state.board[19][0]).toBe(8);
     });
 
+    it("should lift the falling piece with the stack", () => {
+      // Le sol monte de 3 rangées : sans remontée, la pièce se retrouverait
+      // dans le tas et Game.jsx la déclarerait morte sans qu'elle ait bougé.
+      const withPiece = {
+        ...initPlayer,
+        currentPiece: {
+          type: "O",
+          shape: [[1, 1], [1, 1]],
+          x: 4,
+          y: 17,
+          rot: 0,
+        },
+      };
+      const state = playerReducer(withPiece, addPenalty(3));
+      expect(state.currentPiece.y).toBe(14);
+      expect(state.board[state.currentPiece.y][4]).toBe(0);
+    });
+
     it("should track the last penalty for the live region", () => {
       let state = playerReducer(initPlayer, addPenalty(2));
       expect(state.penaltyLines).toBe(2);

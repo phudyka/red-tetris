@@ -7,13 +7,18 @@
       name="description"
       content="Red Tetris — multiplayer Tetris game built with React, Redux and socket.io"
     />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#101010" />
     <title>Red Tetris</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Orbitron:wght@700;900&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Aucune police distante : la pile système porte toute la typographie.
+         Le fond est posé ici et non dans le CSS du bundle, sinon la page reste
+         blanche jusqu'à l'exécution du JS. -->
+    <style>
+      html,
+      body {
+        background: #101010;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

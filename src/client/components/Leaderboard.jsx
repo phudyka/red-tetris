@@ -66,7 +66,7 @@ const Leaderboard = ({ onClose }) => {
         >
           <span aria-hidden="true">×</span>
         </button>
-        <h2 className="lb-modal__title" id="lb-title">🏆 LEADERBOARD</h2>
+        <h2 className="lb-modal__title" id="lb-title">Leaderboard</h2>
 
         {leaderboard.length === 0
           ? <p className="lb-modal__empty">No scores yet. Be the first!</p>

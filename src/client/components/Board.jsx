@@ -41,15 +41,17 @@ const prefersReducedMotion = () =>
 const canAnimate = (el) => el && typeof el.animate === "function";
 
 /**
- * Animation de verrouillage d'une pièce (Web Animations API).
+ * Verrouillage d'une pièce (Web Animations API) : un éclat de luminosité, sans
+ * mise à l'échelle. Un bloc qui grossit puis rétrécit trahirait la grille — ici
+ * une case fait une case, toujours.
  */
 const animatePieceLock = (cells) => {
   cells.forEach((el, i) => {
     if (!canAnimate(el) || prefersReducedMotion()) return;
     el.animate([
-      { transform: "scale(1.12)", filter: "brightness(1.9)" },
-      { transform: "scale(1)", filter: "brightness(1)" },
-    ], { duration: 180, delay: i * 10, easing: EASE_OUT });
+      { filter: "brightness(2.6)" },
+      { filter: "brightness(1)" },
+    ], { duration: 160, delay: i * 8, easing: EASE_OUT });
   });
 };
 
@@ -69,7 +71,7 @@ const animateClearImpact = (boardEl, flashEl, lines) => {
   if (canAnimate(flashEl)) {
     flashEl.animate([
       { opacity: 0 },
-      { opacity: isTetris ? 0.8 : 0.08 * lines, offset: 0.12 },
+      { opacity: isTetris ? 0.5 : 0.07 * lines, offset: 0.12 },
       { opacity: 0 },
     ], { duration, easing: "ease-out" });
   }

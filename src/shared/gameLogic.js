@@ -4,7 +4,14 @@
 // Utilisées côté client ET côté serveur
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { BOARD_HEIGHT, BOARD_WIDTH, PIECE_TYPES, PIECES } from "./constants.js";
+import {
+  BOARD_HEIGHT,
+  BOARD_WIDTH,
+  getKicks,
+  LINES_PER_LEVEL,
+  MAX_LEVEL,
+  PIECE_TYPES,
+} from "./constants.js";
 
 // ─── Board ───────────────────────────────────────────────────────────────────
 
@@ -71,7 +78,7 @@ export const placePiece = (board, shape, x, y, colorIndex) => {
  * Efface les lignes complètes (toutes les cellules non nulles).
  * Les lignes de pénalité (colorIndex 8) ne sont PAS effacées.
  * @param {number[][]} board
- * @returns {{ newBoard: number[][], linesCleared: number }}
+ * @returns {{ newBoard: number[][], linesCleared: number, clearedIndexes: number[] }}
  */
 export const clearLines = (board) => {
   const clearedIndexes = [];
@@ -140,11 +147,36 @@ export const addPenaltyLines = (board, n) => {
   return [...board.slice(n), ...penaltyRows];
 };
 
+/**
+ * Remonte la pièce en cours avec le tas après une pénalité.
+ * Le sol monte de n rangées : une pièce qui reste sur place se retrouve DANS le
+ * tas et déclenche une mort qui n'a pas eu lieu. On la remonte d'autant, et si
+ * la place manque on essaie les rangées intermédiaires avant d'abandonner.
+ * @param {number[][]} board  plateau APRÈS addPenaltyLines
+ * @param {object|null} piece
+ * @param {number}     n
+ * @returns {object|null}  pièce repositionnée, ou telle quelle si nulle part ne passe
+ */
+export const liftPiece = (board, piece, n) => {
+  if (!piece || !piece.shape || n <= 0) return piece;
+  for (let y = piece.y - n; y <= piece.y; y++) {
+    if (isValidPosition(board, piece.shape, piece.x, y)) return { ...piece, y };
+  }
+  return piece;
+};
+
 // ─── Rotations ────────────────────────────────────────────────────────────────
 
 /**
+ * Rotation matricielle d'un quart de tour horaire.
+ * @param {number[][]} shape
+ * @returns {number[][]}
+ */
+export const rotateCW = (shape) =>
+  shape[0].map((_, c) => shape.map((row) => row[c]).reverse());
+
+/**
  * Retourne toutes les rotations clockwise d'une shape.
- * Une rotation 90° clockwise : newShape[col][rows-1-row] = shape[row][col]
  * @param {number[][]} shape
  * @returns {number[][][]}
  */
@@ -152,19 +184,67 @@ export const getRotations = (shape) => {
   const rotations = [shape];
   let current = shape;
   for (let i = 0; i < 3; i++) {
-    const rows = current.length;
-    const cols = current[0].length;
-    const rotated = Array.from(
-      { length: cols },
-      (_, c) =>
-        Array.from({ length: rows }, (_, r) => current[rows - 1 - r][c]),
-    );
+    const rotated = rotateCW(current);
     // Déduplique : si la rotation est identique à la première, on s'arrête
     if (JSON.stringify(rotated) === JSON.stringify(rotations[0])) break;
     rotations.push(rotated);
     current = rotated;
   }
   return rotations;
+};
+
+/**
+ * Rotation SRS complète : tourne la pièce puis essaie les cinq positions de la
+ * table de kicks correspondante. La première libre est retenue.
+ * @param {number[][]} board
+ * @param {{shape: number[][], x: number, y: number, type: string, rot?: number}} piece
+ * @param {number} dir  1 = horaire, -1 = antihoraire
+ * @returns {object|null}  nouvelle pièce, ou null si aucune position ne passe
+ */
+export const rotatePiece = (board, piece, dir = 1) => {
+  if (!piece || !piece.shape) return null;
+
+  const from = piece.rot || 0;
+  const to = (from + (dir > 0 ? 1 : 3)) % 4;
+
+  let rotated = rotateCW(piece.shape);
+  if (dir < 0) rotated = rotateCW(rotateCW(rotated)); // trois quarts horaires
+
+  for (const [dx, dy] of getKicks(piece.type, from, to)) {
+    const nx = piece.x + dx;
+    const ny = piece.y - dy; // tables en y-vers-le-haut, plateau en y-vers-le-bas
+    if (isValidPosition(board, rotated, nx, ny)) {
+      return { ...piece, shape: rotated, x: nx, y: ny, rot: to };
+    }
+  }
+  return null;
+};
+
+/**
+ * Règle des trois coins : un T dont trois des quatre coins de sa boîte 3×3 sont
+ * occupés (par le tas ou par un mur) vient d'être vissé dans un trou. Le
+ * complément côté appelant — le dernier mouvement doit être une rotation — est
+ * ce qui distingue un vrai T-spin d'un T tombé là par hasard.
+ * @param {number[][]} board
+ * @param {{type: string, x: number, y: number}} piece
+ * @returns {boolean}
+ */
+export const isTSpin = (board, piece) => {
+  if (!piece || piece.type !== "T") return false;
+  const cx = piece.x + 1;
+  const cy = piece.y + 1;
+  const corners = [
+    [cy - 1, cx - 1],
+    [cy - 1, cx + 1],
+    [cy + 1, cx - 1],
+    [cy + 1, cx + 1],
+  ];
+  const occupied =
+    corners.filter(([r, c]) =>
+      c < 0 || c >= BOARD_WIDTH || r >= BOARD_HEIGHT ||
+      (r >= 0 && board[r][c] !== 0)
+    ).length;
+  return occupied >= 3;
 };
 
 // ─── Hard Drop ────────────────────────────────────────────────────────────────
@@ -185,16 +265,53 @@ export const getHardDropPosition = (board, shape, x, y) => {
   return finalY;
 };
 
+// ─── Niveau et gravité ───────────────────────────────────────────────────────
+
+/**
+ * Niveau atteint pour un total de lignes effacées.
+ * @param {number} lines
+ * @returns {number}  1 à MAX_LEVEL
+ */
+export const levelForLines = (lines) =>
+  Math.min(MAX_LEVEL, Math.floor((lines || 0) / LINES_PER_LEVEL) + 1);
+
+/**
+ * Durée de chute d'une rangée, formule de la Tetris Guideline :
+ * (0.8 - (niveau - 1) × 0.007) ^ (niveau - 1) secondes.
+ * Plancher à 16 ms — en dessous la pièce descendrait plusieurs rangées par
+ * frame et le lock delay ne servirait plus à rien.
+ * @param {number} level
+ * @returns {number}  millisecondes
+ */
+export const gravityMs = (level) => {
+  const l = Math.min(MAX_LEVEL, Math.max(1, level || 1));
+  return Math.max(16, Math.round((0.8 - (l - 1) * 0.007) ** (l - 1) * 1000));
+};
+
 // ─── Séquence de pièces ──────────────────────────────────────────────────────
 
 /**
- * Génère une séquence aléatoire de N indices de pièces (0-6).
+ * Génère une séquence de pièces par sacs de 7 (« 7-bag »), l'algorithme de la
+ * Guideline : chaque tétromino apparaît une fois par sac, dans un ordre
+ * mélangé. Un tirage uniforme, lui, laisse des famines de I de vingt pièces et
+ * des séries de S/Z injouables.
+ * La longueur retournée est arrondie au sac supérieur : concaténer deux appels
+ * ne coupe donc jamais un sac en deux.
  * Appelée uniquement côté serveur dans Game.start().
- * @param {number} n
+ * @param {number} n  longueur minimale
  * @returns {number[]}
  */
-export const generatePieceSequence = (n) =>
-  Array.from(
-    { length: n },
-    () => Math.floor(Math.random() * PIECE_TYPES.length),
-  );
+export const generatePieceSequence = (n) => {
+  const sequence = [];
+  while (sequence.length < n) {
+    const bag = PIECE_TYPES.map((_, i) => i);
+    for (let i = bag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const swap = bag[i];
+      bag[i] = bag[j];
+      bag[j] = swap;
+    }
+    sequence.push(...bag);
+  }
+  return sequence;
+};

@@ -12,13 +12,22 @@ const { Server } = require("socket.io");
 const GameManager = require("./GameManager");
 const Player = require("./Player");
 const { SPAWN_X, SPAWN_Y, PIECE_TYPES } = require("./constants.cjs");
-const { isValidPosition } = require("./gameLogic.cjs");
-const { calcScore, updateLeaderboard, getLeaderboardArray } = require(
-  "./scoreLogic",
-);
-const { isValidLabel, clampLinesCleared, MAX_LABEL_LENGTH } = require(
-  "./validation",
-);
+const { levelForLines } = require("./gameLogic.cjs");
+const {
+  applyBackToBack,
+  calcScore,
+  comboScore,
+  dropScore,
+  getLeaderboardArray,
+  isDifficultClear,
+  updateLeaderboard,
+} = require("./scoreLogic");
+const {
+  clampDropCells,
+  clampLinesCleared,
+  isValidLabel,
+  MAX_LABEL_LENGTH,
+} = require("./validation");
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "localhost";
@@ -135,22 +144,6 @@ io.on("connection", (socket) => {
     });
   });
 
-  // ── playerAction ──────────────────────────────────────────────────────────
-  // Le serveur valide et relaye : la logique de mouvement reste côté client
-  // (fonctions pures). Le serveur gère uniquement les pénalités et fin de partie.
-  socket.on("playerAction", ({ room, action }) => {
-    const game = manager.get(room);
-    if (!game || !game.started) return;
-
-    const player = game.getPlayer(socket.id);
-    if (!player || !player.isAlive) return;
-
-    // Les actions de mouvement sont gérées côté client (fonctions pures).
-    // Ici on n'a rien à faire — le client applique la logique localement
-    // et émet playerDead ou updateSpectrum selon le résultat.
-    // Cette route est conservée pour compatibilité protocole et extensions futures.
-  });
-
   // ── playerDead ────────────────────────────────────────────────────────────
   socket.on("playerDead", ({ room }) => {
     const game = manager.get(room);
@@ -193,36 +186,60 @@ io.on("connection", (socket) => {
     });
   });
 
-  // ── linesCleared (pénalités) ──────────────────────────────────────────────
-  socket.on("linesCleared", ({ room, linesCleared }) => {
-    const game = manager.get(room);
-    if (!game || !game.started) return;
+  // ── pieceLocked (score, niveau, pénalités) ────────────────────────────────
+  // Émis à CHAQUE verrouillage, effacement ou non : le serveur a besoin du flux
+  // complet pour tenir le combo (qu'une pièce posée à vide remet à zéro) et le
+  // back-to-back. Le client déclare ce qu'il a fait, le serveur borne et arbitre.
+  socket.on(
+    "pieceLocked",
+    ({ room, lines, tSpin, dropCells, hardDrop } = {}) => {
+      const game = manager.get(room);
+      if (!game || !game.started) return;
 
-    const player = game.getPlayer(socket.id);
-    if (!player || !player.isAlive) return;
+      const player = game.getPlayer(socket.id);
+      if (!player || !player.isAlive) return;
 
-    const lines = clampLinesCleared(linesCleared);
+      const cleared = clampLinesCleared(lines);
+      const spin = tSpin === true;
 
-    // Update score
-    const scoreEarned = calcScore(lines);
-    if (scoreEarned > 0) {
-      player.score += scoreEarned;
-      io.to(room).emit("score:update", {
-        playerName: player.name,
-        score: player.score,
-      });
-    }
+      let earned = dropScore(clampDropCells(dropCells), hardDrop === true);
 
-    const penaltyLines = lines - 1;
-    if (penaltyLines <= 0) return;
+      if (cleared > 0 || spin) {
+        player.combo = cleared > 0 ? player.combo + 1 : -1;
+        const difficult = isDifficultClear(cleared, spin);
+        const base = calcScore(cleared, player.level, spin);
+        earned += applyBackToBack(base, difficult && player.b2b) +
+          comboScore(player.combo, player.level);
+        // Un T-spin sans ligne ne casse pas la chaîne, il ne la nourrit pas non plus.
+        if (cleared > 0) player.b2b = difficult;
+      } else {
+        player.combo = -1;
+      }
 
-    // Envoyer la pénalité à tous les autres joueurs vivants
-    game.getAlivePlayers()
-      .filter((p) => p.id !== socket.id)
-      .forEach((p) => {
-        io.to(p.id).emit("addPenalty", { lines: penaltyLines });
-      });
-  });
+      if (cleared > 0) {
+        player.lines += cleared;
+        player.level = levelForLines(player.lines);
+      }
+
+      if (earned > 0) {
+        player.score += earned;
+        io.to(room).emit("score:update", {
+          playerName: player.name,
+          score: player.score,
+        });
+      }
+
+      const penaltyLines = cleared - 1;
+      if (penaltyLines <= 0) return;
+
+      // Envoyer la pénalité à tous les autres joueurs vivants
+      game.getAlivePlayers()
+        .filter((p) => p.id !== socket.id)
+        .forEach((p) => {
+          io.to(p.id).emit("addPenalty", { lines: penaltyLines });
+        });
+    },
+  );
 
   // ── requestNextPiece ─────────────────────────────────────────────────────
   socket.on("requestNextPiece", ({ room }) => {

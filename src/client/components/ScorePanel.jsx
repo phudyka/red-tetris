@@ -1,88 +1,82 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// src/client/components/ScorePanel.jsx
+// Bandeau de statistiques posé sur le bord haut du puits — zéro `this`
+// ─────────────────────────────────────────────────────────────────────────────
+
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-const ScorePanel = () => {
+/**
+ * Une statistique : libellé au-dessus, valeur en dessous.
+ * @param {{ label: string, value: string|number, flash?: boolean,
+ *           strong?: boolean, title?: string }} props
+ */
+const Stat = ({ label, value, flash = false, strong = false, title }) => (
+  <div className={`stat${strong ? " stat--strong" : ""}`}>
+    <span className="stat__label" title={title}>{label}</span>
+    <span className={`stat__value${flash ? " stat__value--flash" : ""}`}>
+      {value}
+    </span>
+  </div>
+);
+
+/**
+ * @param {{ level?: number, lines?: number }} props
+ */
+const ScorePanel = ({ level = 1, lines = 0 }) => {
   const scores = useSelector((s) => s.scores);
   const myName = useSelector((s) => s.player.name);
   const opponents = useSelector((s) => s.opponents);
 
-  const [flashMyScore, setFlashMyScore] = useState(false);
-  const [flashOppScore, setFlashOppScore] = useState(false);
-
   const myScore = scores[myName] || 0;
 
-  // Get max opponent score if any
-  const oppScores = opponents.map((o) => ({
-    name: o.name,
-    score: scores[o.name] || 0,
-  }));
-  const topOpponent = oppScores.sort((a, b) => b.score - a.score)[0];
+  // Un seul adversaire ici : le mieux classé. Les autres restent lisibles dans
+  // la colonne des spectrums, où ils ont déjà leur ligne.
+  const topOpponent = opponents
+    .map((o) => ({ name: o.name, score: scores[o.name] || 0 }))
+    .sort((a, b) => b.score - a.score)[0];
+  const topScore = topOpponent ? topOpponent.score : 0;
+
+  const [flashMine, setFlashMine] = useState(false);
+  const [flashTheirs, setFlashTheirs] = useState(false);
 
   useEffect(() => {
-    if (myScore > 0) {
-      setFlashMyScore(true);
-      const t = setTimeout(() => setFlashMyScore(false), 200);
-      return () => clearTimeout(t);
-    }
+    if (myScore <= 0) return undefined;
+    setFlashMine(true);
+    const t = setTimeout(() => setFlashMine(false), 200);
+    return () => clearTimeout(t);
   }, [myScore]);
 
   useEffect(() => {
-    if (topOpponent && topOpponent.score > 0) {
-      setFlashOppScore(true);
-      const t = setTimeout(() => setFlashOppScore(false), 200);
-      return () => clearTimeout(t);
-    }
-  }, [topOpponent?.score]);
-
-  if (!topOpponent) {
-    return (
-      <div className="panel score-panel score-panel--solo">
-        {
-          /* Même bloc libellé-au-dessus-de-valeur qu'en duel : le bandeau garde
-            la hauteur exacte des deux modes, donc le puits ne remonte pas de
-            20px quand on passe de solo à multi. */
-        }
-        <div className="score-panel__side">
-          <div className="score-panel__label">YOUR SCORE</div>
-          <div
-            className={`score-panel__value ${
-              flashMyScore ? "score-panel__value--flash" : ""
-            }`}
-          >
-            {myScore}
-          </div>
-        </div>
-      </div>
-    );
-  }
+    if (topScore <= 0) return undefined;
+    setFlashTheirs(true);
+    const t = setTimeout(() => setFlashTheirs(false), 200);
+    return () => clearTimeout(t);
+  }, [topScore]);
 
   return (
-    <div className="panel score-panel">
-      <div className="score-panel__side">
-        <div className="score-panel__label">YOU</div>
-        <div
-          className={`score-panel__value ${
-            flashMyScore ? "score-panel__value--flash" : ""
-          }`}
-        >
-          {myScore}
-        </div>
+    <div className="score-panel">
+      <div className="score-panel__group">
+        <Stat
+          label="Score"
+          value={myScore.toLocaleString()}
+          flash={flashMine}
+          strong
+        />
+        <Stat label="Lines" value={lines} />
+        <Stat label="Level" value={level} />
       </div>
 
-      <div className="score-panel__vs">VS</div>
-
-      <div className="score-panel__side score-panel__side--right">
-        <div className="score-panel__label" title={topOpponent.name}>
-          {topOpponent.name}
+      {topOpponent && (
+        <div className="score-panel__group score-panel__group--rival">
+          <Stat
+            label={topOpponent.name}
+            title={topOpponent.name}
+            value={topScore.toLocaleString()}
+            flash={flashTheirs}
+          />
         </div>
-        <div
-          className={`score-panel__value ${
-            flashOppScore ? "score-panel__value--flash" : ""
-          }`}
-        >
-          {topOpponent.score}
-        </div>
-      </div>
+      )}
     </div>
   );
 };

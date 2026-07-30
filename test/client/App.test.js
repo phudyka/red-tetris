@@ -28,7 +28,9 @@ describe("App Component", () => {
         </MemoryRouter>
       </Provider>,
     );
-    expect(screen.getByText("RED TETRIS")).toBeInTheDocument();
+    // Le titre est fragmenté : « RED » porte l'accent dans son propre span.
+    expect(screen.getByRole("heading", { name: "RED TETRIS" }))
+      .toBeInTheDocument();
     expect(screen.getByText(/Navigate to/)).toBeInTheDocument();
   });
 

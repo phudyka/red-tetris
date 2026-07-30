@@ -144,10 +144,6 @@ export const emitStartGame = (room) => {
   if (socket) socket.emit("startGame", { room });
 };
 
-export const emitAction = (room, action) => {
-  if (socket) socket.emit("playerAction", { room, action });
-};
-
 export const emitPlayerDead = (room) => {
   if (socket) socket.emit("playerDead", { room });
 };
@@ -156,8 +152,14 @@ export const emitLeaveGame = (room) => {
   if (socket) socket.emit("leaveGame", { room });
 };
 
-export const emitLinesCleared = (room, linesCleared) => {
-  if (socket) socket.emit("linesCleared", { room, linesCleared });
+/**
+ * Émis à chaque verrouillage, effacement ou non : le serveur tient le combo et
+ * le back-to-back, et une pièce posée sans ligne casse la série.
+ * @param {string} room
+ * @param {{lines: number, tSpin: boolean, dropCells: number, hardDrop: boolean}} result
+ */
+export const emitPieceLocked = (room, result) => {
+  if (socket) socket.emit("pieceLocked", { room, ...result });
 };
 
 export const emitRequestNextPiece = (room) => {

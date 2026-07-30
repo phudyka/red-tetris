@@ -1,46 +1,94 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    src/client/styles/global.css
-   Direction artistique : "3D plastique lumineux"
-   Palette pastel violet → rose, blocs Tetris 3D brillants, glassmorphisme
-   Les polices sont chargées depuis public/index.html (pas d'@import : évite
-   une requête chaînée bloquante bundle → css → css → woff2).
+   Direction : brutalist arcade.
+   Fond charbon uni, blocs strictement plats, angles droits, bordures nettes,
+   hiérarchie portée par la taille et la graisse — jamais par une ombre ou un
+   dégradé. Aucune police distante : la pile système suffit et ne bloque rien.
    ───────────────────────────────────────────────────────────────────────────── */
 
-/* ── Design tokens ──────────────────────────────────────────────────────────── */
+/* ═══ Tokens ═══════════════════════════════════════════════════════════════ */
 :root {
-  --bg-gradient-start: #c9aaff;
-  --bg-gradient-end: #f7aaee;
+  /* ── Surfaces ─────────────────────────────────────────────────────────────
+     Quatre paliers seulement. Sans ombre pour séparer deux plans, c'est le
+     saut de valeur et la bordure qui font tout le travail : plus de paliers et
+     ils cessent d'être distinguables. */
+  --bg: #101010;
+  --surface-1: #171717;
+  --surface-2: #1e1e1e;
+  --surface-3: #262626;
 
-  /* Pièces Tetris — couleurs d'objet, jamais de texte.
-     Teintes canoniques de la planche du sujet (p.6) : I cyan, O jaune,
-     T violet, S vert, Z rouge, J bleu, L orange. Contrainte de lisibilité
-     qui prime sur la fidélité : aucune pièce ne doit tirer vers le gris de
-     pénalité, sinon un bloc posé se confond avec une ligne indestructible. */
-  --block-I: #14b8c4;
-  --block-O: #e8b109;
-  --block-T: #9b3fe8;
-  --block-S: #3fbf5a;
-  --block-Z: #e23b3b;
-  --block-J: #2f66d8;
-  --block-L: #ef8b17;
-  --block-penalty: #9a98a8;
-  --block-penalty-light: #c8c8d4;
+  /* ── Traits ────────────────────────────────────────────────────────────── */
+  --line: #2e2e2e; /* séparation discrète, quadrillage du puits */
+  --line-strong: #4d4d4d; /* contour d'un objet, ghost */
 
-  /* Texte — valeurs vérifiées ≥ 4.5:1 sur les deux extrémités du dégradé,
-     panneau ou pas de panneau (le pire cas est le violet #c9aaff nu). */
-  --text-primary: #2a1a4a; /* 7.9:1 mini  */
-  --text-muted: #4c3f68; /* 4.8:1 mini  */
-  --ink-accent: #5f11a3; /* 5.1:1 mini — équivalent texte de --block-T */
+  /* ── Encre — contrastes mesurés sur --bg ───────────────────────────────── */
+  --ink-0: #f2f2f2; /* 16.4:1 — titres, valeurs                */
+  --ink-1: #b9b9b9; /*  8.6:1 — texte courant                  */
+  --ink-2: #909090; /*  4.9:1 — libellés, plancher AA           */
+  --ink-inverse: #101010; /* sur fond clair (bouton primaire)  */
 
-  /* Surfaces */
-  --panel-bg: rgba(255, 255, 255, 0.25);
-  --panel-border: rgba(255, 255, 255, 0.5);
-  --bg-card: rgba(255, 255, 255, 0.18);
-  --border: rgba(255, 255, 255, 0.35);
+  /* ── Accent ────────────────────────────────────────────────────────────────
+     Rouge réservé au danger : pénalité reçue, joueur éliminé, refus serveur.
+     Le bouton primaire est blanc — un bouton rouge et un tétromino Z rouge
+     dans le même écran diraient la même chose sans le même sens. */
+  --accent: #ff3b30;
+  --accent-ink: #ff7a72; /* 6.1:1 — la même famille, lisible en texte */
 
-  /* Échelle d'espacement, base 4. Les pas intermédiaires (12, 20, 28) manquent
-     à une échelle purement 8 et c'est là que se joue le contraste serré /
-     généreux entre l'intérieur d'un groupe et la séparation de deux groupes. */
+  /* ── Tétrominos ────────────────────────────────────────────────────────────
+     Teintes canoniques du sujet, remontées en luminosité pour le fond sombre.
+     Contrainte qui prime sur la fidélité : chacune doit rester distincte des
+     six autres ET du gris de pénalité, sinon un bloc posé se confond avec une
+     ligne indestructible. */
+  --block-I: #3ad6f0;
+  --block-O: #f7d047;
+  --block-T: #c058e0;
+  --block-S: #4bd763;
+  --block-Z: #f0453f;
+  --block-J: #4a7bf0;
+  --block-L: #f79433;
+  --block-penalty: #4f4f4f;
+
+  /* ── Typographie ───────────────────────────────────────────────────────────
+     Deux familles système, zéro requête réseau. Le mono porte tout ce qui se
+     compare (scores, niveau, noms de room, touches) : les chiffres y sont de
+     largeur fixe, une valeur qui change ne déplace donc jamais son voisin. */
+  --font-ui:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  --font-mono:
+    ui-monospace,
+    SFMono-Regular,
+    "SF Mono",
+    Menlo,
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  /* Échelle modulaire ~1.25, sept pas nommés — plus aucune taille en dur. */
+  --text-2xs: 0.6875rem; /* 11px */
+  --text-xs: 0.8125rem; /* 13px */
+  --text-sm: 0.9375rem; /* 15px */
+  --text-md: 1.125rem; /* 18px */
+  --text-lg: 1.75rem; /* 28px */
+  --text-xl: 2.5rem; /* 40px */
+  --text-2xl: 4rem; /* 64px */
+
+  --weight-normal: 500;
+  --weight-bold: 700;
+  --weight-black: 900;
+
+  /* Interlettrage : négatif sur les gros titres (ils se resserrent), positif
+     sur les capitales de petite taille (elles s'étouffent sinon). */
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.14em;
+
+  /* ── Espacement, base 4 ───────────────────────────────────────────────── */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -48,93 +96,78 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-10: 40px;
 
-  /* Board — le puits ne défile jamais.
-     Budget vertical hors plateau : bandeau de score (~80) + gouttière (12) +
-     padding/bordure du plateau (20) + padding de la page (48) + marge = 168px.
+  /* ── Formes ────────────────────────────────────────────────────────────────
+     Zéro rayon, c'est la décision de fond de la direction. Le token existe
+     quand même : c'est le seul endroit où la revenir dessus est possible. */
+  --radius: 0;
+  --border: 1px solid var(--line);
+  --border-strong: 2px solid var(--line-strong);
+
+  /* ── Mouvement ────────────────────────────────────────────────────────── */
+  --duration-fast: 0.12s;
+  --duration-base: 0.2s;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Puits ─────────────────────────────────────────────────────────────────
+     Le plateau ne défile jamais. Budget vertical hors puits : bandeau de stats
+     (66) + gouttière (12) + bordures (4) + padding de page (48) + marge (20).
      Le terme en vw garde les 10 colonnes dans la largeur sur mobile.
      Première déclaration en vh : repli pour les moteurs sans dvh. */
-  --cell-size: min(30px, calc((100vh - 168px) / 20), calc((100vw - 40px) / 10));
+  --cell-size: min(40px, calc((100vh - 150px) / 20), calc((100vw - 32px) / 10));
   --cell-size: min(
-    30px,
-    calc((100dvh - 168px) / 20),
-    calc((100vw - 40px) / 10)
+    40px,
+    calc((100dvh - 150px) / 20),
+    calc((100vw - 32px) / 10)
   );
-  --radius: 6px;
-  --transition: 0.15s ease;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --board-width: calc(var(--cell-size) * 10 + 4px);
 
   /* Cible tactile minimale (WCAG 2.5.5) */
   --tap: 44px;
 }
 
-/* ── Reset ──────────────────────────────────────────────────────────────────── */
-*, *::before, *::after {
+/* ═══ Reset ════════════════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
-  color: var(--text-primary);
-  font-family: "Nunito", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink-1);
+  font-family: var(--font-ui);
   font-size: 16px;
+  font-weight: var(--weight-normal);
   line-height: 1.5;
-}
-
-/* Deux voiles clairs par-dessus le dégradé : le fond gagne une source de
-   lumière au lieu d'une pente uniforme. Les deux voiles n'ajoutent que de la
-   luminance — assombrir le fond ferait tomber --text-muted sous 4.5:1. */
-body, #root {
-  background:
-    radial-gradient(
-      115% 85% at 12% 4%,
-      rgba(255, 255, 255, 0.5),
-      transparent 55%
-    ),
-    radial-gradient(
-    80% 60% at 88% 96%,
-    rgba(255, 222, 248, 0.55),
-    transparent 60%
-  ),
-    linear-gradient(
-    135deg,
-    var(--bg-gradient-start),
-    var(--bg-gradient-end)
-  );
-  background-attachment: fixed;
-  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
-  height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-/* ── Typography ─────────────────────────────────────────────────────────────── */
-h1, h2, h3 {
-  font-family: "Nunito", system-ui, sans-serif;
-  letter-spacing: 0.03em;
+h1,
+h2,
+h3 {
+  color: var(--ink-0);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
 }
 
-/* ── Focus visible ──────────────────────────────────────────────────────────── */
+/* Le contour est le vocabulaire de toute la direction : ici il change juste de
+   couleur pour se voir par-dessus n'importe quelle surface. */
 :focus-visible {
-  outline: 3px solid var(--ink-accent);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
-/* ── Structure ───────────────────────────────────────────────────────────────── */
-/* Le centrage vertical vit ici et non sur .game-layout : la grille de jeu a une
-   rangée en 1fr (le rail droit doit pouvoir défiler), et un 1fr mange l'espace
-   libre qu'un align-content chercherait à répartir. */
-.app-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  outline: 2px solid var(--ink-0);
+  outline-offset: 2px;
 }
 
 /* Visible pour les lecteurs d'écran uniquement (régions live). */
@@ -150,127 +183,102 @@ h1, h2, h3 {
   border: 0;
 }
 
-/* ── Écran plein ─────────────────────────────────────────────────────────────── */
+/* ═══ Primitives typographiques ════════════════════════════════════════════ */
+
+/* Intertitre : capitales espacées, la plus petite taille du système. Une seule
+   section du jeu en porte un — « Opponents ». Hold, Next et les raccourcis se
+   lisent sans qu'on les annonce. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Statistique : libellé au-dessus, valeur en dessous. Le seul motif de données
+   du jeu — score, lignes, niveau, score adverse en partagent la mécanique. */
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.stat__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 14ch;
+}
+
+.stat__value {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  line-height: 1.1;
+  color: var(--ink-0);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat--strong .stat__value {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-black);
+}
+
+.stat__value--flash {
+  animation: statFlash var(--duration-base) var(--ease-out);
+}
+
+@keyframes statFlash {
+  from {
+    color: var(--accent-ink);
+  }
+  to {
+    color: var(--ink-0);
+  }
+}
+
+/* ═══ Structure ════════════════════════════════════════════════════════════ */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .screen {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 24px 16px;
-  position: relative;
+  padding: var(--space-6) var(--space-4);
 }
 
 .screen__hint {
-  font-family: "Orbitron", "Nunito", monospace;
-  color: var(--text-muted);
-  letter-spacing: 0.06em;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-2);
 }
 
-/* ── Bandeau d'état ──────────────────────────────────────────────────────────
-   Coupure réseau ou refus du serveur, annoncé par-dessus la partie et jamais à
-   sa place : le joueur garde son plateau sous les yeux. Fond opaque, pas de
-   verre — il doit rester lisible au-dessus de n'importe quel contenu. */
-.notice {
-  position: fixed;
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  max-width: min(90vw, 520px);
-  padding: 10px 18px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1.5px solid #b81818;
-  color: var(--text-primary);
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-align: center;
-  overflow-wrap: anywhere;
-  box-shadow: 0 6px 20px rgba(60, 25, 110, 0.25);
-}
-
-/* ── Panel glassmorphisme ────────────────────────────────────────────────────── */
-.panel {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 1rem 1.25rem;
-  box-shadow: 0 4px 24px rgba(100, 50, 180, 0.12);
-}
-
-/* ── Boutons ─────────────────────────────────────────────────────────────────── */
-.btn {
-  font-family: "Nunito", system-ui, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  min-height: var(--tap);
-  padding: 12px 28px;
-  /* Bordure transparente en base : l'état désactivé en ajoute une, sans elle
-     le bouton changeait de taille de 3px en basculant host / non-host. */
-  border: 1.5px solid transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  transition:
-    transform var(--transition),
-    box-shadow var(--transition),
-    background var(--transition);
-}
-
-.btn:active {
-  transform: scale(0.97);
-}
-
-.btn--primary {
-  background: var(--block-T);
-  color: #fff; /* 4.9:1 sur --block-T */
-  box-shadow: 0 4px 16px rgba(155, 63, 232, 0.4);
-}
-
-.btn--primary:hover {
-  box-shadow: 0 6px 24px rgba(155, 63, 232, 0.55);
-  transform: translateY(-2px) scale(1.03);
-}
-
-.btn--secondary {
-  background: rgba(255, 255, 255, 0.35);
-  color: var(--text-primary);
-  border: 1.5px solid rgba(255, 255, 255, 0.7);
-}
-
-.btn--secondary:hover {
-  background: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
-}
-
-/* Désactivé : lisible (WCAG n'exempte pas l'information portée par ce bouton). */
-.btn:disabled {
-  background: rgba(255, 255, 255, 0.28);
-  color: var(--text-muted);
-  border: 1.5px dashed rgba(95, 17, 163, 0.35);
-  box-shadow: none;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn:disabled:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-/* ── Board principal ──────────────────────────────────────────────────────────── */
-/* Grille à zones nommées plutôt qu'une rangée flex qui s'enroule : le puits
-   mène et reste premier dans le DOM à toutes les tailles, ce sont les zones qui
-   le replacent au centre en large et en tête en étroit. Une rangée flex avec
-   wrap imposait l'ordre inverse — les raccourcis clavier avant le plateau.
-   Deux rangées : les instruments (hold, next) collés au bord haut du puits,
-   la référence et les adversaires alignés sur son bord bas. */
+/* Grille à zones nommées : le puits mène et reste premier dans le DOM à toutes
+   les tailles, ce sont les zones qui le replacent au centre en large et en tête
+   en étroit. Deux rangées : les instruments (hold, next) collés au bord haut du
+   puits, la référence et les adversaires alignés sur son bord bas. */
 .game-layout {
   display: grid;
-  grid-template-columns: minmax(0, 12.5rem) auto minmax(0, 13.5rem);
+  grid-template-columns: minmax(0, 12rem) auto minmax(0, 13rem);
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-areas:
     "hold stage next"
@@ -282,8 +290,6 @@ h1, h2, h3 {
   width: 100%;
 }
 
-/* Bandeau de score + puits : un seul objet, d'où la gouttière serrée face aux
-   24/32px qui séparent les groupes voisins. */
 .game-stage {
   grid-area: stage;
   align-self: start;
@@ -304,8 +310,8 @@ h1, h2, h3 {
   align-self: start;
 }
 
-/* Le rail des adversaires part du haut de sa rangée et défile chez lui :
-   à huit joueurs il ne doit pas allonger la page sous le puits. */
+/* Le rail des adversaires part du haut de sa rangée et défile chez lui : à huit
+   joueurs il ne doit pas allonger la page sous le puits. */
 .game-foes {
   grid-area: foes;
   align-self: stretch;
@@ -315,8 +321,8 @@ h1, h2, h3 {
   min-height: 0;
 }
 
-/* L'intertitre reste hors de la pile qui défile — sinon il disparaît au
-   premier scroll et la colonne n'a plus de nom. */
+/* L'intertitre reste hors de la pile qui défile — sinon il disparaît au premier
+   scroll et la colonne n'a plus de nom. */
 .game-foes__group {
   display: flex;
   flex-direction: column;
@@ -324,66 +330,140 @@ h1, h2, h3 {
 }
 
 /* Référence (raccourcis, room) : posée sur le bord bas du puits, hors du champ
-   de jeu. C'est ce que `margin-top: auto` visait sans jamais l'obtenir — un
-   conteneur dimensionné par son contenu n'a pas d'espace libre à distribuer. */
+   de jeu. */
 .game-meta {
   grid-area: meta;
   align-self: end;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
-/* Pas de backdrop-filter ici, contrairement aux autres panneaux : c'est
-   l'élément qui repeint le plus (200 cellules, chaque descente de pièce) et
-   son arrière-plan est un dégradé lisse et statique — le flouter ne change
-   rien à l'œil mais impose une passe de composition à chaque frame. */
+/* ═══ Panneau ══════════════════════════════════════════════════════════════ */
+.panel {
+  background: var(--surface-1);
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+/* ═══ Boutons ══════════════════════════════════════════════════════════════ */
+.btn {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  min-height: var(--tap);
+  padding: var(--space-3) var(--space-6);
+  border: var(--border-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink-0);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) linear,
+    color var(--duration-fast) linear,
+    border-color var(--duration-fast) linear;
+}
+
+/* L'inversion complète du couple fond/encre remplace l'ombre portée et le
+   soulèvement : l'état actif se voit de loin sans que rien ne bouge. */
+.btn--primary {
+  background: var(--ink-0);
+  color: var(--ink-inverse);
+  border-color: var(--ink-0);
+}
+
+.btn--primary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink-0);
+}
+
+.btn--secondary:hover {
+  background: var(--surface-3);
+  border-color: var(--ink-0);
+}
+
+/* Désactivé : lisible (WCAG n'exempte pas l'information portée par ce bouton). */
+.btn:disabled {
+  background: transparent;
+  color: var(--ink-2);
+  border-color: var(--line);
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+  background: transparent;
+  color: var(--ink-2);
+  border-color: var(--line);
+}
+
+/* ═══ Bandeau d'état ═══════════════════════════════════════════════════════
+   Coupure réseau ou refus du serveur, annoncé par-dessus la partie et jamais à
+   sa place : le joueur garde son plateau sous les yeux. */
+.notice {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  max-width: min(92vw, 560px);
+  padding: var(--space-3) var(--space-5);
+  background: var(--accent);
+  color: var(--ink-0);
+  border: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+/* ═══ Puits ════════════════════════════════════════════════════════════════ */
 .board {
   position: relative;
   display: grid;
   grid-template-columns: repeat(10, var(--cell-size));
   grid-template-rows: repeat(20, var(--cell-size));
-  background: rgba(255, 255, 255, 0.18);
-  border: 2px solid rgba(255, 255, 255, 0.45);
-  border-radius: 16px;
-  /* L'ombre portée pose le plateau sur le fond ; l'ombre interne haute en fait
-     un puits dans lequel les pièces tombent, au lieu d'une simple grille. */
-  box-shadow:
-    0 8px 32px rgba(100, 50, 180, 0.25),
-    inset 0 10px 20px -8px rgba(60, 25, 110, 0.35);
-  padding: 8px;
+  background: var(--surface-1);
+  border: var(--border-strong);
+  border-radius: var(--radius);
   overflow: hidden;
   /* Isole les 200 cellules du reste du document : une pièce qui descend ne peut
      plus provoquer de calcul de mise en page hors du plateau. Crée aussi le
      contexte d'empilement dont ::before a besoin pour passer sous les cellules. */
   contain: layout paint;
-  transition: filter 0.5s var(--ease-out);
+  transition: filter 0.4s var(--ease-out);
 }
 
 /* Éliminé : le puits se vide de sa couleur au lieu de se figer sans rien dire.
    La partie continue à côté, ce plateau-là est fini — l'encre le dit. */
 .board--dead {
-  filter: grayscale(0.9) brightness(0.86);
+  filter: grayscale(1) brightness(0.55);
 }
 
 /* Le quadrillage est peint par le puits, pas par 200 cellules vides bordées :
-   une seule boîte à peindre, et plus rien qui dépasse derrière les coins
-   arrondis de la pièce en cours. */
+   une seule boîte à peindre. Il est franc, pas suggéré — c'est la grille de
+   lecture du jeu, elle doit se compter à l'œil. */
 .board::before {
   content: "";
   position: absolute;
-  inset: 8px;
+  inset: 0;
   z-index: -1;
   pointer-events: none;
   background-image:
     repeating-linear-gradient(
       to right,
-      rgba(255, 255, 255, 0.22) 0 1px,
+      var(--line) 0 1px,
       transparent 1px var(--cell-size)
     ),
     repeating-linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.22) 0 1px,
+    var(--line) 0 1px,
     transparent 1px var(--cell-size)
   );
 }
@@ -394,26 +474,25 @@ h1, h2, h3 {
 .board__flash {
   position: absolute;
   inset: 0;
-  border-radius: 14px;
-  background: #fff;
+  background: var(--ink-0);
   opacity: 0;
   pointer-events: none;
+  z-index: 60;
 }
 
-/* Lueur de pénalité — la seule chose du jeu qui vienne du sol, et rouge quand
-   tout le reste est blanc : effacer une ligne et en encaisser trois ne peuvent
-   pas se ressembler. */
+/* Lueur de pénalité — la seule chose du jeu qui vienne du sol : effacer une
+   ligne et en encaisser trois ne peuvent pas se ressembler. */
 .board__surge {
   position: absolute;
   inset: 0;
-  border-radius: 14px;
   pointer-events: none;
   opacity: 0;
+  z-index: 55;
   background: linear-gradient(
     to top,
-    rgba(210, 30, 60, 0.72),
-    rgba(210, 30, 60, 0.18) 22%,
-    transparent 48%
+    rgba(255, 59, 48, 1),
+    rgba(255, 59, 48, 0.25) 22%,
+    transparent 46%
   );
 }
 
@@ -426,7 +505,7 @@ h1, h2, h3 {
     opacity: 0;
   }
   16% {
-    opacity: 1;
+    opacity: 0.85;
   }
   100% {
     opacity: 0;
@@ -438,148 +517,122 @@ h1, h2, h3 {
    déjà posée, la trace n'a rien à faire attendre. */
 .drop-trail {
   pointer-events: none;
-  border-radius: 4px;
-  transform-origin: bottom;
-  background: linear-gradient(to bottom, transparent, var(--tint));
-  animation: dropTrail 0.22s var(--ease-out) both;
+  background: var(--tint);
+  animation: dropTrail 0.22s linear both;
 }
 
 @keyframes dropTrail {
   from {
-    opacity: 0.5;
-    transform: scaleY(1);
+    opacity: 0.45;
   }
   to {
     opacity: 0;
-    transform: scaleY(0.88);
   }
 }
 
-/* ── Cellules ────────────────────────────────────────────────────────────────── */
+/* ═══ Cellules ═════════════════════════════════════════════════════════════ */
 .cell {
   width: var(--cell-size);
   height: var(--cell-size);
 }
 
-.cell--empty {
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
 /* Dans le puits, rien à peindre : la case vide n'est plus qu'un emplacement de
    grille, le quadrillage vient de .board::before. Les aperçus Next/Hold gardent
    leur lattice, eux ne se repeignent pas à 30 Hz. */
+.cell--empty {
+  background: transparent;
+  border: 1px solid var(--line);
+}
+
 .board .cell--empty {
-  background: none;
   border: none;
 }
 
+/* Le ghost porte la couleur de sa pièce : deux tétrominos ne se posent pas au
+   même endroit, la projection doit dire lequel arrive. */
 .cell--ghost {
-  border-radius: 4px;
-  background: rgba(95, 17, 163, 0.12);
-  border: 2px solid rgba(95, 17, 163, 0.55);
+  background: transparent;
+  border: 2px solid var(--ghost, var(--line-strong));
+  opacity: 0.5;
 }
 
-.cell--penalty {
-  background: repeating-linear-gradient(
-    45deg,
-    var(--block-penalty) 0px,
-    var(--block-penalty) 4px,
-    var(--block-penalty-light) 4px,
-    var(--block-penalty-light) 10px
-  );
-  border-radius: 4px;
+.cell--ghost-I {
+  --ghost: var(--block-I);
+}
+.cell--ghost-O {
+  --ghost: var(--block-O);
+}
+.cell--ghost-T {
+  --ghost: var(--block-T);
+}
+.cell--ghost-S {
+  --ghost: var(--block-S);
+}
+.cell--ghost-Z {
+  --ghost: var(--block-Z);
+}
+.cell--ghost-J {
+  --ghost: var(--block-J);
+}
+.cell--ghost-L {
+  --ghost: var(--block-L);
 }
 
-/* Effet 3D plastique sur tous les blocs colorés */
+/* Aplat strict. La bordure couleur du fond sépare deux blocs voisins de même
+   teinte sans rien simuler : c'est un trait, pas une lumière. */
 .cell--I,
 .cell--O,
 .cell--T,
 .cell--S,
 .cell--Z,
 .cell--J,
-.cell--L {
-  border-radius: 6px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  box-shadow:
-    inset -4px -4px 8px rgba(0, 0, 0, 0.25),
-    inset 4px 4px 8px rgba(255, 255, 255, 0.55),
-    0 4px 8px rgba(0, 0, 0, 0.18);
+.cell--L,
+.cell--penalty {
+  border: 1px solid var(--bg);
 }
 
 .cell--I {
-  background: radial-gradient(
-    circle at 35% 35%,
-    #6fe6ee,
-    var(--block-I) 60%,
-    #0a828b
-  );
+  background: var(--block-I);
 }
 .cell--O {
-  background: radial-gradient(
-    circle at 35% 35%,
-    #ffdb63,
-    var(--block-O) 60%,
-    #a37a00
-  );
+  background: var(--block-O);
 }
 .cell--T {
-  background: radial-gradient(
-    circle at 35% 35%,
-    #cc7fff,
-    var(--block-T) 60%,
-    #6a18b0
-  );
+  background: var(--block-T);
 }
 .cell--S {
-  background: radial-gradient(
-    circle at 35% 35%,
-    #7fe094,
-    var(--block-S) 60%,
-    #22803a
-  );
+  background: var(--block-S);
 }
 .cell--Z {
-  background: radial-gradient(
-    circle at 35% 35%,
-    #f58585,
-    var(--block-Z) 60%,
-    #9c2020
-  );
+  background: var(--block-Z);
 }
 .cell--J {
-  background: radial-gradient(
-    circle at 35% 35%,
-    #7ba3f2,
-    var(--block-J) 60%,
-    #16408f
-  );
+  background: var(--block-J);
 }
 .cell--L {
-  background: radial-gradient(
-    circle at 35% 35%,
-    #ffb865,
-    var(--block-L) 60%,
-    #a35700
+  background: var(--block-L);
+}
+
+/* Indestructible : hachures. Le gris seul se lirait comme un bloc terne, les
+   diagonales disent « ça ne partira pas » sans dépendre de la couleur. */
+.cell--penalty {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--block-penalty) 0 3px,
+    var(--surface-3) 3px 7px
   );
 }
 
-/* État "stacked" — légèrement plus sombre */
+/* La pièce en cours est la seule chose vivante du puits : elle est franche,
+   le tas est d'un cran en retrait. */
 .cell--stacked {
-  filter: brightness(0.9);
-}
-/* État "active" — brillant */
-.cell--active {
-  filter: brightness(1.08);
+  filter: brightness(0.82);
 }
 
 /* Pénalité reçue : le tas ne se téléporte pas d'un cran vers le haut, il est
    poussé. Chaque cellule pleine part de `--rise` rangées plus bas — la même
-   distance pour toutes, c'est un seul mouvement — et les rangées
-   indestructibles arrivent, elles, de sous le plancher (le puits les rogne).
-   Seules les cases pleines portent la classe : une case vide ne peint rien,
-   l'animer coûterait 200 calques pour rien. */
+   distance pour toutes, c'est un seul mouvement. Seules les cases pleines
+   portent la classe : une case vide ne peint rien. */
 .cell--rising {
   animation: penaltyRise 0.3s var(--ease-out) both;
 }
@@ -593,7 +646,9 @@ h1, h2, h3 {
   }
 }
 
-/* ── Particules de destruction de ligne ─────────────────────────────────────── */
+/* ═══ Particules d'effacement ══════════════════════════════════════════════
+   Des éclats carrés, pas des étincelles : même vocabulaire de forme que les
+   blocs dont ils sortent. */
 .particles {
   position: absolute;
   inset: 0;
@@ -607,277 +662,169 @@ h1, h2, h3 {
   width: var(--size);
   height: var(--size);
   margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
-  border-radius: 50%;
   background: var(--tint);
-  box-shadow: 0 0 10px var(--tint);
-  animation: burst var(--dur) var(--ease-out) both;
+  animation: burst var(--dur) linear both;
   will-change: transform, opacity;
 }
 
 @keyframes burst {
   from {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 0.95;
-  }
-  to {
-    transform: translate3d(var(--dx), var(--dy), 0) scale(0.2);
-    opacity: 0;
-  }
-}
-
-/* ── Animations ─────────────────────────────────────────────────────────────── */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
+    transform: translate3d(0, 0, 0);
     opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scoreFlash {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.15);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes titleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.86);
   }
   to {
-    opacity: 1;
-    transform: scale(1);
+    transform: translate3d(var(--dx), var(--dy), 0);
+    opacity: 0;
   }
 }
 
-/* ── Intertitre ──────────────────────────────────────────────────────────────── */
-/* Une seule section du jeu en porte un : « Opponents ». Hold, Next et les
-   raccourcis se lisent sans qu'on les annonce ; un intertitre au-dessus de
-   chaque groupe donne cinq titres de même poids et plus aucune hiérarchie. */
-.eyebrow {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-weight: 700;
-  margin-bottom: var(--space-1);
-}
-
-/* ── Aide-mémoire clavier ────────────────────────────────────────────────────── */
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.controls__row {
+/* ═══ Bandeau de statistiques ══════════════════════════════════════════════
+   Calé sur la largeur exacte du puits, il en devient le bord haut et non un
+   panneau de plus. Même hauteur solo et multi : le puits ne remonte pas de
+   20px quand un adversaire arrive. */
+.score-panel {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: var(--board-width);
+  max-width: 100%;
+  padding: var(--space-3) 0;
+  border-bottom: var(--border);
 }
 
-.controls__keys {
-  display: flex;
-  gap: 3px;
-  flex-shrink: 0;
-}
-
-.controls__key {
-  font-family: "Nunito", system-ui, sans-serif;
-  font-size: 0.65rem;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-bottom-width: 2px;
-  border-radius: 5px;
-  padding: 4px 6px;
-  min-width: 20px;
-  text-align: center;
-}
-
-.controls__action {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-/* Room et mode : deux faits, pas deux sections. Une paire clé/valeur en ligne
-   remplace deux intertitres empilés et rend 40px au puits. */
-.game-meta__facts {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.game-meta__fact {
+.score-panel__group {
   display: flex;
   align-items: baseline;
-  gap: var(--space-2);
-}
-
-.game-meta__key {
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.game-meta__value {
-  font-family: "Orbitron", "Nunito", monospace;
-  font-size: 0.85rem;
-  color: var(--ink-accent);
-  font-weight: 800;
-  overflow-wrap: anywhere;
+  gap: var(--space-6);
   min-width: 0;
 }
 
-/* ── Preview Next / Hold ─────────────────────────────────────────────────────── */
-/* Libellé collé à sa grille (4px) : c'est une légende du cadre, pas le titre
-   d'une section — d'où le rendu discret face à .eyebrow. */
+/* L'adversaire est aligné à droite : deux camps, deux bords. */
+.score-panel__group--rival {
+  text-align: right;
+}
+
+.score-panel__group--rival .stat {
+  align-items: flex-end;
+}
+
+/* ═══ Aperçus Next / Hold ══════════════════════════════════════════════════ */
 .preview__label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-bottom: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: var(--space-2);
 }
 
 .preview__grid {
-  transition: opacity 0.2s;
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  padding: var(--space-2);
+  background: var(--surface-1);
+  border: var(--border);
+  transition: opacity var(--duration-base) linear;
 }
 
 /* Hold déjà consommé : on grise la pièce, jamais son libellé. */
 .preview--spent .preview__grid {
-  opacity: 0.5;
-}
-
-.preview__grid {
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 8px;
-  width: fit-content;
+  opacity: 0.35;
 }
 
 .preview__row {
   display: flex;
 }
 
-/* Plafonné à 20px mais jamais plus gros qu'une case du puits : sur un écran
+/* Plafonné à 22px mais jamais plus gros qu'une case du puits : sur un écran
    court, un aperçu qui dépasse le plateau inverse la hiérarchie. */
 .preview__grid .cell {
-  width: min(20px, var(--cell-size));
-  height: min(20px, var(--cell-size));
+  width: min(22px, var(--cell-size));
+  height: min(22px, var(--cell-size));
 }
 
-/* ── OpponentView ────────────────────────────────────────────────────────────── */
+/* ═══ Adversaires ══════════════════════════════════════════════════════════ */
 .opponent {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
-  padding: 10px;
+  background: var(--surface-1);
+  border: var(--border);
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  transition: opacity 0.3s;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  gap: var(--space-2);
 }
 
 /* Éliminé : on éteint le spectrum, pas le texte. Baisser l'opacité du bloc
-   entier faisait tomber le nom à 3.0:1. */
+   entier ferait tomber le nom sous le seuil de contraste. */
 .opponent--dead {
   border-style: dashed;
 }
 
 .opponent__name {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--ink-0);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 /* Depuis que le spectrum est la seule fenêtre sur l'adversaire, il est traité
-   comme un puits miniature et non comme un graphique : même cadre, même ombre
-   interne que le plateau, et une graduation sur 20 rangées. */
+   comme un puits miniature et non comme un graphique : même fond, même
+   quadrillage sur 20 rangées. */
 .opponent__spectrum {
   position: relative;
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   align-items: end;
-  gap: 2px;
-  height: 80px;
-  padding: 3px;
-  margin-top: 8px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  border-radius: var(--radius);
-  box-shadow: inset 0 6px 12px -4px rgba(60, 25, 110, 0.3);
+  gap: 1px;
+  height: 84px;
+  padding: 2px;
+  background: var(--bg);
+  border: var(--border);
   overflow: hidden;
-  /* Les barres s'animent en hauteur (voir .opponent__bar) : la containment
-     enferme ce recalcul dans le cadre au lieu de le laisser remonter la page. */
+  /* Les barres s'animent en hauteur : la containment enferme ce recalcul dans
+     le cadre au lieu de le laisser remonter la page. */
   contain: layout paint;
 }
 
-/* Les 20 rangées du terrain adverse : une barre à mi-hauteur se lit « 10
-   lignes empilées » sans compter, comme sur son propre plateau. */
+/* Les 20 rangées du terrain adverse : une barre à mi-hauteur se lit « 10 lignes
+   empilées » sans compter, comme sur son propre plateau. */
 .opponent__spectrum::after {
   content: "";
   position: absolute;
-  inset: 3px;
+  inset: 2px;
   pointer-events: none;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.4) 0 1px,
+    var(--line) 0 1px,
     transparent 1px calc(100% / 20)
   );
 }
 
 /* Encre neutre, jamais une couleur de pièce : la hauteur est la seule
-   information transmise, la teinte n'en porte aucune. */
-/* La barre monte au lieu de sauter : c'est la seule façon de voir, d'un onglet
-   à l'autre, que les lignes qu'on vient d'envoyer sont bien tombées chez
-   l'adversaire. Dix boîtes dans un cadre à `overflow: hidden`, la mise en page
-   ne sort pas du spectrum. */
+   information transmise, la teinte n'en porte aucune. La barre monte au lieu de
+   sauter — c'est la seule façon de voir que les lignes qu'on vient d'envoyer
+   sont bien tombées chez l'adversaire. */
 .opponent__bar {
-  background: rgba(42, 26, 74, 0.72);
-  border-radius: 2px 2px 0 0;
+  background: var(--ink-1);
   min-height: 2px;
-  transition: height 0.22s var(--ease-out);
+  transition: height var(--duration-base) var(--ease-out);
 }
 
 .opponent--dead .opponent__name {
-  color: var(--text-muted); /* 5.8:1 */
+  color: var(--ink-2);
 }
 
 .opponent--dead .opponent__bar {
-  background: var(--text-muted);
-  opacity: 0.45;
+  background: var(--line-strong);
 }
 
 /* Une room n'a pas de limite de joueurs : au-delà de ce que l'écran tient, la
-   colonne défile au lieu d'étirer la page sous le plateau. En large c'est la
-   rangée de grille qui donne la borne (min-height: 0), le max-height couvre les
-   dispositions empilées où la rangée est en `auto`.
-   12px entre deux adversaires contre 16px avant l'intertitre : la pile se lit
-   comme un groupe, pas comme trois panneaux indépendants. */
+   colonne défile au lieu d'étirer la page sous le plateau. */
 .opponents-stack {
   display: flex;
   flex-direction: column;
@@ -888,128 +835,126 @@ h1, h2, h3 {
   padding-right: var(--space-1);
 }
 
-/* ── État éliminé ────────────────────────────────────────────────────────────── */
-/* Le signal d'alerte passe par la bordure et le titre, pas par un fond teinté :
-   un fond rouge translucide faisait tomber le texte sous 4.5:1. */
-/* Après la pile qui défile, jamais dedans : le statut reste visible quel que
-   soit le nombre d'adversaires. L'écart vient du gap de .game-foes. */
+/* ═══ Éliminé ══════════════════════════════════════════════════════════════ */
 .eliminated {
   text-align: center;
-  border: 1.5px solid #b81818;
-  animation: fadeIn 0.3s var(--ease-out);
+  background: var(--accent);
+  border: none;
+  color: var(--ink-0);
 }
 
 .eliminated__title {
-  color: #a01414; /* 4.9:1 sur --panel-bg */
-  font-weight: 800;
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-wide);
 }
 
 .eliminated__hint {
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  margin-top: 4px;
+  font-size: var(--text-xs);
+  margin-top: var(--space-1);
 }
 
-/* ── Score Panel ─────────────────────────────────────────────────────────────── */
-/* Toujours au-dessus du puits, solo comme multi. Le score changeait de colonne
-   selon le mode : même donnée, deux emplacements à retrouver. Calé sur la
-   largeur exacte du plateau, il en devient le bandeau et non un panneau de
-   plus. */
-.score-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: 0.75rem 1.25rem;
-  width: calc(var(--cell-size) * 10 + 20px); /* board width + padding */
-  max-width: 100%;
-  animation: fadeIn 0.4s var(--ease-out);
-}
-
-/* Solo : un seul bloc, centré. Même structure interne qu'en duel — mesuré
-   77px dans les deux cas, c'est ce qui tient le budget vertical de --cell-size. */
-.score-panel--solo {
-  justify-content: center;
-}
-
-.score-panel--solo .score-panel__side {
-  align-items: center;
-}
-
-.score-panel__label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
-  margin-bottom: var(--space-1);
-  max-width: 12ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.score-panel__value {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--ink-accent);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.score-panel__value--flash {
-  animation: scoreFlash 0.2s var(--ease-out);
-}
-
-.score-panel__vs {
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-}
-
-.score-panel__side {
+/* ═══ Aide-mémoire clavier ═════════════════════════════════════════════════ */
+.controls {
   display: flex;
   flex-direction: column;
+  gap: var(--space-2);
 }
 
-.score-panel__side--right {
-  text-align: right;
-  align-items: flex-end;
+.controls__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-/* ── Lobby ───────────────────────────────────────────────────────────────────── */
+.controls__keys {
+  display: flex;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.controls__key {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  color: var(--ink-0);
+  background: var(--surface-2);
+  border: var(--border);
+  padding: 5px 6px;
+  min-width: 22px;
+  text-align: center;
+}
+
+.controls__action {
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+
+/* Room et mode : deux faits, pas deux sections. */
+.game-meta__facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.game-meta__fact {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.game-meta__key {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+
+.game-meta__value {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--ink-0);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* ═══ Marque ═══════════════════════════════════════════════════════════════ */
+.brand {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--ink-0);
+}
+
+.brand__accent {
+  color: var(--accent);
+}
+
+/* ═══ Lobby ════════════════════════════════════════════════════════════════ */
 .lobby {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: var(--space-6);
   width: 440px;
   max-width: 100%;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.3);
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
-  border-radius: 20px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 8px 40px rgba(100, 50, 180, 0.18);
-  animation: fadeIn 0.5s var(--ease-out);
-}
-
-.lobby__title {
-  font-size: clamp(2rem, 6vw, 4rem);
-  font-weight: 800;
-  color: var(--ink-accent);
-  letter-spacing: 0.05em;
-  text-align: center;
-  text-wrap: balance;
+  padding: var(--space-8);
+  background: var(--surface-1);
+  border: var(--border-strong);
 }
 
 .lobby__subtitle {
-  color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
   text-align: center;
   max-width: 46ch;
 }
@@ -1019,11 +964,11 @@ h1, h2, h3 {
 }
 
 .lobby__room-name {
-  font-family: "Orbitron", "Nunito", monospace;
-  font-size: 1.2rem;
-  color: var(--ink-accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
   letter-spacing: 0.06em;
-  font-weight: 800;
+  color: var(--ink-0);
   overflow-wrap: anywhere;
 }
 
@@ -1031,281 +976,272 @@ h1, h2, h3 {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-1);
 }
 
 .lobby__player {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.35);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  font-size: 0.9rem;
-  font-weight: 600;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--surface-2);
+  border-left: 3px solid var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+/* Soi-même : la barre passe à l'accent, pas le fond. Une ligne de liste ne
+   change pas de nature parce qu'elle vous concerne. */
+.lobby__player--self {
+  border-left-color: var(--accent);
+}
+
+.lobby__player-name--self {
+  color: var(--ink-0);
+  font-weight: var(--weight-bold);
 }
 
 .lobby__player-name {
-  color: var(--text-muted);
+  color: var(--ink-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.lobby__player-name--self {
-  color: var(--text-primary);
-}
-
 .lobby__badge {
-  font-size: 0.7rem;
-  background: var(--ink-accent);
-  color: #fff; /* 10:1 */
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  background: var(--ink-0);
+  color: var(--ink-inverse);
+  padding: 2px var(--space-2);
   flex-shrink: 0;
 }
 
 .lobby__actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
   justify-content: center;
   flex-wrap: wrap;
 }
 
-/* ── Home (URL invalide) ─────────────────────────────────────────────────────── */
+/* ═══ Accueil (URL invalide) ═══════════════════════════════════════════════ */
 .home {
   width: 480px;
   max-width: 100%;
 }
 
 .home__example {
-  color: var(--text-muted);
-  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-2);
 }
 
 .home__link {
-  color: var(--ink-accent);
-  font-weight: 700;
+  color: var(--ink-0);
+  font-weight: var(--weight-bold);
 }
 
 .home__link:hover {
-  text-decoration: underline;
+  color: var(--accent-ink);
 }
 
-/* ── GameOver ────────────────────────────────────────────────────────────────── */
+/* ═══ Game Over ════════════════════════════════════════════════════════════ */
 .gameover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: var(--space-6);
   text-align: center;
-  animation: fadeIn 0.4s var(--ease-out);
-  background: rgba(255, 255, 255, 0.3);
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
-  border-radius: 20px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  padding: 2.5rem 3rem;
-  box-shadow: 0 8px 40px rgba(100, 50, 180, 0.2);
+  padding: var(--space-10) var(--space-8);
+  background: var(--surface-1);
+  border: var(--border-strong);
 }
 
 .gameover__title {
-  font-size: clamp(2rem, 8vw, 3rem);
-  font-weight: 900;
-  color: var(--ink-accent);
-  letter-spacing: 0.05em;
-  animation: titleIn 0.45s var(--ease-out) both;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink-0);
 }
 
 .gameover__winner {
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
 }
 
-/* Le nom vient de l'URL : il peut être long, accentué, en emoji ou sans
-   espace. Il coupe plutôt que de faire déborder le panneau. */
+/* Le nom vient de l'URL : il peut être long, accentué, en emoji ou sans espace.
+   Il coupe plutôt que de faire déborder le panneau. */
 .gameover__winner strong {
-  color: var(--ink-accent);
-  font-weight: 800;
+  color: var(--ink-0);
+  font-weight: var(--weight-black);
   overflow-wrap: anywhere;
 }
 
 .gameover__scoreblock {
-  margin-top: 24px;
+  margin-top: var(--space-6);
 }
 
 .gameover__score {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-black);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .gameover__score--winner {
-  font-size: 3rem;
-  font-weight: 800;
-  color: #1f7a35; /* vert lisible, pas --block-S */
+  font-size: var(--text-xl);
+  color: var(--block-S);
 }
 
 .gameover__score--loser {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-muted);
+  font-size: var(--text-lg);
+  color: var(--ink-1);
 }
 
 .gameover__wait {
-  color: var(--text-muted);
-  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-2);
 }
 
-/* ── Leaderboard modal ───────────────────────────────────────────────────────── */
+/* ═══ Leaderboard ══════════════════════════════════════════════════════════ */
 .lb-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(120, 80, 180, 0.4);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.78);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: var(--space-4);
   z-index: 1000;
-  animation: fadeIn 0.25s var(--ease-out);
 }
 
 .lb-modal {
-  background: rgba(255, 255, 255, 0.35);
-  border: 1.5px solid rgba(255, 255, 255, 0.65);
-  border-radius: 20px;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  padding: 2rem 2.5rem;
-  width: min(480px, 100%);
-  box-shadow: 0 12px 48px rgba(100, 50, 180, 0.25);
   position: relative;
-  animation: fadeIn 0.3s var(--ease-out);
+  width: min(460px, 100%);
   max-height: 90vh;
   overflow-y: auto;
+  padding: var(--space-8);
+  background: var(--surface-1);
+  border: var(--border-strong);
 }
 
 .lb-modal__title {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--ink-accent);
-  margin-bottom: 1.25rem;
+  font-size: var(--text-md);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
   text-align: center;
-  letter-spacing: 0.04em;
+  color: var(--ink-0);
+  margin-bottom: var(--space-6);
 }
 
 .lb-modal__close {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: rgba(255, 255, 255, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 50%;
+  top: 0;
+  right: 0;
   width: var(--tap);
   height: var(--tap);
-  cursor: pointer;
-  font-size: 1.25rem;
-  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
-  transition: background var(--transition), transform var(--transition);
+  background: transparent;
+  border: none;
+  border-left: var(--border);
+  border-bottom: var(--border);
+  color: var(--ink-1);
+  font-size: var(--text-md);
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--duration-fast) linear;
 }
 
 .lb-modal__close:hover {
-  background: rgba(255, 255, 255, 0.75);
-  transform: scale(1.08);
+  background: var(--accent);
+  color: var(--ink-0);
 }
 
 .lb-modal__empty {
-  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-2);
   text-align: center;
-  font-size: 0.9rem;
-  padding: 1rem 0;
+  padding: var(--space-4) 0;
 }
 
 .lb-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 8px;
-  border-radius: 10px;
-  margin-bottom: 6px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  animation: fadeIn 0.3s var(--ease-out);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2);
+  border-bottom: var(--border);
+  font-family: var(--font-mono);
 }
 
+/* Première place : la barre latérale, pas un fond doré. Le classement se lit
+   déjà dans l'ordre — l'accent ne fait que pointer le sommet. */
 .lb-row--gold {
-  background: rgba(245, 166, 35, 0.22);
-  border-color: rgba(180, 110, 10, 0.55);
+  border-left: 3px solid var(--accent);
+  padding-left: var(--space-3);
 }
 
 .lb-row__rank {
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  width: 28px;
-  text-align: center;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--ink-2);
+  width: 32px;
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
 
 .lb-row--gold .lb-row__rank {
-  color: #6b4504; /* 5.1:1 sur la ligne dorée */
-  font-size: 1rem;
+  color: var(--accent-ink);
 }
 
 .lb-row__name {
   flex: 1;
-  font-weight: 700;
-  color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--ink-0);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.lb-row--gold .lb-row__name {
-  font-size: 1.05rem;
-}
-
 .lb-row__score {
-  font-weight: 800;
-  color: var(--ink-accent);
-  font-size: 0.95rem;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--ink-1);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Scrollbar ───────────────────────────────────────────────────────────────── */
+/* ═══ Scrollbar ════════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.15);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(95, 17, 163, 0.45);
-  border-radius: 4px;
+  width: 10px;
 }
 
-/* ── Responsive ──────────────────────────────────────────────────────────────── */
-/* Seuil calculé, pas rond : 200 + 24 + 320 + 24 + 216 = 784px pour les trois
-   colonnes. En dessous les rails écrasaient le plateau, et l'ancien wrap flex
-   ouvrait entre 700 et 850px une zone où le rail droit passait seul à la ligne.
-   Le puits reste premier — l'empilement le garde en tête, les instruments
-   dessous, la référence en dernier. */
-@media (max-width: 830px) {
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+}
+
+/* ═══ Responsive ═══════════════════════════════════════════════════════════
+   Seuil calculé, pas rond : 192 + 24 + 404 + 24 + 208 = 852px pour les trois
+   colonnes. En dessous les rails écrasaient le plateau. Le puits reste premier
+   — l'empilement le garde en tête, les instruments dessous, la référence en
+   dernier. */
+@media (max-width: 880px) {
   .game-layout {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(4, auto);
@@ -1352,19 +1288,27 @@ h1, h2, h3 {
 }
 
 @media (max-width: 640px) {
-  .gameover {
-    padding: 2rem 1.5rem;
+  :root {
+    --text-2xl: 2.75rem;
+    --text-xl: 2rem;
   }
+
+  .lobby,
+  .gameover,
   .lb-modal {
-    padding: 1.5rem 1.25rem;
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .score-panel__group {
+    gap: var(--space-4);
   }
 }
 
-/* ── Contraste forcé (Windows High Contrast) ─────────────────────────────────
+/* ═══ Contraste forcé (Windows High Contrast) ══════════════════════════════
    Le mode remplace toutes les couleurs par la palette système. Ici la couleur
    d'une pièce est une information de jeu, pas de la décoration : sans exception
    explicite les sept tétrominos deviennent identiques et la partie devient
-   injouable. ─────────────────────────────────────────────────────────────── */
+   injouable. */
 @media (forced-colors: active) {
   .cell--I,
   .cell--O,
@@ -1378,61 +1322,42 @@ h1, h2, h3 {
     forced-color-adjust: none;
   }
 
-  /* Les surfaces en verre perdent leur fond : il leur faut un contour système
-     pour rester des objets distincts. */
   .board,
   .panel,
   .notice,
   .opponent,
   .opponent__spectrum,
-  .preview__grid {
+  .preview__grid,
+  .lobby,
+  .gameover,
+  .lb-modal {
     border: 1px solid CanvasText;
   }
 }
 
-/* ── Mouvement réduit ────────────────────────────────────────────────────────
+/* ═══ Mouvement réduit ═════════════════════════════════════════════════════
    On garde les changements d'état (opacité, couleur) : ce sont des retours
-   d'information de jeu. On supprime les déplacements, les mises à l'échelle
-   et les particules. ───────────────────────────────────────────────────────── */
+   d'information de jeu. On supprime les déplacements et les particules. */
 @media (prefers-reduced-motion: reduce) {
-  /* Les quatre animations du fichier, nommées une par une plutôt qu'un
-     `animation-duration: 0.01ms` global qui écraserait aussi les retours utiles. */
-  .lobby,
-  .gameover,
-  .lb-overlay,
-  .lb-modal,
-  .lb-row,
-  .score-panel,
-  .eliminated,
-  .gameover__title,
-  .score-panel__value--flash,
+  .stat__value--flash,
   .cell--rising,
   .drop-trail,
   .board--penalty .board__surge {
     animation: none;
   }
 
-  /* La pénalité reste annoncée — région live, lignes grises au sol, spectrum à
-     jour ; c'est la poussée et la lueur qui disparaissent, pas l'information.
+  /* La pénalité reste annoncée — région live, lignes hachurées au sol, spectrum
+     à jour ; c'est la poussée et la lueur qui disparaissent, pas l'information.
      Le sillage sans animation ne doit rien laisser derrière lui. */
-  .drop-trail {
-    display: none;
-  }
-
-  .btn:hover,
-  .btn:active,
-  .lb-modal__close:hover {
-    transform: none;
-  }
-
+  .drop-trail,
   .particles {
     display: none;
   }
 
-  /* Les transitions d'opacité et de couleur restent : ce sont des changements
-     d'état du jeu, pas de la décoration. On les raccourcit simplement. */
-  *, *::before, *::after {
-    transition-duration: 0.12s !important;
+  *,
+  *::before,
+  *::after {
+    transition-duration: var(--duration-fast) !important;
     scroll-behavior: auto !important;
   }
 }

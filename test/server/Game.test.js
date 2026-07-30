@@ -51,7 +51,10 @@ describe("Game Class", () => {
     game.start();
 
     expect(game.started).toBe(true);
-    expect(game.pieces.length).toBe(500);
+    // Sacs de 7 complets : la longueur est arrondie au sac supérieur, jamais
+    // coupée au milieu — sinon deux segments concaténés casseraient le 7-bag.
+    expect(game.pieces.length).toBeGreaterThanOrEqual(500);
+    expect(game.pieces.length % 7).toBe(0);
     expect(p.isAlive).toBe(true); // Reset called on player
   });
 

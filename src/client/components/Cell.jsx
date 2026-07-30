@@ -17,7 +17,14 @@ import { COLOR_INDEX } from "../../shared/constants";
  * @returns {string}
  */
 export const cellClass = (value, state, rising) => {
-  if (state === "ghost") return "cell cell--ghost";
+  if (state === "ghost") {
+    // La projection porte la couleur de sa pièce : deux tétrominos ne se posent
+    // pas au même endroit, elle doit dire lequel arrive.
+    const ghostType = COLOR_INDEX[value];
+    return ghostType && ghostType !== "empty" && ghostType !== "penalty"
+      ? `cell cell--ghost cell--ghost-${ghostType}`
+      : "cell cell--ghost";
+  }
   if (state === "empty" || !value) return "cell cell--empty";
 
   const rise = rising ? " cell--rising" : "";

@@ -7,6 +7,8 @@
 
 const MAX_LABEL_LENGTH = 24;
 const MAX_LINES_CLEARED = 4;
+// Une pièce ne peut pas descendre de plus de rangées qu'en compte le plateau.
+const MAX_DROP_CELLS = 20;
 
 /**
  * Room et nom de joueur viennent d'une URL que n'importe qui compose.
@@ -30,4 +32,21 @@ const clampLinesCleared = (value) => {
   return Math.min(n, MAX_LINES_CLEARED);
 };
 
-module.exports = { isValidLabel, clampLinesCleared, MAX_LABEL_LENGTH };
+/**
+ * Borne la distance de chute déclarée : elle vaut des points, donc elle vaut
+ * la peine d'être mentie.
+ * @param {*} value
+ * @returns {number}  entier dans [0, 20]
+ */
+const clampDropCells = (value) => {
+  const n = Math.trunc(Number(value));
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.min(n, MAX_DROP_CELLS);
+};
+
+module.exports = {
+  isValidLabel,
+  clampLinesCleared,
+  clampDropCells,
+  MAX_LABEL_LENGTH,
+};

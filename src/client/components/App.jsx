@@ -36,8 +36,10 @@ const RoomEntry = () => {
   if (error && !gameRoom) {
     return (
       <div className="screen">
-        <div className="panel lobby home">
-          <h1 className="lobby__title">RED TETRIS</h1>
+        <div className="lobby home">
+          <h1 className="brand">
+            <span className="brand__accent">RED</span> TETRIS
+          </h1>
           <p className="screen__hint" role="alert">{error}</p>
         </div>
       </div>
@@ -72,8 +74,10 @@ const RoomEntry = () => {
 // ── Écran d'accueil (URL invalide) ───────────────────────────────────────────
 const Home = () => (
   <div className="screen">
-    <div className="panel lobby home">
-      <h1 className="lobby__title">RED TETRIS</h1>
+    <div className="lobby home">
+      <h1 className="brand">
+        <span className="brand__accent">RED</span> TETRIS
+      </h1>
       <p className="lobby__subtitle">
         Navigate to <strong className="home__link">/:room/:playerName</strong>
         {" "}

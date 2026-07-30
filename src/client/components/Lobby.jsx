@@ -32,8 +32,10 @@ const Lobby = () => {
 
   return (
     <div className="screen">
-      <div className="panel lobby">
-        <h1 className="lobby__title">RED TETRIS</h1>
+      <div className="lobby">
+        <h1 className="brand">
+          <span className="brand__accent">RED</span> TETRIS
+        </h1>
 
         <div className="lobby__room">
           <p className="eyebrow">ROOM</p>
@@ -43,7 +45,12 @@ const Lobby = () => {
         <div className="lobby__player-list">
           <p className="eyebrow">Players ({players.length})</p>
           {players.map((p) => (
-            <div key={p.name} className="lobby__player">
+            <div
+              key={p.name}
+              className={`lobby__player${
+                p.name === myName ? " lobby__player--self" : ""
+              }`}
+            >
               <span
                 className={`lobby__player-name${
                   p.name === myName ? " lobby__player-name--self" : ""
@@ -76,7 +83,7 @@ const Lobby = () => {
             className="btn btn--secondary"
             onClick={() => setShowLB(true)}
           >
-            🏆 Leaderboard
+            Leaderboard
           </button>
         </div>
       </div>

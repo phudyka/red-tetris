@@ -12,14 +12,14 @@ import { createEmptyBoard } from "../../src/shared/gameLogic";
 
 jest.mock("../../src/client/socket", () => ({
   emitPlayerDead: jest.fn(),
-  emitLinesCleared: jest.fn(),
+  emitPieceLocked: jest.fn(),
   emitRequestNextPiece: jest.fn(),
   emitUpdateSpectrum: jest.fn(),
 }));
 
 const {
   emitPlayerDead,
-  emitLinesCleared,
+  emitPieceLocked,
   emitRequestNextPiece,
   emitUpdateSpectrum,
 } = require("../../src/client/socket");
@@ -319,11 +319,8 @@ describe("Game Component", () => {
         window.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
       });
 
-      // hardDrop does setTimeout(() => lockPiece(), 0)
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
-
+      // Le verrouillage est synchrone : la pièce descendue est passée en
+      // argument, pas relue dans une ref au tour suivant.
       expect(emitRequestNextPiece).toHaveBeenCalledWith("room1");
       jest.useRealTimers();
     });
@@ -381,7 +378,7 @@ describe("Game Component", () => {
 
   // ── Penalty lines ───────────────────────────────────────────────────────
   describe("Lock piece with lines cleared", () => {
-    it("emits linesCleared when piece clears rows", async () => {
+    it("emits pieceLocked when piece clears rows", async () => {
       jest.useFakeTimers();
       const board = createEmptyBoard();
       // Remplir la dernière ligne sauf 2 cases (pièce O viendra combler)
@@ -410,9 +407,9 @@ describe("Game Component", () => {
         jest.advanceTimersByTime(1000);
       });
 
-      expect(emitLinesCleared).toHaveBeenCalledWith(
+      expect(emitPieceLocked).toHaveBeenCalledWith(
         "room1",
-        expect.any(Number),
+        expect.objectContaining({ lines: 1 }),
       );
       jest.useRealTimers();
     });

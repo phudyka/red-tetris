@@ -16,14 +16,18 @@ import ScorePanel from "./ScorePanel";
 
 import useGameLoop from "../hooks/useGameLoop";
 
-import { playerDied, setBoard } from "../actions/player";
+import { playerDied, setBoard, setPlayer } from "../actions/player";
 
 import {
   clearLines,
   computeSpectrum,
   getHardDropPosition,
+  gravityMs,
+  isTSpin,
   isValidPosition,
+  levelForLines,
   placePiece,
+  rotatePiece,
 } from "../../shared/gameLogic";
 
 import {
@@ -32,12 +36,11 @@ import {
   PIECES,
   SPAWN_X,
   SPAWN_Y,
-  TICK_INTERVAL,
   TYPE_TO_COLOR_INDEX,
 } from "../../shared/constants";
 
 import {
-  emitLinesCleared,
+  emitPieceLocked,
   emitPlayerDead,
   emitRequestNextPiece,
   emitUpdateSpectrum,
@@ -46,9 +49,10 @@ import {
 // ── Aide-mémoire clavier (le jeu se joue exclusivement au clavier) ───────────
 const CONTROLS = [
   [["←", "→"], "Move"],
-  [["↑"], "Rotate"],
   [["↓"], "Soft drop"],
   [["Space"], "Hard drop"],
+  [["↑", "X"], "Rotate"],
+  [["Z"], "Rotate CCW"],
   [["C"], "Hold"],
 ];
 
@@ -58,6 +62,9 @@ const DAS_RATE = 33; // ms entre chaque répétition (~30/s)
 
 // Durée du sillage de hard drop — égale à celle de `dropTrail` dans global.css.
 const DROP_TRAIL_MS = 220;
+
+// Durée de l'effacement de ligne — le tas ne retombe qu'après.
+const CLEAR_ANIM_MS = 300;
 
 /**
  * Sillage laissé par un hard drop : une bande par colonne occupée, du départ de
@@ -99,21 +106,34 @@ const Game = () => {
   const nextPieceType = useSelector((s) => s.player.nextPieceType);
   const holdPieceType = useSelector((s) => s.player.holdPieceType);
   const canHold = useSelector((s) => s.player.canHold);
+  const lines = useSelector((s) => s.player.lines);
 
   const isPlaying = started && !over && isAlive;
+  const level = levelForLines(lines);
 
   const [clearingRows, setClearingRows] = useState([]);
   const [lockingCells, setLockingCells] = useState([]);
   const [dropTrail, setDropTrail] = useState(null);
+  // Change à chaque pièce posée : fait repartir la gravité de zéro au spawn.
+  const [spawnSeq, setSpawnSeq] = useState(0);
+
   const trailSeqRef = useRef(0);
   const trailTimerRef = useRef(null);
-  useEffect(() => () => clearTimeout(trailTimerRef.current), []);
+  const clearTimerRef = useRef(null);
+  // Vrai pendant l'animation d'effacement : le plateau affiché porte encore les
+  // lignes pleines, publier ce spectrum montrerait aux adversaires un tas plus
+  // haut qu'il ne l'est pour 300 ms.
+  const clearingRef = useRef(false);
+
+  useEffect(() => () => {
+    clearTimeout(trailTimerRef.current);
+    clearTimeout(clearTimerRef.current);
+  }, []);
 
   // ── Annonces lecteur d'écran ──────────────────────────────────────────────
   // Le plateau est muet pour une synthèse vocale : ces trois événements sont
   // les seuls qui changent la situation du joueur, et ils sont assez rares
   // (au plus un par pièce posée) pour tenir dans une région "polite".
-  const myName = useSelector((s) => s.player.name);
   const myScore = useSelector((s) => s.scores[s.player.name] || 0);
   const penaltyLines = useSelector((s) => s.player.penaltyLines);
   const penaltySeq = useSelector((s) => s.player.penaltySeq);
@@ -138,7 +158,7 @@ const Game = () => {
       const text = `${penaltyLines} penalty ${
         penaltyLines > 1 ? "lines" : "line"
       } added`;
-      setAnnouncement(penaltySeq % 2 ? text : `${text} `);
+      setAnnouncement(penaltySeq % 2 ? text : `${text} `);
     }
     prevSeqRef.current = penaltySeq;
   }, [penaltySeq, penaltyLines]);
@@ -162,6 +182,13 @@ const Game = () => {
   const holdTypeRef = useRef(null);
   const canHoldRef = useRef(true);
   const roomRef = useRef(room);
+  const linesRef = useRef(lines);
+
+  // Rangées descendues en soft drop depuis le spawn — vaut des points au lock.
+  const softDropRef = useRef(0);
+  // Dernière action réussie = une rotation. Sans ce drapeau, un T tombé par
+  // hasard dans un creux compterait comme un T-spin.
+  const rotatedLastRef = useRef(false);
 
   // Sync de l'état Redux vers les refs à chaque render
   const board = useSelector((s) => s.player.board);
@@ -184,6 +211,9 @@ const Game = () => {
   useEffect(() => {
     roomRef.current = room;
   }, [room]);
+  useEffect(() => {
+    linesRef.current = lines;
+  }, [lines]);
 
   // ── Refs pour le Lock Delay (Guideline) ───────────────────────────────────
   const lockTimeoutRef = useRef(null);
@@ -200,90 +230,119 @@ const Game = () => {
   // une pièce sur un composant démonté.
   useEffect(() => clearLockTimeout, [clearLockTimeout]);
 
-  // ── Board changé : spectrum + check de mort ────────────────────────────────
-  // Le board ne change qu'au lock ou à la réception d'une pénalité : c'est le
-  // seul endroit d'où le spectrum peut bouger, on le publie donc ici.
-  // Si la pièce en cours entre en collision après une pénalité, c'est Game Over.
+  // ── Spectrum ──────────────────────────────────────────────────────────────
+  // Le tas ne change qu'au verrouillage ou à la réception d'une pénalité :
+  // c'est le seul endroit d'où le spectrum peut bouger, on le publie donc ici.
   useEffect(() => {
-    if (!isPlaying || !board) return;
+    if (!isPlaying || !board || clearingRef.current) return;
     emitUpdateSpectrum(roomRef.current, computeSpectrum(board));
-    if (piece && !isValidPosition(board, piece.shape, piece.x, piece.y)) {
+  }, [board, isPlaying]);
+
+  // ── Check de mort ─────────────────────────────────────────────────────────
+  // La pièce est dans les deux dépendances : une pénalité change le plateau ET
+  // remonte la pièce, et lire l'une avec l'autre périmée donnait des morts
+  // fantômes. Une pièce valide traverse ce test sans rien coûter.
+  useEffect(() => {
+    if (!isPlaying || !board || !piece || !piece.shape) return;
+    if (!isValidPosition(board, piece.shape, piece.x, piece.y)) {
       dispatch(playerDied());
       emitPlayerDead(roomRef.current);
     }
-  }, [board]); // Uniquement quand le board change (lock, pénalités)
+  }, [board, piece, isPlaying, dispatch]);
 
-  // ── Spawning Prédictif ──────────────────────────────────────────────────
-  const spawnNextPiece = useCallback(() => {
+  // ── Spawn de la pièce suivante ────────────────────────────────────────────
+  /**
+   * @param {number[][]} [boardOverride]  plateau à jour — les refs ne sont
+   *   synchronisées qu'après le commit React, or on spawne dans le même tour
+   *   que le verrouillage qui vient de modifier le tas.
+   * @returns {boolean}  false si la pièce n'a pas la place d'apparaître
+   */
+  const spawnNextPiece = useCallback((boardOverride) => {
     const type = nextTypeRef.current;
-    const currentBoard = boardRef.current;
-    if (!type || !currentBoard) return;
+    const currentBoard = boardOverride || boardRef.current;
+    if (!type || !currentBoard) return false;
 
-    const newPieceLocal = {
+    const spawned = {
       type,
       shape: PIECES[type].shape,
       x: SPAWN_X[type],
       y: SPAWN_Y,
+      rot: 0,
     };
 
-    // Check death on spawn
-    if (
-      !isValidPosition(
-        currentBoard,
-        newPieceLocal.shape,
-        newPieceLocal.x,
-        newPieceLocal.y,
-      )
-    ) {
+    if (!isValidPosition(currentBoard, spawned.shape, spawned.x, spawned.y)) {
       dispatch(playerDied());
       emitPlayerDead(roomRef.current);
-      return;
+      return false;
     }
 
-    dispatch({ type: "SET_PIECE", payload: newPieceLocal });
-    dispatch({ type: "SET_PLAYER", payload: { canHold: true } });
+    softDropRef.current = 0;
+    rotatedLastRef.current = false;
+    setSpawnSeq((n) => n + 1);
+
+    dispatch({ type: "SET_PIECE", payload: spawned });
+    dispatch(setPlayer({ canHold: true }));
     emitRequestNextPiece(roomRef.current);
+    return true;
   }, [dispatch]);
 
   // ── Lock piece ────────────────────────────────────────────────────────────
-  const lockPiece = useCallback(() => {
-    const currentPiece = pieceRef.current;
+  /**
+   * @param {object} [override]   pièce à verrouiller — le hard drop la connaît
+   *   avant que Redux ne l'ait propagée jusqu'aux refs.
+   * @param {number} [hardCells]  rangées franchies en hard drop, si c'en est un
+   */
+  const lockPiece = useCallback((override, hardCells) => {
+    const currentPiece = override || pieceRef.current;
     const currentBoard = boardRef.current;
     if (!currentPiece || !currentPiece.shape || !currentBoard) return;
 
     clearLockTimeout();
     moveResetsRef.current = 0;
 
-    // Animation Lock Flash
-    const pieceCells = [];
     const { shape, x, y, type } = currentPiece;
+
+    // Animation Lock Flash — le tableau est neuf à chaque appel, l'effet de
+    // Board.jsx repart donc même pour deux verrouillages identiques.
+    const pieceCells = [];
     shape.forEach((row, ri) => {
       row.forEach((cell, ci) => {
         if (cell !== 0) pieceCells.push({ x: x + ci, y: y + ri });
       });
     });
     setLockingCells(pieceCells);
-    setTimeout(() => setLockingCells([]), 150);
+
+    const tSpin = rotatedLastRef.current && isTSpin(currentBoard, currentPiece);
 
     const colorIndex = TYPE_TO_COLOR_INDEX[type];
-    const newBoard = placePiece(currentBoard, shape, x, y, colorIndex);
-    const { newBoard: clearedBoard, linesCleared, clearedIndexes } = clearLines(
-      newBoard,
+    const placed = placePiece(currentBoard, shape, x, y, colorIndex);
+    const { newBoard: cleared, linesCleared, clearedIndexes } = clearLines(
+      placed,
     );
 
+    const isHard = hardCells !== undefined;
+    emitPieceLocked(roomRef.current, {
+      lines: linesCleared,
+      tSpin,
+      dropCells: isHard ? hardCells : softDropRef.current,
+      hardDrop: isHard,
+    });
+
     if (linesCleared > 0) {
+      dispatch(setPlayer({ lines: linesRef.current + linesCleared }));
+      clearingRef.current = true;
       setClearingRows(clearedIndexes);
-      dispatch(setBoard(newBoard));
+      dispatch(setBoard(placed));
       dispatch({ type: "SET_PIECE", payload: null });
-      setTimeout(() => {
+      clearTimerRef.current = setTimeout(() => {
+        clearingRef.current = false;
         setClearingRows([]);
-        dispatch(setBoard(clearedBoard));
-        emitLinesCleared(roomRef.current, linesCleared);
-        spawnNextPiece();
-      }, 300);
+        dispatch(setBoard(cleared));
+        spawnNextPiece(cleared);
+      }, CLEAR_ANIM_MS);
     } else {
-      dispatch(setBoard(newBoard));
-      spawnNextPiece();
+      dispatch(setBoard(placed));
+      spawnNextPiece(placed);
     }
   }, [dispatch, clearLockTimeout, spawnNextPiece]);
 
@@ -329,6 +388,7 @@ const Game = () => {
       isValidPosition(currentBoard, currentPiece.shape, currentPiece.x, nextY)
     ) {
       dispatch({ type: "SET_PIECE", payload: { ...currentPiece, y: nextY } });
+      rotatedLastRef.current = false;
       clearLockTimeout();
       moveResetsRef.current = 0;
     } else {
@@ -336,52 +396,37 @@ const Game = () => {
     }
   }, [dispatch, requestLock, clearLockTimeout]);
 
-  useGameLoop(isPlaying, TICK_INTERVAL, onTick);
+  useGameLoop(isPlaying, gravityMs(level), onTick, spawnSeq);
 
   // ── Handlers clavier ─────────────────────────────────────────────────────
-  const moveLeft = useCallback(() => {
+  const move = useCallback((dx) => {
     const p = pieceRef.current;
     const b = boardRef.current;
     if (!p || !b) return;
-    if (isValidPosition(b, p.shape, p.x - 1, p.y)) {
-      const updated = { ...p, x: p.x - 1 };
+    if (isValidPosition(b, p.shape, p.x + dx, p.y)) {
+      const updated = { ...p, x: p.x + dx };
+      rotatedLastRef.current = false;
       dispatch({ type: "SET_PIECE", payload: updated });
       handleMoveReset(updated);
     }
   }, [dispatch, handleMoveReset]);
 
-  const moveRight = useCallback(() => {
+  const moveLeft = useCallback(() => move(-1), [move]);
+  const moveRight = useCallback(() => move(1), [move]);
+
+  const rotate = useCallback((dir) => {
     const p = pieceRef.current;
     const b = boardRef.current;
     if (!p || !b) return;
-    if (isValidPosition(b, p.shape, p.x + 1, p.y)) {
-      const updated = { ...p, x: p.x + 1 };
-      dispatch({ type: "SET_PIECE", payload: updated });
-      handleMoveReset(updated);
-    }
+    const updated = rotatePiece(b, p, dir);
+    if (!updated) return; // aucun des cinq kicks ne passe
+    rotatedLastRef.current = true;
+    dispatch({ type: "SET_PIECE", payload: updated });
+    handleMoveReset(updated);
   }, [dispatch, handleMoveReset]);
 
-  const rotate = useCallback(() => {
-    const p = pieceRef.current;
-    const b = boardRef.current;
-    if (!p || !b) return;
-    const { shape } = p;
-    const cols = shape[0].length;
-    const rows = shape.length;
-    const rotated = Array.from(
-      { length: cols },
-      (_, c) => Array.from({ length: rows }, (_, r) => shape[rows - 1 - r][c]),
-    );
-    const kicks = [0, -1, 1, -2, 2];
-    for (const kick of kicks) {
-      if (isValidPosition(b, rotated, p.x + kick, p.y)) {
-        const updated = { ...p, shape: rotated, x: p.x + kick };
-        dispatch({ type: "SET_PIECE", payload: updated });
-        handleMoveReset(updated);
-        break;
-      }
-    }
-  }, [dispatch, handleMoveReset]);
+  const rotateCW = useCallback(() => rotate(1), [rotate]);
+  const rotateCCW = useCallback(() => rotate(-1), [rotate]);
 
   const softDrop = useCallback(() => {
     const p = pieceRef.current;
@@ -389,6 +434,8 @@ const Game = () => {
     if (!p || !b) return;
     const nextY = p.y + 1;
     if (isValidPosition(b, p.shape, p.x, nextY)) {
+      softDropRef.current += 1;
+      rotatedLastRef.current = false;
       dispatch({ type: "SET_PIECE", payload: { ...p, y: nextY } });
       clearLockTimeout();
     } else {
@@ -413,9 +460,12 @@ const Game = () => {
       );
     }
 
-    dispatch({ type: "SET_PIECE", payload: { ...p, y: finalY } });
-    // Donne un tick pour que le state se mette à jour, puis lock
-    setTimeout(() => lockPiece(), 0);
+    const dropped = { ...p, y: finalY };
+    dispatch({ type: "SET_PIECE", payload: dropped });
+    // La pièce est passée en argument, pas relue dans une ref : attendre que
+    // Redux ait propagé la nouvelle position, c'est parier sur l'ordre entre le
+    // scheduler React et le prochain macrotask — et perdre parfois.
+    lockPiece(dropped, finalY - p.y);
   }, [dispatch, lockPiece]);
 
   const holdPiece = useCallback(() => {
@@ -424,42 +474,35 @@ const Game = () => {
     if (!p || !b || !canHoldRef.current) return;
 
     if (!holdTypeRef.current) {
-      dispatch({
-        type: "SET_PLAYER",
-        payload: { holdPieceType: p.type, canHold: false },
-      });
-      dispatch({ type: "SET_PIECE", payload: null });
-      emitRequestNextPiece(roomRef.current);
-    } else {
-      const nextType = holdTypeRef.current;
-      const newPieceLocal = {
-        type: nextType,
-        shape: PIECES[nextType].shape,
-        x: SPAWN_X[nextType],
-        y: SPAWN_Y,
-      };
-
-      // Check death on hold swap
-      if (
-        !isValidPosition(
-          b,
-          newPieceLocal.shape,
-          newPieceLocal.x,
-          newPieceLocal.y,
-        )
-      ) {
-        dispatch(playerDied());
-        emitPlayerDead(roomRef.current);
-        return;
+      // Réserve vide : on prend la pièce d'aperçu tout de suite, localement.
+      // Passer par le serveur ferait attendre un aller-retour au joueur.
+      if (spawnNextPiece(b)) {
+        dispatch(setPlayer({ holdPieceType: p.type, canHold: false }));
       }
-
-      dispatch({
-        type: "SET_PLAYER",
-        payload: { holdPieceType: p.type, canHold: false },
-      });
-      dispatch({ type: "SET_PIECE", payload: newPieceLocal });
+      return;
     }
-  }, [dispatch]);
+
+    const nextType = holdTypeRef.current;
+    const swapped = {
+      type: nextType,
+      shape: PIECES[nextType].shape,
+      x: SPAWN_X[nextType],
+      y: SPAWN_Y,
+      rot: 0,
+    };
+
+    if (!isValidPosition(b, swapped.shape, swapped.x, swapped.y)) {
+      dispatch(playerDied());
+      emitPlayerDead(roomRef.current);
+      return;
+    }
+
+    softDropRef.current = 0;
+    rotatedLastRef.current = false;
+    setSpawnSeq((n) => n + 1);
+    dispatch(setPlayer({ holdPieceType: p.type, canHold: false }));
+    dispatch({ type: "SET_PIECE", payload: swapped });
+  }, [dispatch, spawnNextPiece]);
 
   // ── Clavier avec DAS ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -497,8 +540,15 @@ const Game = () => {
           startDAS("down", softDrop);
           break;
         case "ArrowUp":
+        case "x":
+        case "X":
           e.preventDefault();
-          rotate();
+          rotateCW();
+          break;
+        case "z":
+        case "Z":
+          e.preventDefault();
+          rotateCCW();
           break;
         case " ":
           e.preventDefault();
@@ -540,7 +590,16 @@ const Game = () => {
         clearInterval(t);
       });
     };
-  }, [isPlaying, moveLeft, moveRight, rotate, softDrop, hardDrop, holdPiece]);
+  }, [
+    isPlaying,
+    moveLeft,
+    moveRight,
+    rotateCW,
+    rotateCCW,
+    softDrop,
+    hardDrop,
+    holdPiece,
+  ]);
 
   // ── Rendu ─────────────────────────────────────────────────────────────────
   if (over) return <GameOver />;
@@ -554,11 +613,10 @@ const Game = () => {
       {
         /* Le puits en premier dans le DOM à toutes les tailles : les zones de
           grille le replacent au centre en large, et un lecteur d'écran comme un
-          écran étroit commencent par ce qui porte la partie. Le score le
-          surmonte solo comme multi — une seule position à retrouver. */
+          écran étroit commencent par ce qui porte la partie. */
       }
       <section className="game-stage">
-        <ScorePanel />
+        <ScorePanel level={level} lines={lines} />
         <Board
           clearingRows={clearingRows}
           lockingCells={lockingCells}

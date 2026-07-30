@@ -67,14 +67,6 @@ describe("socket.js — Emitters", () => {
     expect(mockEmitFn).toHaveBeenCalledWith("startGame", { room: "room1" });
   });
 
-  it("emitAction", () => {
-    sock.emitAction("room1", { type: "move" });
-    expect(mockEmitFn).toHaveBeenCalledWith("playerAction", {
-      room: "room1",
-      action: { type: "move" },
-    });
-  });
-
   it("emitPlayerDead", () => {
     sock.emitPlayerDead("room1");
     expect(mockEmitFn).toHaveBeenCalledWith("playerDead", { room: "room1" });
@@ -85,11 +77,19 @@ describe("socket.js — Emitters", () => {
     expect(mockEmitFn).toHaveBeenCalledWith("leaveGame", { room: "room1" });
   });
 
-  it("emitLinesCleared", () => {
-    sock.emitLinesCleared("room1", 3);
-    expect(mockEmitFn).toHaveBeenCalledWith("linesCleared", {
+  it("emitPieceLocked", () => {
+    sock.emitPieceLocked("room1", {
+      lines: 3,
+      tSpin: false,
+      dropCells: 5,
+      hardDrop: true,
+    });
+    expect(mockEmitFn).toHaveBeenCalledWith("pieceLocked", {
       room: "room1",
-      linesCleared: 3,
+      lines: 3,
+      tSpin: false,
+      dropCells: 5,
+      hardDrop: true,
     });
   });
 

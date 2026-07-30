@@ -2,8 +2,12 @@
 // src/client/reducers/player.js
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { addPenaltyLines, createEmptyBoard } from "../../shared/gameLogic";
-import { PIECES } from "../../shared/constants";
+import {
+  addPenaltyLines,
+  createEmptyBoard,
+  liftPiece,
+} from "../../shared/gameLogic";
+import { PIECES, SPAWN_X, SPAWN_Y } from "../../shared/constants";
 import {
   ADD_PENALTY,
   NEW_PIECE,
@@ -22,10 +26,11 @@ const initialState = {
   isHost: false,
   isAlive: true,
   board: createEmptyBoard(),
-  currentPiece: null, // { type, shape, x, y }
+  currentPiece: null, // { type, shape, x, y, rot }
   nextPieceType: null,
   holdPieceType: null,
   canHold: true,
+  lines: 0, // total effacé cette manche — pilote le niveau et donc la gravité
   // Dernière pénalité reçue — lue par la région live de Game.jsx.
   // penaltySeq incrémente à chaque pénalité pour distinguer deux fois "2 lignes".
   penaltyLines: 0,
@@ -43,39 +48,40 @@ const playerReducer = (state = initialState, action) => {
     // Dispatché directement par Game.jsx (mouvement, rotation, descente)
     case SET_PIECE:
       return { ...state, currentPiece: action.payload };
+
     case NEW_PIECE: {
       const { piece, nextPiece } = action.payload;
-      const nextPieceState = nextPiece ? { type: nextPiece.type } : null;
+      const nextType = nextPiece ? nextPiece.type : null;
 
-      // Si on a déjà une pièce (Predictive spawning / Fast move), on n'écrase pas.
-      // Mais on met TOUJOURS à jour la preview (nextPieceType).
-      if (state.currentPiece) {
-        return {
-          ...state,
-          nextPieceType: nextPieceState ? nextPieceState.type : null,
-        };
-      }
+      // Si on a déjà une pièce (spawn prédictif côté client), on n'écrase pas.
+      // Mais on met TOUJOURS à jour la preview.
+      if (state.currentPiece) return { ...state, nextPieceType: nextType };
 
-      const newPieceState = {
-        type: piece.type,
-        shape: piece.shape ||
-          (PIECES[piece.type] ? PIECES[piece.type].shape : null),
-        x: piece.spawnX,
-        y: piece.spawnY,
-      };
+      const definition = PIECES[piece.type];
       return {
         ...state,
-        currentPiece: newPieceState,
-        nextPieceType: nextPieceState ? nextPieceState.type : null,
+        currentPiece: {
+          type: piece.type,
+          shape: piece.shape || (definition ? definition.shape : null),
+          x: piece.spawnX !== undefined ? piece.spawnX : SPAWN_X[piece.type],
+          y: piece.spawnY !== undefined ? piece.spawnY : SPAWN_Y,
+          rot: 0,
+        },
+        nextPieceType: nextType,
       };
     }
 
     case ADD_PENALTY: {
-      const newBoard = addPenaltyLines(state.board, action.payload);
+      const n = action.payload;
+      const board = addPenaltyLines(state.board, n);
       return {
         ...state,
-        board: newBoard,
-        penaltyLines: action.payload,
+        board,
+        // Le sol monte de n rangées : la pièce en cours monte avec lui. Sans ça
+        // elle se retrouve DANS le tas et le check de mort de Game.jsx la
+        // déclare perdue alors qu'elle n'a rien fait.
+        currentPiece: liftPiece(board, state.currentPiece, n),
+        penaltyLines: n,
         penaltySeq: state.penaltySeq + 1,
       };
     }
@@ -93,7 +99,6 @@ const playerReducer = (state = initialState, action) => {
         name: state.name,
         isHost: state.isHost,
         board: createEmptyBoard(),
-        canHold: true,
       };
 
     default:

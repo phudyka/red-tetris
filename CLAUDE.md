@@ -36,18 +36,26 @@ Contre-intuitif mais central : **toute la simulation tourne côté client**. Le
 serveur ne fait jamais tomber de pièce, ne valide aucun mouvement, ne détecte
 aucune mort. Il est un distributeur de pièces + relais d'événements.
 
-- Le serveur génère à `Game.start()` une séquence commune de 500 index de pièces
-  (`game.pieces`) ; chaque joueur avance son propre curseur `player.pieceIndex`
-  → même séquence pour tous, à des rythmes différents (exigence du sujet).
+- Le serveur génère à `Game.start()` une séquence commune de pièces
+  (`game.pieces`, sacs de 7 complets, ≥ 500) ; chaque joueur avance son propre
+  curseur `player.pieceIndex` → même séquence pour tous, à des rythmes
+  différents (exigence du sujet).
 - Le client applique collision/rotation/lock/clear localement via
   `src/shared/gameLogic.js`, puis **déclare** le résultat au serveur
-  (`linesCleared`, `playerDead`, `updateSpectrum`).
+  (`pieceLocked`, `playerDead`, `updateSpectrum`).
 - Le serveur n'arbitre que : pénalités (`n-1` lignes aux autres vivants), score,
   condition de victoire, host.
-- `playerAction` est un no-op conservé pour compat protocole.
+
+`pieceLocked` part à **chaque** verrouillage, effacement ou non : le serveur a
+besoin du flux complet pour tenir le combo (qu'une pièce posée à vide remet à
+zéro) et le back-to-back. Tout ce qui rapporte des points y est borné avant
+d'entrer dans l'état (`validation.js` : lignes ≤ 4, descente ≤ 20).
 
 Conséquence : `player.board`/`x`/`y` côté serveur ne sont pas la vérité du jeu —
-seuls `isAlive`, `score`, `pieceIndex` et `isHost` comptent.
+seuls `isAlive`, `score`, `lines`, `level`, `combo`, `b2b`, `pieceIndex` et
+`isHost` comptent. Le **niveau est calculé des deux côtés** par la même fonction
+pure `levelForLines` : le client en a besoin tout de suite pour la gravité, un
+aller-retour serveur ferait tomber la pièce au mauvais rythme.
 
 Les adversaires ne voient **que** nom + spectrum (exigence du sujet) : aucun
 board complet ne transite. Le spectrum est publié depuis l'effet `[board]` de
@@ -65,7 +73,7 @@ silencieusement.
 
 ### Protocole socket.io
 
-Client → serveur : `joinGame`, `startGame`, `playerDead`, `linesCleared`,
+Client → serveur : `joinGame`, `startGame`, `playerDead`, `pieceLocked`,
 `requestNextPiece`, `updateSpectrum`, `leaveGame`. Serveur → client :
 `gameJoined`, `playerJoined`, `playerLeft`, `gameStarted`, `newPiece`,
 `addPenalty`, `updateSpectrum`, `opponentDead`, `score:update`,
@@ -92,16 +100,62 @@ en constante locale dans `reducers/player.js` — contournement d'import
 circulaire, ne pas « corriger » en important depuis `actions/player.js` sans
 vérifier le cycle.
 
+### Règles de jeu (Tetris Guideline)
+
+- **Boîtes SRS** : `PIECES` définit le I en 4×4, le O en 2×2, les cinq autres en
+  3×3. La boîte n'est pas un détail de stockage, c'est le centre de rotation —
+  les tables de kicks la supposent. Ne pas « resserrer » une shape.
+- **Rotation** : `rotatePiece(board, piece, dir)` essaie les cinq positions de
+  `getKicks(type, from, to)` et renvoie `null` si aucune ne passe. La pièce
+  porte son orientation dans `piece.rot` (0-3).
+- **7-bag** : `generatePieceSequence(n)` rend des sacs de 7 complets — d'où une
+  longueur arrondie au sac supérieur, pour que deux segments concaténés par
+  `Game.ensureSequence` ne coupent jamais un sac en deux.
+- **Gravité** : `gravityMs(levelForLines(lines))`, formule de la Guideline,
+  plancher à 16 ms. Le `resetKey` de `useGameLoop` fait repartir l'intervalle à
+  chaque spawn.
+- **T-spin** : `isTSpin` applique la règle des trois coins ; le complément (« le
+  dernier mouvement était une rotation ») vit dans `rotatedLastRef` de
+  `Game.jsx`. Toute action qui déplace la pièce doit remettre ce drapeau à faux.
+
 ### Game.jsx
 
-Concentre la boucle de jeu, le DAS clavier, le lock delay et les trois checks de
-mort (spawn, hold swap, board modifié par pénalité). Le state Redux est mirroré
+Concentre la boucle de jeu, le DAS clavier, le lock delay et les checks de mort
+(spawn, hold swap, plateau modifié par pénalité). Le state Redux est mirroré
 dans des refs (`boardRef`, `pieceRef`…) parce que les timers (`setInterval`,
 `setTimeout` du lock delay, intervals DAS) captureraient sinon des closures
 périmées. Toute nouvelle valeur lue dans un timer doit passer par une ref.
 
+Deux pièges déjà payés, à ne pas réintroduire :
+
+- **Ne pas relire une ref qu'on vient de dispatcher.** `hardDrop` passe la pièce
+  descendue en argument à `lockPiece`, et `lockPiece` passe le plateau modifié à
+  `spawnNextPiece` : les refs ne sont synchronisées qu'après le commit React, et
+  parier sur l'ordre entre le scheduler et un `setTimeout(0)`, c'est perdre
+  parfois.
+- **Une pénalité remonte le tas ET la pièce en cours** (`liftPiece`, dans le
+  reducer `ADD_PENALTY`). Le check de mort dépend de `[board, piece]` ensemble ;
+  lire l'un avec l'autre périmé donnait des morts fantômes.
+
 `useKeyboard.js` existe mais n'est plus branché : `Game.jsx` gère le clavier en
 interne pour supporter le DAS.
+
+### Design system
+
+Direction **brutalist arcade** : fond charbon uni, blocs strictement plats,
+angles droits (`--radius: 0`), bordures nettes, hiérarchie portée par la taille
+et la graisse — jamais par une ombre ou un dégradé. Aucune police distante : la
+pile système (`--font-ui`, `--font-mono`) porte toute la typographie.
+
+Tout passe par les tokens en tête de `global.css` : surfaces (`--surface-*`),
+traits (`--line*`), encre (`--ink-*`, contrastes mesurés sur `--bg`), échelle
+typographique (`--text-*`), espacement (`--space-*`). Aucune valeur en dur dans
+une règle — une taille ou une couleur qui manque se rajoute au token set, pas
+dans le sélecteur.
+
+`--accent` (rouge) est réservé au danger : pénalité, éliminé, refus serveur. Le
+bouton primaire est blanc — un bouton rouge à côté d'un tétromino Z rouge dirait
+la même chose sans le même sens.
 
 ### Serveur
 

@@ -1,23 +1,72 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // src/server/scoreLogic.js — Fonctions pures de score et leaderboard
-// Utilisées par index.js — Testables unitairement
+// Barème de la Tetris Guideline. Utilisées par index.js — testables unitairement.
 // ─────────────────────────────────────────────────────────────────────────────
 
+const LINE_SCORES = { 1: 100, 2: 300, 3: 500, 4: 800 };
+// Un T-spin rapporte plus qu'un effacement classique du même nombre de lignes —
+// y compris à zéro ligne, où c'est la seule chose qui récompense le placement.
+const TSPIN_SCORES = { 0: 400, 1: 800, 2: 1200, 3: 1600 };
+
 /**
- * Calcule le score pour un nombre de lignes effacées (règle Tetris classique).
- * @param {number} linesCleared
+ * Score de base d'un effacement, multiplié par le niveau.
+ * @param {number}  linesCleared
+ * @param {number} [level]  1 par défaut
+ * @param {boolean} [tSpin]
  * @returns {number}
  */
-const calcScore = (linesCleared) => {
-  const table = { 1: 100, 2: 300, 3: 500, 4: 800 };
-  return table[linesCleared] || 0;
+const calcScore = (linesCleared, level = 1, tSpin = false) => {
+  const table = tSpin ? TSPIN_SCORES : LINE_SCORES;
+  const base = table[linesCleared];
+  return base ? base * Math.max(1, level) : 0;
 };
+
+/**
+ * Bonus de combo : 50 × combo × niveau à partir du deuxième effacement
+ * consécutif. `combo` est le compteur du joueur APRÈS incrément (0 = premier
+ * effacement de la série, donc aucun bonus).
+ * @param {number} combo
+ * @param {number} [level]
+ * @returns {number}
+ */
+const comboScore = (combo, level = 1) =>
+  combo > 0 ? 50 * combo * Math.max(1, level) : 0;
+
+/**
+ * Points de descente : 1 par rangée en soft drop, 2 en hard drop.
+ * @param {number}  cells
+ * @param {boolean} [hard]
+ * @returns {number}
+ */
+const dropScore = (cells, hard = false) => {
+  const n = Math.trunc(Number(cells));
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return n * (hard ? 2 : 1);
+};
+
+/**
+ * Un effacement est « difficile » — donc éligible au back-to-back — s'il vide
+ * quatre lignes d'un coup ou s'il vient d'un T-spin. Deux difficiles à la suite
+ * valent 1,5× ; une ligne simple entre les deux casse la chaîne.
+ * @param {number}  linesCleared
+ * @param {boolean} tSpin
+ * @returns {boolean}
+ */
+const isDifficultClear = (linesCleared, tSpin) =>
+  linesCleared >= 4 || (tSpin && linesCleared > 0);
+
+/**
+ * Applique le multiplicateur back-to-back.
+ * @param {number}  score
+ * @param {boolean} active  chaîne déjà en cours avant cet effacement
+ * @returns {number}
+ */
+const applyBackToBack = (score, active) =>
+  active ? Math.round(score * 1.5) : score;
 
 /**
  * Met à jour le leaderboard en mémoire (Map<string, number>).
  * Ne met à jour que si le nouveau score est supérieur au précédent.
- * Fonction pure — prend la Map en entrée et la mutate, retourne la Map.
- * (la Map est passée par référence — comportement attendu côté serveur)
  * @param {Map<string, number>} leaderboardMap
  * @param {string} playerName
  * @param {number} newScore
@@ -43,4 +92,12 @@ const getLeaderboardArray = (leaderboardMap) => {
     .slice(0, 10);
 };
 
-module.exports = { calcScore, updateLeaderboard, getLeaderboardArray };
+module.exports = {
+  calcScore,
+  comboScore,
+  dropScore,
+  isDifficultClear,
+  applyBackToBack,
+  updateLeaderboard,
+  getLeaderboardArray,
+};

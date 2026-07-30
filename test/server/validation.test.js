@@ -1,6 +1,7 @@
 const {
   isValidLabel,
   clampLinesCleared,
+  clampDropCells,
   MAX_LABEL_LENGTH,
 } = require("../../src/server/validation");
 
@@ -45,6 +46,21 @@ describe("validation", () => {
       // nombre de lignes du tout, ils ne rapportent rien et ne punissent personne.
       expect(clampLinesCleared(Infinity)).toBe(0);
       expect(clampLinesCleared(NaN)).toBe(0);
+    });
+  });
+
+  describe("clampDropCells", () => {
+    it("laisse passer une descente plausible", () => {
+      expect(clampDropCells(0)).toBe(0);
+      expect(clampDropCells(19)).toBe(19);
+    });
+
+    it("borne à la hauteur du plateau — la distance vaut des points", () => {
+      expect(clampDropCells(9999)).toBe(20);
+      expect(clampDropCells(-4)).toBe(0);
+      expect(clampDropCells("boom")).toBe(0);
+      expect(clampDropCells(Infinity)).toBe(0);
+      expect(clampDropCells(undefined)).toBe(0);
     });
   });
 });
