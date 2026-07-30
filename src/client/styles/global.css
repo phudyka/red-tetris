@@ -11,14 +11,18 @@
   --bg-gradient-start: #c9aaff;
   --bg-gradient-end: #f7aaee;
 
-  /* Pièces Tetris — couleurs d'objet, jamais de texte */
-  --block-I: #3fe8e8;
-  --block-O: #f5a623;
+  /* Pièces Tetris — couleurs d'objet, jamais de texte.
+     Teintes canoniques de la planche du sujet (p.6) : I cyan, O jaune,
+     T violet, S vert, Z rouge, J bleu, L orange. Contrainte de lisibilité
+     qui prime sur la fidélité : aucune pièce ne doit tirer vers le gris de
+     pénalité, sinon un bloc posé se confond avec une ligne indestructible. */
+  --block-I: #14b8c4;
+  --block-O: #e8b109;
   --block-T: #9b3fe8;
-  --block-S: #5ae87a;
-  --block-Z: #f54848;
-  --block-J: #f548a0;
-  --block-L: #c8c8d4;
+  --block-S: #3fbf5a;
+  --block-Z: #e23b3b;
+  --block-J: #2f66d8;
+  --block-L: #ef8b17;
   --block-penalty: #9a98a8;
   --block-penalty-light: #c8c8d4;
 
@@ -34,9 +38,28 @@
   --bg-card: rgba(255, 255, 255, 0.18);
   --border: rgba(255, 255, 255, 0.35);
 
-  /* Board */
-  --cell-size: 30px;
-  --mini-cell: 12px;
+  /* Échelle d'espacement, base 4. Les pas intermédiaires (12, 20, 28) manquent
+     à une échelle purement 8 et c'est là que se joue le contraste serré /
+     généreux entre l'intérieur d'un groupe et la séparation de deux groupes. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Board — le puits ne défile jamais.
+     Budget vertical hors plateau : bandeau de score (~80) + gouttière (12) +
+     padding/bordure du plateau (20) + padding de la page (48) + marge = 168px.
+     Le terme en vw garde les 10 colonnes dans la largeur sur mobile.
+     Première déclaration en vh : repli pour les moteurs sans dvh. */
+  --cell-size: min(30px, calc((100vh - 168px) / 20), calc((100vw - 40px) / 10));
+  --cell-size: min(
+    30px,
+    calc((100dvh - 168px) / 20),
+    calc((100vw - 40px) / 10)
+  );
   --radius: 6px;
   --transition: 0.15s ease;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -60,8 +83,22 @@ html, body {
   line-height: 1.5;
 }
 
+/* Deux voiles clairs par-dessus le dégradé : le fond gagne une source de
+   lumière au lieu d'une pente uniforme. Les deux voiles n'ajoutent que de la
+   luminance — assombrir le fond ferait tomber --text-muted sous 4.5:1. */
 body, #root {
-  background: linear-gradient(
+  background:
+    radial-gradient(
+      115% 85% at 12% 4%,
+      rgba(255, 255, 255, 0.5),
+      transparent 55%
+    ),
+    radial-gradient(
+    80% 60% at 88% 96%,
+    rgba(255, 222, 248, 0.55),
+    transparent 60%
+  ),
+    linear-gradient(
     135deg,
     var(--bg-gradient-start),
     var(--bg-gradient-end)
@@ -90,10 +127,14 @@ h1, h2, h3 {
 }
 
 /* ── Structure ───────────────────────────────────────────────────────────────── */
+/* Le centrage vertical vit ici et non sur .game-layout : la grille de jeu a une
+   rangée en 1fr (le rail droit doit pouvoir défiler), et un 1fr mange l'espace
+   libre qu'un align-content chercherait à répartir. */
 .app-main {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 /* Visible pour les lecteurs d'écran uniquement (régions live). */
@@ -124,6 +165,29 @@ h1, h2, h3 {
   font-family: "Orbitron", "Nunito", monospace;
   color: var(--text-muted);
   letter-spacing: 0.06em;
+}
+
+/* ── Bandeau d'état ──────────────────────────────────────────────────────────
+   Coupure réseau ou refus du serveur, annoncé par-dessus la partie et jamais à
+   sa place : le joueur garde son plateau sous les yeux. Fond opaque, pas de
+   verre — il doit rester lisible au-dessus de n'importe quel contenu. */
+.notice {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  max-width: min(90vw, 520px);
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1.5px solid #b81818;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  overflow-wrap: anywhere;
+  box-shadow: 0 6px 20px rgba(60, 25, 110, 0.25);
 }
 
 /* ── Panel glassmorphisme ────────────────────────────────────────────────────── */
@@ -198,28 +262,76 @@ h1, h2, h3 {
 }
 
 /* ── Board principal ──────────────────────────────────────────────────────────── */
+/* Grille à zones nommées plutôt qu'une rangée flex qui s'enroule : le puits
+   mène et reste premier dans le DOM à toutes les tailles, ce sont les zones qui
+   le replacent au centre en large et en tête en étroit. Une rangée flex avec
+   wrap imposait l'ordre inverse — les raccourcis clavier avant le plateau.
+   Deux rangées : les instruments (hold, next) collés au bord haut du puits,
+   la référence et les adversaires alignés sur son bord bas. */
 .game-layout {
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(0, 12.5rem) auto minmax(0, 13.5rem);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    "hold stage next"
+    "meta stage foes";
   justify-content: center;
-  gap: 24px;
-  padding: 2vw 1vw;
-  min-height: 100vh;
+  column-gap: var(--space-6);
+  row-gap: var(--space-8);
+  padding: var(--space-6) var(--space-4);
   width: 100%;
-  flex-wrap: wrap;
 }
 
-.game-column {
+/* Bandeau de score + puits : un seul objet, d'où la gouttière serrée face aux
+   24/32px qui séparent les groupes voisins. */
+.game-stage {
+  grid-area: stage;
+  align-self: start;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: var(--space-3);
 }
 
-.game-mode-hint {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  font-style: italic;
+.game-hold {
+  grid-area: hold;
+  align-self: start;
+  justify-self: end;
+}
+
+.game-next {
+  grid-area: next;
+  align-self: start;
+}
+
+/* Le rail des adversaires part du haut de sa rangée et défile chez lui :
+   à huit joueurs il ne doit pas allonger la page sous le puits. */
+.game-foes {
+  grid-area: foes;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+/* L'intertitre reste hors de la pile qui défile — sinon il disparaît au
+   premier scroll et la colonne n'a plus de nom. */
+.game-foes__group {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Référence (raccourcis, room) : posée sur le bord bas du puits, hors du champ
+   de jeu. C'est ce que `margin-top: auto` visait sans jamais l'obtenir — un
+   conteneur dimensionné par son contenu n'a pas d'espace libre à distribuer. */
+.game-meta {
+  grid-area: meta;
+  align-self: end;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
 /* Pas de backdrop-filter ici, contrairement aux autres panneaux : c'est
@@ -234,8 +346,113 @@ h1, h2, h3 {
   background: rgba(255, 255, 255, 0.18);
   border: 2px solid rgba(255, 255, 255, 0.45);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(100, 50, 180, 0.25);
+  /* L'ombre portée pose le plateau sur le fond ; l'ombre interne haute en fait
+     un puits dans lequel les pièces tombent, au lieu d'une simple grille. */
+  box-shadow:
+    0 8px 32px rgba(100, 50, 180, 0.25),
+    inset 0 10px 20px -8px rgba(60, 25, 110, 0.35);
   padding: 8px;
+  overflow: hidden;
+  /* Isole les 200 cellules du reste du document : une pièce qui descend ne peut
+     plus provoquer de calcul de mise en page hors du plateau. Crée aussi le
+     contexte d'empilement dont ::before a besoin pour passer sous les cellules. */
+  contain: layout paint;
+  transition: filter 0.5s var(--ease-out);
+}
+
+/* Éliminé : le puits se vide de sa couleur au lieu de se figer sans rien dire.
+   La partie continue à côté, ce plateau-là est fini — l'encre le dit. */
+.board--dead {
+  filter: grayscale(0.9) brightness(0.86);
+}
+
+/* Le quadrillage est peint par le puits, pas par 200 cellules vides bordées :
+   une seule boîte à peindre, et plus rien qui dépasse derrière les coins
+   arrondis de la pièce en cours. */
+.board::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.22) 0 1px,
+      transparent 1px var(--cell-size)
+    ),
+    repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.22) 0 1px,
+    transparent 1px var(--cell-size)
+  );
+}
+
+/* Flash de ligne effacée — un seul élément, jamais dans le flux de la grille.
+   Piloté depuis Board.jsx (Web Animations API) : l'intensité dit combien de
+   lignes sont parties, un Tetris ne peut pas se confondre avec un simple. */
+.board__flash {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Lueur de pénalité — la seule chose du jeu qui vienne du sol, et rouge quand
+   tout le reste est blanc : effacer une ligne et en encaisser trois ne peuvent
+   pas se ressembler. */
+.board__surge {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    to top,
+    rgba(210, 30, 60, 0.72),
+    rgba(210, 30, 60, 0.18) 22%,
+    transparent 48%
+  );
+}
+
+.board--penalty .board__surge {
+  animation: surge 0.4s var(--ease-out);
+}
+
+@keyframes surge {
+  0% {
+    opacity: 0;
+  }
+  16% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Sillage du hard drop — une bande par colonne traversée, placée dans la grille
+   du puits comme les cellules. Sort plus vite qu'elle n'entre : la pièce est
+   déjà posée, la trace n'a rien à faire attendre. */
+.drop-trail {
+  pointer-events: none;
+  border-radius: 4px;
+  transform-origin: bottom;
+  background: linear-gradient(to bottom, transparent, var(--tint));
+  animation: dropTrail 0.22s var(--ease-out) both;
+}
+
+@keyframes dropTrail {
+  from {
+    opacity: 0.5;
+    transform: scaleY(1);
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0.88);
+  }
 }
 
 /* ── Cellules ────────────────────────────────────────────────────────────────── */
@@ -248,6 +465,14 @@ h1, h2, h3 {
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Dans le puits, rien à peindre : la case vide n'est plus qu'un emplacement de
+   grille, le quadrillage vient de .board::before. Les aperçus Next/Hold gardent
+   leur lattice, eux ne se repeignent pas à 30 Hz. */
+.board .cell--empty {
+  background: none;
+  border: none;
 }
 
 .cell--ghost {
@@ -286,17 +511,17 @@ h1, h2, h3 {
 .cell--I {
   background: radial-gradient(
     circle at 35% 35%,
-    #7bf5f5,
+    #6fe6ee,
     var(--block-I) 60%,
-    #1db8b8
+    #0a828b
   );
 }
 .cell--O {
   background: radial-gradient(
     circle at 35% 35%,
-    #fdd07a,
+    #ffdb63,
     var(--block-O) 60%,
-    #c97e0a
+    #a37a00
   );
 }
 .cell--T {
@@ -310,33 +535,33 @@ h1, h2, h3 {
 .cell--S {
   background: radial-gradient(
     circle at 35% 35%,
-    #90f5a8,
+    #7fe094,
     var(--block-S) 60%,
-    #28a045
+    #22803a
   );
 }
 .cell--Z {
   background: radial-gradient(
     circle at 35% 35%,
-    #ff9292,
+    #f58585,
     var(--block-Z) 60%,
-    #b81818
+    #9c2020
   );
 }
 .cell--J {
   background: radial-gradient(
     circle at 35% 35%,
-    #ff8fcb,
+    #7ba3f2,
     var(--block-J) 60%,
-    #b81878
+    #16408f
   );
 }
 .cell--L {
   background: radial-gradient(
     circle at 35% 35%,
-    #e8e8f0,
+    #ffb865,
     var(--block-L) 60%,
-    #8888a0
+    #a35700
   );
 }
 
@@ -347,6 +572,25 @@ h1, h2, h3 {
 /* État "active" — brillant */
 .cell--active {
   filter: brightness(1.08);
+}
+
+/* Pénalité reçue : le tas ne se téléporte pas d'un cran vers le haut, il est
+   poussé. Chaque cellule pleine part de `--rise` rangées plus bas — la même
+   distance pour toutes, c'est un seul mouvement — et les rangées
+   indestructibles arrivent, elles, de sous le plancher (le puits les rogne).
+   Seules les cases pleines portent la classe : une case vide ne peint rien,
+   l'animer coûterait 200 calques pour rien. */
+.cell--rising {
+  animation: penaltyRise 0.3s var(--ease-out) both;
+}
+
+@keyframes penaltyRise {
+  from {
+    transform: translate3d(0, calc(var(--rise, 0) * 100%), 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 /* ── Particules de destruction de ligne ─────────────────────────────────────── */
@@ -416,40 +660,30 @@ h1, h2, h3 {
   }
 }
 
-/* ── Game sidebar ────────────────────────────────────────────────────────────── */
-.game-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 160px;
-  max-width: 200px;
-}
-
-.game-sidebar__title {
+/* ── Intertitre ──────────────────────────────────────────────────────────────── */
+/* Une seule section du jeu en porte un : « Opponents ». Hold, Next et les
+   raccourcis se lisent sans qu'on les annonce ; un intertitre au-dessus de
+   chaque groupe donne cinq titres de même poids et plus aucune hiérarchie. */
+.eyebrow {
   font-size: 0.7rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.game-sidebar__footer {
-  margin-top: auto;
+  margin-bottom: var(--space-1);
 }
 
 /* ── Aide-mémoire clavier ────────────────────────────────────────────────────── */
 .controls {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 20px;
+  gap: var(--space-1);
 }
 
 .controls__row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .controls__keys {
@@ -479,17 +713,46 @@ h1, h2, h3 {
   margin: 0;
 }
 
-.game-sidebar__footer-name {
+/* Room et mode : deux faits, pas deux sections. Une paire clé/valeur en ligne
+   remplace deux intertitres empilés et rend 40px au puits. */
+.game-meta__facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.game-meta__fact {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.game-meta__key {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.game-meta__value {
   font-family: "Orbitron", "Nunito", monospace;
   font-size: 0.85rem;
   color: var(--ink-accent);
   font-weight: 800;
   overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 /* ── Preview Next / Hold ─────────────────────────────────────────────────────── */
-.preview {
-  margin-bottom: 8px;
+/* Libellé collé à sa grille (4px) : c'est une légende du cadre, pas le titre
+   d'une section — d'où le rendu discret face à .eyebrow. */
+.preview__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
 }
 
 .preview__grid {
@@ -515,9 +778,11 @@ h1, h2, h3 {
   display: flex;
 }
 
+/* Plafonné à 20px mais jamais plus gros qu'une case du puits : sur un écran
+   court, un aperçu qui dépasse le plateau inverse la hiérarchie. */
 .preview__grid .cell {
-  width: 20px;
-  height: 20px;
+  width: min(20px, var(--cell-size));
+  height: min(20px, var(--cell-size));
 }
 
 /* ── OpponentView ────────────────────────────────────────────────────────────── */
@@ -549,19 +814,53 @@ h1, h2, h3 {
   text-overflow: ellipsis;
 }
 
+/* Depuis que le spectrum est la seule fenêtre sur l'adversaire, il est traité
+   comme un puits miniature et non comme un graphique : même cadre, même ombre
+   interne que le plateau, et une graduation sur 20 rangées. */
 .opponent__spectrum {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   align-items: end;
   gap: 2px;
-  height: 40px;
+  height: 80px;
+  padding: 3px;
   margin-top: 8px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: var(--radius);
+  box-shadow: inset 0 6px 12px -4px rgba(60, 25, 110, 0.3);
+  overflow: hidden;
+  /* Les barres s'animent en hauteur (voir .opponent__bar) : la containment
+     enferme ce recalcul dans le cadre au lieu de le laisser remonter la page. */
+  contain: layout paint;
 }
 
+/* Les 20 rangées du terrain adverse : une barre à mi-hauteur se lit « 10
+   lignes empilées » sans compter, comme sur son propre plateau. */
+.opponent__spectrum::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.4) 0 1px,
+    transparent 1px calc(100% / 20)
+  );
+}
+
+/* Encre neutre, jamais une couleur de pièce : la hauteur est la seule
+   information transmise, la teinte n'en porte aucune. */
+/* La barre monte au lieu de sauter : c'est la seule façon de voir, d'un onglet
+   à l'autre, que les lignes qu'on vient d'envoyer sont bien tombées chez
+   l'adversaire. Dix boîtes dans un cadre à `overflow: hidden`, la mise en page
+   ne sort pas du spectrum. */
 .opponent__bar {
-  background: linear-gradient(to top, var(--ink-accent), var(--block-J));
+  background: rgba(42, 26, 74, 0.72);
   border-radius: 2px 2px 0 0;
   min-height: 2px;
+  transition: height 0.22s var(--ease-out);
 }
 
 .opponent--dead .opponent__name {
@@ -573,25 +872,31 @@ h1, h2, h3 {
   opacity: 0.45;
 }
 
+/* Une room n'a pas de limite de joueurs : au-delà de ce que l'écran tient, la
+   colonne défile au lieu d'étirer la page sous le plateau. En large c'est la
+   rangée de grille qui donne la borne (min-height: 0), le max-height couvre les
+   dispositions empilées où la rangée est en `auto`.
+   12px entre deux adversaires contre 16px avant l'intertitre : la pile se lit
+   comme un groupe, pas comme trois panneaux indépendants. */
 .opponents-stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.opponent-slot {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  gap: var(--space-3);
+  min-height: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: var(--space-1);
 }
 
 /* ── État éliminé ────────────────────────────────────────────────────────────── */
 /* Le signal d'alerte passe par la bordure et le titre, pas par un fond teinté :
    un fond rouge translucide faisait tomber le texte sous 4.5:1. */
+/* Après la pile qui défile, jamais dedans : le statut reste visible quel que
+   soit le nombre d'adversaires. L'écart vient du gap de .game-foes. */
 .eliminated {
-  margin-top: 16px;
   text-align: center;
   border: 1.5px solid #b81818;
+  animation: fadeIn 0.3s var(--ease-out);
 }
 
 .eliminated__title {
@@ -607,84 +912,30 @@ h1, h2, h3 {
   margin-top: 4px;
 }
 
-/* ── MiniBoard (adversaire) ─────────────────────────────────────────────────── */
-.mini-board-panel {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.mini-board-panel__name {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mini-board {
-  display: grid;
-  grid-template-columns: repeat(10, var(--mini-cell));
-  grid-template-rows: repeat(20, var(--mini-cell));
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
-  padding: 4px;
-  gap: 1px;
-}
-
-.mini-cell--empty,
-.mini-cell--filled,
-.mini-cell--penalty {
-  width: var(--mini-cell);
-  height: var(--mini-cell);
-}
-
-.mini-cell--empty {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 2px;
-}
-
-.mini-cell--filled {
-  border-radius: 3px;
-  box-shadow:
-    inset -2px -2px 4px rgba(0, 0, 0, 0.25),
-    inset 2px 2px 4px rgba(255, 255, 255, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.mini-cell--penalty {
-  background: repeating-linear-gradient(
-    45deg,
-    var(--block-penalty) 0px,
-    var(--block-penalty) 2px,
-    var(--block-penalty-light) 2px,
-    var(--block-penalty-light) 5px
-  );
-  border-radius: 2px;
-}
-
 /* ── Score Panel ─────────────────────────────────────────────────────────────── */
+/* Toujours au-dessus du puits, solo comme multi. Le score changeait de colonne
+   selon le mode : même donnée, deux emplacements à retrouver. Calé sur la
+   largeur exacte du plateau, il en devient le bandeau et non un panneau de
+   plus. */
 .score-panel {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
   padding: 0.75rem 1.25rem;
-  width: 100%;
-  max-width: calc(var(--cell-size) * 10 + 20px); /* board width + padding */
+  width: calc(var(--cell-size) * 10 + 20px); /* board width + padding */
+  max-width: 100%;
   animation: fadeIn 0.4s var(--ease-out);
 }
 
+/* Solo : un seul bloc, centré. Même structure interne qu'en duel — mesuré
+   77px dans les deux cas, c'est ce qui tient le budget vertical de --cell-size. */
 .score-panel--solo {
   justify-content: center;
-  flex-direction: column;
-  text-align: center;
+}
+
+.score-panel--solo .score-panel__side {
+  align-items: center;
 }
 
 .score-panel__label {
@@ -693,7 +944,7 @@ h1, h2, h3 {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-muted);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
   max-width: 12ch;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -878,9 +1129,12 @@ h1, h2, h3 {
   font-weight: 600;
 }
 
+/* Le nom vient de l'URL : il peut être long, accentué, en emoji ou sans
+   espace. Il coupe plutôt que de faire déborder le panneau. */
 .gameover__winner strong {
   color: var(--ink-accent);
   font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .gameover__scoreblock {
@@ -1046,57 +1300,93 @@ h1, h2, h3 {
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────────── */
-@media (max-width: 900px) {
-  .game-sidebar {
-    max-width: 240px;
-  }
-}
-
-@media (max-width: 700px) {
-  :root {
-    --cell-size: min(8.5vw, 30px);
-    --mini-cell: min(3.2vw, 12px);
-  }
-
+/* Seuil calculé, pas rond : 200 + 24 + 320 + 24 + 216 = 784px pour les trois
+   colonnes. En dessous les rails écrasaient le plateau, et l'ancien wrap flex
+   ouvrait entre 700 et 850px une zone où le rail droit passait seul à la ligne.
+   Le puits reste premier — l'empilement le garde en tête, les instruments
+   dessous, la référence en dernier. */
+@media (max-width: 830px) {
   .game-layout {
-    flex-direction: column;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(4, auto);
+    grid-template-areas:
+      "stage stage"
+      "hold  next"
+      "foes  foes"
+      "meta  meta";
+    row-gap: var(--space-5);
+    padding: var(--space-4) var(--space-3);
+  }
+
+  /* Hold et Next épaule contre épaule au centre plutôt qu'aux deux bords. */
+  .game-hold {
+    justify-self: end;
+  }
+
+  .game-next {
+    justify-self: start;
+  }
+
+  .game-foes,
+  .game-meta {
+    align-self: start;
     align-items: center;
-    padding: 1rem;
-    gap: 16px;
-  }
-
-  .game-sidebar {
-    flex-direction: row;
-    flex-wrap: wrap;
-    min-width: 0;
-    max-width: 100%;
-    width: 100%;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .game-sidebar__footer {
-    margin-top: 0;
-  }
-
-  /* En colonne empilée la sidebar devient une rangée : sans ça le panneau de
-     score prend toute la largeur et écrase Hold et l'aide-mémoire. */
-  .score-panel {
-    width: auto;
   }
 
   .opponents-stack {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
+    max-height: none;
+    overflow: visible;
   }
 
+  /* La référence passe en rangée : elle ne doit pas rallonger la page sous le
+     puits pour un contenu qu'on lit une fois. */
+  .game-meta {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: var(--space-8);
+  }
+}
+
+@media (max-width: 640px) {
   .gameover {
     padding: 2rem 1.5rem;
   }
   .lb-modal {
     padding: 1.5rem 1.25rem;
+  }
+}
+
+/* ── Contraste forcé (Windows High Contrast) ─────────────────────────────────
+   Le mode remplace toutes les couleurs par la palette système. Ici la couleur
+   d'une pièce est une information de jeu, pas de la décoration : sans exception
+   explicite les sept tétrominos deviennent identiques et la partie devient
+   injouable. ─────────────────────────────────────────────────────────────── */
+@media (forced-colors: active) {
+  .cell--I,
+  .cell--O,
+  .cell--T,
+  .cell--S,
+  .cell--Z,
+  .cell--J,
+  .cell--L,
+  .cell--penalty,
+  .opponent__bar {
+    forced-color-adjust: none;
+  }
+
+  /* Les surfaces en verre perdent leur fond : il leur faut un contour système
+     pour rester des objets distincts. */
+  .board,
+  .panel,
+  .notice,
+  .opponent,
+  .opponent__spectrum,
+  .preview__grid {
+    border: 1px solid CanvasText;
   }
 }
 
@@ -1113,9 +1403,20 @@ h1, h2, h3 {
   .lb-modal,
   .lb-row,
   .score-panel,
+  .eliminated,
   .gameover__title,
-  .score-panel__value--flash {
+  .score-panel__value--flash,
+  .cell--rising,
+  .drop-trail,
+  .board--penalty .board__surge {
     animation: none;
+  }
+
+  /* La pénalité reste annoncée — région live, lignes grises au sol, spectrum à
+     jour ; c'est la poussée et la lueur qui disparaissent, pas l'information.
+     Le sillage sans animation ne doit rien laisser derrière lui. */
+  .drop-trail {
+    display: none;
   }
 
   .btn:hover,

@@ -24,11 +24,25 @@ const RoomEntry = () => {
   const dispatch = useDispatch();
   const started = useSelector((s) => s.game.started);
   const gameRoom = useSelector((s) => s.game.room);
+  const error = useSelector((s) => s.game.error);
+  const connected = useSelector((s) => s.game.connected);
 
   useEffect(() => {
     initSocket(dispatch);
     emitJoinGame(room, playerName);
   }, [room, playerName, dispatch]);
+
+  // Refus d'entrée : rien à afficher derrière, l'écran entier porte le message.
+  if (error && !gameRoom) {
+    return (
+      <div className="screen">
+        <div className="panel lobby home">
+          <h1 className="lobby__title">RED TETRIS</h1>
+          <p className="screen__hint" role="alert">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!gameRoom) {
     // Connexion en cours
@@ -39,7 +53,20 @@ const RoomEntry = () => {
     );
   }
 
-  return started ? <Game /> : <Lobby />;
+  // Déjà dans la room : un refus ponctuel ou une coupure réseau s'annonce sans
+  // faire disparaître la partie sous les yeux du joueur.
+  const notice = !connected ? "Connection lost. Reconnecting…" : error;
+
+  return (
+    <>
+      {notice && (
+        <p className="notice" role="status">
+          {notice}
+        </p>
+      )}
+      {started ? <Game /> : <Lobby />}
+    </>
+  );
 };
 
 // ── Écran d'accueil (URL invalide) ───────────────────────────────────────────

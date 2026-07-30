@@ -3,7 +3,7 @@
 // Zéro `this`
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { emitStartGame } from "../socket";
 import { gameReset } from "../actions/game";
@@ -20,7 +20,16 @@ const GameOver = () => {
   const scores = useSelector((s) => s.scores);
   const myName = useSelector((s) => s.player.name);
 
+  const error = useSelector((s) => s.game.error);
+  const [restarting, setRestarting] = useState(false);
+
+  useEffect(() => {
+    if (error) setRestarting(false);
+  }, [error]);
+
   const handleRestart = () => {
+    if (restarting) return;
+    setRestarting(true);
     dispatch(gameReset());
     dispatch(resetPlayer());
     dispatch(setOpponents(
@@ -53,7 +62,7 @@ const GameOver = () => {
           </p>
 
           <div className="gameover__scoreblock">
-            <p className="game-sidebar__title">YOUR FINAL SCORE</p>
+            <p className="eyebrow">YOUR FINAL SCORE</p>
             <p
               className={`gameover__score ${
                 isWinner ? "gameover__score--winner" : "gameover__score--loser"
@@ -69,8 +78,9 @@ const GameOver = () => {
             id="btn-restart"
             className="btn btn--primary"
             onClick={handleRestart}
+            disabled={restarting}
           >
-            Play Again
+            {restarting ? "Starting…" : "Play Again"}
           </button>
         )}
         {!isHost && (

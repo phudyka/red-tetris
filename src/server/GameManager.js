@@ -2,11 +2,11 @@
 // src/server/GameManager.js — Registre des parties actives
 // ─────────────────────────────────────────────────────────────────────────────
 
-const Game = require('./Game')
+const Game = require("./Game");
 
 class GameManager {
   constructor() {
-    this.games = new Map() // Map<string, Game>  clé = room name
+    this.games = new Map(); // Map<string, Game>  clé = room name
   }
 
   /**
@@ -16,9 +16,9 @@ class GameManager {
    */
   getOrCreate(roomName) {
     if (!this.games.has(roomName)) {
-      this.games.set(roomName, new Game(roomName))
+      this.games.set(roomName, new Game(roomName));
     }
-    return this.games.get(roomName)
+    return this.games.get(roomName);
   }
 
   /**
@@ -26,7 +26,7 @@ class GameManager {
    * @returns {Game|undefined}
    */
   get(roomName) {
-    return this.games.get(roomName)
+    return this.games.get(roomName);
   }
 
   /**
@@ -34,15 +34,15 @@ class GameManager {
    * @param {string} roomName
    */
   delete(roomName) {
-    this.games.delete(roomName)
+    this.games.delete(roomName);
   }
 
   /**
    * @returns {Game[]}
    */
   getAll() {
-    return Array.from(this.games.values())
+    return Array.from(this.games.values());
   }
 }
 
-module.exports = GameManager
+module.exports = GameManager;

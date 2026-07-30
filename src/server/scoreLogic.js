@@ -9,9 +9,9 @@
  * @returns {number}
  */
 const calcScore = (linesCleared) => {
-  const table = { 1: 100, 2: 300, 3: 500, 4: 800 }
-  return table[linesCleared] || 0
-}
+  const table = { 1: 100, 2: 300, 3: 500, 4: 800 };
+  return table[linesCleared] || 0;
+};
 
 /**
  * Met à jour le leaderboard en mémoire (Map<string, number>).
@@ -24,12 +24,12 @@ const calcScore = (linesCleared) => {
  * @returns {Map<string, number>}
  */
 const updateLeaderboard = (leaderboardMap, playerName, newScore) => {
-  const prev = leaderboardMap.get(playerName) || 0
+  const prev = leaderboardMap.get(playerName) || 0;
   if (newScore > prev) {
-    leaderboardMap.set(playerName, newScore)
+    leaderboardMap.set(playerName, newScore);
   }
-  return leaderboardMap
-}
+  return leaderboardMap;
+};
 
 /**
  * Convertit la Map leaderboard en tableau trié desc, limité à 10 entrées.
@@ -40,19 +40,7 @@ const getLeaderboardArray = (leaderboardMap) => {
   return Array.from(leaderboardMap.entries())
     .map(([playerName, score]) => ({ playerName, score }))
     .sort((a, b) => b.score - a.score)
-    .slice(0, 10)
-}
+    .slice(0, 10);
+};
 
-/**
- * Vérifie si un board a changé depuis la dernière version envoyée.
- * Comparaison rapide par sérialisation JSON.
- * @param {number[][]|null} prev
- * @param {number[][]} next
- * @returns {boolean}
- */
-const boardHasChanged = (prev, next) => {
-  if (!prev) return true
-  return JSON.stringify(prev) !== JSON.stringify(next)
-}
-
-module.exports = { calcScore, updateLeaderboard, getLeaderboardArray, boardHasChanged }
+module.exports = { calcScore, updateLeaderboard, getLeaderboardArray };

@@ -4,20 +4,20 @@
 // Zéro `this`
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { LEADERBOARD_UPDATE } from '../actions/leaderboard'
+import { LEADERBOARD_UPDATE } from "../actions/leaderboard";
 
 // initialState : tableau vide
-const initialState = []
+const initialState = [];
 
 const leaderboardReducer = (state = initialState, action) => {
   switch (action.type) {
     case LEADERBOARD_UPDATE:
       // payload = [{ playerName, score }] déjà trié par le serveur (desc)
-      return Array.isArray(action.payload) ? action.payload : state
+      return Array.isArray(action.payload) ? action.payload : state;
 
     default:
-      return state
+      return state;
   }
-}
+};
 
-export default leaderboardReducer
+export default leaderboardReducer;

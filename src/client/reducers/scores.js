@@ -5,26 +5,27 @@
 // Zéro `this`
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { SCORE_UPDATE, SCORES_RESET } from '../actions/scores'
-import { GAME_RESET } from '../actions/game'
+import { SCORE_UPDATE, SCORES_RESET } from "../actions/scores";
+import { GAME_RESET, GAME_STARTED } from "../actions/game";
 
 // initialState : objet vide — clés = noms des joueurs, valeurs = scores
-const initialState = {}
+const initialState = {};
 
 const scoresReducer = (state = initialState, action) => {
   switch (action.type) {
     case SCORE_UPDATE: {
-      const { playerName, score } = action.payload
-      return { ...state, [playerName]: score }
+      const { playerName, score } = action.payload;
+      return { ...state, [playerName]: score };
     }
 
     case SCORES_RESET:
+    case GAME_STARTED:
     case GAME_RESET:
-      return initialState
+      return initialState;
 
     default:
-      return state
+      return state;
   }
-}
+};
 
-export default scoresReducer
+export default scoresReducer;

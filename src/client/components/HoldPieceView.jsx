@@ -14,4 +14,4 @@ const HoldPieceView = () => {
   return <PiecePreview label="Hold" type={holdType} spent={!canHold} />;
 };
 
-export default HoldPieceView;
+export default React.memo(HoldPieceView);

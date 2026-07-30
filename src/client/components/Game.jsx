@@ -13,7 +13,6 @@ import GameOver from "./GameOver";
 import NextPiecePreview from "./NextPiecePreview";
 import HoldPieceView from "./HoldPieceView";
 import ScorePanel from "./ScorePanel";
-import MiniBoard from "./MiniBoard";
 
 import useGameLoop from "../hooks/useGameLoop";
 
@@ -41,7 +40,6 @@ import {
   emitLinesCleared,
   emitPlayerDead,
   emitRequestNextPiece,
-  emitUpdateBoard,
   emitUpdateSpectrum,
 } from "../socket";
 
@@ -57,6 +55,38 @@ const CONTROLS = [
 // ── DAS constants (Delayed Auto Shift) ───────────────────────────────────────
 const DAS_DELAY = 167; // ms avant répétition
 const DAS_RATE = 33; // ms entre chaque répétition (~30/s)
+
+// Durée du sillage de hard drop — égale à celle de `dropTrail` dans global.css.
+const DROP_TRAIL_MS = 220;
+
+/**
+ * Sillage laissé par un hard drop : une bande par colonne occupée, du départ de
+ * la pièce à son point de chute — fonction pure.
+ * C'est le seul accusé de réception de la touche la plus utilisée du jeu : sans
+ * lui, un hard drop et une pièce qui touche le sol toute seule se ressemblent.
+ * @param {{shape: number[][], x: number, y: number, type: string}} piece
+ * @param {number} finalY  rangée d'arrivée renvoyée par getHardDropPosition
+ * @param {number} seq     numéro de salve, pour des clés React stables
+ * @returns {{seq: number, type: string, cols: {x, from, to}[]}}
+ */
+export const buildDropTrail = (piece, finalY, seq) => {
+  const { shape, x, y, type } = piece;
+  const cols = [];
+
+  for (let c = 0; c < shape[0].length; c++) {
+    let top = -1;
+    let bottom = -1;
+    for (let r = 0; r < shape.length; r++) {
+      if (shape[r][c] === 0) continue;
+      if (top < 0) top = r;
+      bottom = r;
+    }
+    if (top < 0) continue; // colonne vide de la shape
+    cols.push({ x: x + c, from: Math.max(y + top, 0), to: finalY + bottom });
+  }
+
+  return { seq, type, cols };
+};
 
 const Game = () => {
   const dispatch = useDispatch();
@@ -74,6 +104,10 @@ const Game = () => {
 
   const [clearingRows, setClearingRows] = useState([]);
   const [lockingCells, setLockingCells] = useState([]);
+  const [dropTrail, setDropTrail] = useState(null);
+  const trailSeqRef = useRef(0);
+  const trailTimerRef = useRef(null);
+  useEffect(() => () => clearTimeout(trailTimerRef.current), []);
 
   // ── Annonces lecteur d'écran ──────────────────────────────────────────────
   // Le plateau est muet pour une synthèse vocale : ces trois événements sont
@@ -151,13 +185,6 @@ const Game = () => {
     roomRef.current = room;
   }, [room]);
 
-  // ── Emit Board Snapshot (Throttled by server) ─────────────────────────────
-  useEffect(() => {
-    if (isPlaying && board) {
-      emitUpdateBoard(room, board);
-    }
-  }, [board, isPlaying, room]);
-
   // ── Refs pour le Lock Delay (Guideline) ───────────────────────────────────
   const lockTimeoutRef = useRef(null);
   const moveResetsRef = useRef(0);
@@ -169,16 +196,22 @@ const Game = () => {
     }
   }, []);
 
-  // ── Death check on Board change (Penalty) ──────────────────────────────────
-  // Si le board change (pénalité reçue), on vérifie si la pièce actuelle
-  // entre en collision. Si oui, c'est Game Over.
+  // Quitter la partie pendant le lock delay laisserait un timer verrouiller
+  // une pièce sur un composant démonté.
+  useEffect(() => clearLockTimeout, [clearLockTimeout]);
+
+  // ── Board changé : spectrum + check de mort ────────────────────────────────
+  // Le board ne change qu'au lock ou à la réception d'une pénalité : c'est le
+  // seul endroit d'où le spectrum peut bouger, on le publie donc ici.
+  // Si la pièce en cours entre en collision après une pénalité, c'est Game Over.
   useEffect(() => {
-    if (!isPlaying || !piece || !board) return;
-    if (!isValidPosition(board, piece.shape, piece.x, piece.y)) {
+    if (!isPlaying || !board) return;
+    emitUpdateSpectrum(roomRef.current, computeSpectrum(board));
+    if (piece && !isValidPosition(board, piece.shape, piece.x, piece.y)) {
       dispatch(playerDied());
       emitPlayerDead(roomRef.current);
     }
-  }, [board]); // Uniquement quand le board change (pénalités)
+  }, [board]); // Uniquement quand le board change (lock, pénalités)
 
   // ── Spawning Prédictif ──────────────────────────────────────────────────
   const spawnNextPiece = useCallback(() => {
@@ -246,12 +279,10 @@ const Game = () => {
         setClearingRows([]);
         dispatch(setBoard(clearedBoard));
         emitLinesCleared(roomRef.current, linesCleared);
-        emitUpdateSpectrum(roomRef.current, computeSpectrum(clearedBoard));
         spawnNextPiece();
       }, 300);
     } else {
       dispatch(setBoard(newBoard));
-      emitUpdateSpectrum(roomRef.current, computeSpectrum(newBoard));
       spawnNextPiece();
     }
   }, [dispatch, clearLockTimeout, spawnNextPiece]);
@@ -370,6 +401,18 @@ const Game = () => {
     const b = boardRef.current;
     if (!p || !b) return;
     const finalY = getHardDropPosition(b, p.shape, p.x, p.y);
+
+    // Une pièce déjà au sol ne laisse pas de sillage : il n'y a rien à raconter.
+    if (finalY > p.y) {
+      trailSeqRef.current += 1;
+      setDropTrail(buildDropTrail(p, finalY, trailSeqRef.current));
+      clearTimeout(trailTimerRef.current);
+      trailTimerRef.current = setTimeout(
+        () => setDropTrail(null),
+        DROP_TRAIL_MS,
+      );
+    }
+
     dispatch({ type: "SET_PIECE", payload: { ...p, y: finalY } });
     // Donne un tick pour que le state se mette à jour, puis lock
     setTimeout(() => lockPiece(), 0);
@@ -477,11 +520,21 @@ const Game = () => {
       if (e.key === "ArrowDown") stopDAS("down");
     };
 
+    // Changer d'onglet flèche enfoncée : le keyup part dans l'autre fenêtre et
+    // la répétition continuerait à déplacer la pièce toute seule au retour.
+    const onBlur = () => {
+      stopDAS("left");
+      stopDAS("right");
+      stopDAS("down");
+    };
+
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
       Object.values(dasTimers).forEach((t) => {
         clearTimeout(t);
         clearInterval(t);
@@ -498,53 +551,43 @@ const Game = () => {
         {announcement}
       </p>
 
-      {/* Sidebar gauche — Hold + Score (solo) */}
-      <aside className="game-sidebar">
+      {
+        /* Le puits en premier dans le DOM à toutes les tailles : les zones de
+          grille le replacent au centre en large, et un lecteur d'écran comme un
+          écran étroit commencent par ce qui porte la partie. Le score le
+          surmonte solo comme multi — une seule position à retrouver. */
+      }
+      <section className="game-stage">
+        <ScorePanel />
+        <Board
+          clearingRows={clearingRows}
+          lockingCells={lockingCells}
+          dropTrail={dropTrail}
+        />
+      </section>
+
+      <div className="game-hold">
         <HoldPieceView />
-        {opponents.length === 0 && <ScorePanel />}
-
-        <div className="game-sidebar__footer">
-          <p className="game-sidebar__title">Controls</p>
-          <dl className="controls">
-            {CONTROLS.map(([keys, action]) => (
-              <div className="controls__row" key={action}>
-                <dt className="controls__keys">
-                  {keys.map((k) => <kbd className="controls__key" key={k}>{k}</kbd>)}
-                </dt>
-                <dd className="controls__action">{action}</dd>
-              </div>
-            ))}
-          </dl>
-
-          <p className="game-sidebar__title">Room</p>
-          <p className="game-sidebar__footer-name">{room}</p>
-        </div>
-      </aside>
-
-      {/* Centre — Board + Score (multi) */}
-      <div className="game-column">
-        {opponents.length > 0 && <ScorePanel />}
-        <Board clearingRows={clearingRows} lockingCells={lockingCells} />
-        {opponents.length === 0 && <p className="game-mode-hint">Solo Mode</p>}
       </div>
 
-      {/* Sidebar droite — Next + Opponents/MiniBoards */}
-      <aside className="game-sidebar">
+      <div className="game-next">
         <NextPiecePreview />
+      </div>
 
+      <aside className="game-foes">
         {opponents.length > 0 && (
-          <div className="opponents-stack">
-            <p className="game-sidebar__title">Opponents</p>
-            {opponents.map((opp) => (
-              <div key={opp.name} className="opponent-slot">
-                <MiniBoard playerName={opp.name} />
+          <div className="game-foes__group">
+            <p className="eyebrow">Opponents</p>
+            <div className="opponents-stack">
+              {opponents.map((opp) => (
                 <OpponentView
+                  key={opp.name}
                   name={opp.name}
                   spectrum={opp.spectrum}
                   isAlive={opp.isAlive}
                 />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
 
@@ -555,6 +598,40 @@ const Game = () => {
           </div>
         )}
       </aside>
+
+      <div className="game-meta">
+        {
+          /* Pas d'intertitre visible : des touches et leur action se lisent sans
+            qu'on les annonce. Le titre reste pour les lecteurs d'écran, qui
+            n'ont pas la mise en forme pour le déduire. */
+        }
+        <p className="sr-only" id="controls-title">Keyboard controls</p>
+        <dl className="controls" aria-labelledby="controls-title">
+          {CONTROLS.map(([keys, action]) => (
+            <div className="controls__row" key={action}>
+              <dt className="controls__keys">
+                {keys.map((k) => (
+                  <kbd className="controls__key" key={k}>{k}</kbd>
+                ))}
+              </dt>
+              <dd className="controls__action">{action}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <dl className="game-meta__facts">
+          <div className="game-meta__fact">
+            <dt className="game-meta__key">Room</dt>
+            <dd className="game-meta__value">{room}</dd>
+          </div>
+          {opponents.length === 0 && (
+            <div className="game-meta__fact">
+              <dt className="game-meta__key">Mode</dt>
+              <dd className="game-meta__value">Solo</dd>
+            </div>
+          )}
+        </dl>
+      </div>
     </div>
   );
 };

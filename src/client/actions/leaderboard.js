@@ -3,6 +3,9 @@
 // Zéro `this`
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const LEADERBOARD_UPDATE = 'LEADERBOARD_UPDATE'
+export const LEADERBOARD_UPDATE = "LEADERBOARD_UPDATE";
 
-export const leaderboardUpdate = (payload) => ({ type: LEADERBOARD_UPDATE, payload })
+export const leaderboardUpdate = (payload) => ({
+  type: LEADERBOARD_UPDATE,
+  payload,
+});

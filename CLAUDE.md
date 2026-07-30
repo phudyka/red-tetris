@@ -41,13 +41,17 @@ aucune mort. Il est un distributeur de pièces + relais d'événements.
   → même séquence pour tous, à des rythmes différents (exigence du sujet).
 - Le client applique collision/rotation/lock/clear localement via
   `src/shared/gameLogic.js`, puis **déclare** le résultat au serveur
-  (`linesCleared`, `playerDead`, `updateSpectrum`, `updateBoard`).
+  (`linesCleared`, `playerDead`, `updateSpectrum`).
 - Le serveur n'arbitre que : pénalités (`n-1` lignes aux autres vivants), score,
   condition de victoire, host.
 - `playerAction` est un no-op conservé pour compat protocole.
 
 Conséquence : `player.board`/`x`/`y` côté serveur ne sont pas la vérité du jeu —
-seuls `isAlive`, `score`, `pieceIndex`, `isHost` et les snapshots comptent.
+seuls `isAlive`, `score`, `pieceIndex` et `isHost` comptent.
+
+Les adversaires ne voient **que** nom + spectrum (exigence du sujet) : aucun
+board complet ne transite. Le spectrum est publié depuis l'effet `[board]` de
+`Game.jsx`, seul endroit où le tas peut bouger (lock ou pénalité reçue).
 
 ### Le pont CJS ↔ ESM (duplication volontaire)
 
@@ -62,16 +66,19 @@ silencieusement.
 ### Protocole socket.io
 
 Client → serveur : `joinGame`, `startGame`, `playerDead`, `linesCleared`,
-`requestNextPiece`, `updateSpectrum`, `updateBoard`, `leaveGame`. Serveur →
-client : `gameJoined`, `playerJoined`, `playerLeft`, `gameStarted`, `newPiece`,
-`addPenalty`, `updateSpectrum`, `board:snapshot`, `score:update`,
+`requestNextPiece`, `updateSpectrum`, `leaveGame`. Serveur → client :
+`gameJoined`, `playerJoined`, `playerLeft`, `gameStarted`, `newPiece`,
+`addPenalty`, `updateSpectrum`, `opponentDead`, `score:update`,
 `leaderboard:update`, `gameOver`, `error`.
 
 Tous les émetteurs sont centralisés dans `src/client/socket.js` (`emitXxx`) ;
-chaque listener y dispatch une action Redux. **Exception** : `board:snapshot`
-est relayé en `CustomEvent` DOM consommé par `MiniBoard.jsx`, hors Redux, pour
-ne pas re-render tout l'arbre à 5 Hz (throttle serveur : 200 ms + diff JSON dans
-`scoreLogic.boardHasChanged`).
+chaque listener y dispatch une action Redux — `error` compris (`GAME_ERROR`,
+affiché par `App.jsx`, sinon un join refusé laisse l'écran sur « Connecting… »).
+
+`joinGame` est refusé tant que `started && !over` (« no new players can join
+until the next round »), et `GAME_STARTED` réinitialise `player`/`opponents`/
+`scores` chez **tous** les clients : au restart, seul le host dispatche
+`GAME_RESET` localement.
 
 ### State Redux
 

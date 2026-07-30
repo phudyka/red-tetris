@@ -13,4 +13,6 @@ const NextPiecePreview = () => {
   return <PiecePreview label="Next" type={nextType} />;
 };
 
-export default NextPiecePreview;
+// Mémoïsé : sans props, il ne se re-rend plus que sur changement de sa propre
+// tranche de state, pas à chaque déplacement de pièce de Game.jsx.
+export default React.memo(NextPiecePreview);

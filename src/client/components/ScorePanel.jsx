@@ -37,13 +37,20 @@ const ScorePanel = () => {
   if (!topOpponent) {
     return (
       <div className="panel score-panel score-panel--solo">
-        <div className="score-panel__label">YOUR SCORE</div>
-        <div
-          className={`score-panel__value ${
-            flashMyScore ? "score-panel__value--flash" : ""
-          }`}
-        >
-          {myScore}
+        {
+          /* Même bloc libellé-au-dessus-de-valeur qu'en duel : le bandeau garde
+            la hauteur exacte des deux modes, donc le puits ne remonte pas de
+            20px quand on passe de solo à multi. */
+        }
+        <div className="score-panel__side">
+          <div className="score-panel__label">YOUR SCORE</div>
+          <div
+            className={`score-panel__value ${
+              flashMyScore ? "score-panel__value--flash" : ""
+            }`}
+          >
+            {myScore}
+          </div>
         </div>
       </div>
     );
@@ -80,4 +87,4 @@ const ScorePanel = () => {
   );
 };
 
-export default ScorePanel;
+export default React.memo(ScorePanel);

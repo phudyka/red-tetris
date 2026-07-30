@@ -3,7 +3,7 @@
 // Hook React — zéro `this`
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from "react";
 
 /**
  * Lance un setInterval quand isPlaying === true.
@@ -14,22 +14,22 @@ import { useEffect, useRef } from 'react'
  * @param {Function} onTick        - Appelée à chaque tick
  */
 const useGameLoop = (isPlaying, tickInterval, onTick) => {
-  const onTickRef = useRef(onTick)
+  const onTickRef = useRef(onTick);
 
   // Garde la référence à jour sans relancer l'effet
   useEffect(() => {
-    onTickRef.current = onTick
-  }, [onTick])
+    onTickRef.current = onTick;
+  }, [onTick]);
 
   useEffect(() => {
-    if (!isPlaying) return
+    if (!isPlaying) return;
 
     const id = setInterval(() => {
-      onTickRef.current()
-    }, tickInterval)
+      onTickRef.current();
+    }, tickInterval);
 
-    return () => clearInterval(id)
-  }, [isPlaying, tickInterval])
-}
+    return () => clearInterval(id);
+  }, [isPlaying, tickInterval]);
+};
 
-export default useGameLoop
+export default useGameLoop;

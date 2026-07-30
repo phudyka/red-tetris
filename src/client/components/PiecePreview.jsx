@@ -43,7 +43,7 @@ const PiecePreview = ({ label, type, spent = false }) => {
 
   return (
     <div className={`preview${spent ? " preview--spent" : ""}`}>
-      <p className="game-sidebar__title">{label}</p>
+      <p className="preview__label">{label}</p>
       <div
         className="preview__grid"
         role="img"
