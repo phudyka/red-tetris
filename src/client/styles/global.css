@@ -33,6 +33,10 @@
      dans le même écran diraient la même chose sans le même sens. */
   --accent: #ff3b30;
   --accent-ink: #ff7a72; /* 6.1:1 — la même famille, lisible en texte */
+  /* Sur un aplat d'accent, l'encre s'inverse : blanc sur ce rouge ne donne que
+     3.2:1, l'encre sombre 5.4:1. Même mécanique que le bouton primaire — la
+     surface porte la couleur, le texte porte le contraste. */
+  --accent-on: var(--ink-inverse);
 
   /* Voile des surcouches. Un noir franc et non le fond assombri : le classement
      doit couper la partie, pas s'y fondre. */
@@ -120,8 +124,9 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ── Puits ─────────────────────────────────────────────────────────────────
-     Le plateau ne défile jamais. Budget vertical hors puits : bandeau de stats
-     (66) + gouttière (12) + bordures (4) + padding de page (48) + marge (20).
+     Le plateau ne défile jamais. Budget vertical hors puits, mesuré : bandeau
+     de stats (74) + gouttière (12) + bordures (4) + padding de page (48), soit
+     138 — la marge restante absorbe une valeur de score qui passe à la ligne.
      Le terme en vw garde les 10 colonnes dans la largeur sur mobile.
      Première déclaration en vh : repli pour les moteurs sans dvh. */
   --cell-size: min(40px, calc((100vh - 150px) / 20), calc((100vw - 32px) / 10));
@@ -296,6 +301,12 @@ h3 {
    puits, la référence et les adversaires alignés sur son bord bas. */
 .game-layout {
   display: grid;
+  /* Hauteur d'écran assumée : sans elle, `1fr` n'a rien à résoudre et la rangée
+     basse grandit avec son contenu — à sept adversaires le rail poussait le bas
+     de page sous le plateau au lieu de défiler chez lui. Repli en vh d'abord,
+     pour les moteurs sans dvh. */
+  height: 100vh;
+  height: 100dvh;
   grid-template-columns: minmax(0, 12rem) auto minmax(0, 13rem);
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-areas:
@@ -344,6 +355,7 @@ h3 {
 .game-foes__group {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-height: 0;
 }
 
@@ -396,7 +408,7 @@ h3 {
 .btn--primary:hover {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--ink-0);
+  color: var(--accent-on);
 }
 
 .btn--secondary:hover {
@@ -430,7 +442,7 @@ h3 {
   max-width: min(92vw, 560px);
   padding: var(--space-3) var(--space-5);
   background: var(--accent);
-  color: var(--ink-0);
+  color: var(--accent-on);
   border: none;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
@@ -530,9 +542,24 @@ h3 {
   }
 }
 
+/* Calque de la pièce en cours et du sillage : une grille jumelle du puits,
+   posée par-dessus. Le tas et ses 200 cellules sont auto-placés ; une cellule
+   explicitement positionnée dans la même grille leur retire une case libre et
+   pousse d'autant la fin du tas dans une rangée implicite — le plateau gagnait
+   une 21ᵉ rangée et sortait de l'écran. Les deux grilles restent séparées. */
+.board__layer {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: repeat(10, var(--cell-size));
+  grid-template-rows: repeat(20, var(--cell-size));
+  pointer-events: none;
+}
+
 /* Sillage du hard drop — une bande par colonne traversée, placée dans la grille
-   du puits comme les cellules. Sort plus vite qu'elle n'entre : la pièce est
-   déjà posée, la trace n'a rien à faire attendre. */
+   du calque comme les cellules de la pièce. Sort plus vite qu'elle n'entre : la
+   pièce est déjà posée, la trace n'a rien à faire attendre. */
 .drop-trail {
   pointer-events: none;
   background: var(--tint);
@@ -848,13 +875,15 @@ h3 {
 }
 
 /* Une room n'a pas de limite de joueurs : au-delà de ce que l'écran tient, la
-   colonne défile au lieu d'étirer la page sous le plateau. */
+   colonne défile au lieu d'étirer la page sous le plateau. Elle se cale sur la
+   hauteur de sa colonne — un plafond en vh l'ignore et, à sept joueurs sur un
+   écran court, repousse le bas de page sous le plateau. */
 .opponents-stack {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  flex: 1;
   min-height: 0;
-  max-height: 70vh;
   overflow-y: auto;
   padding-right: var(--space-1);
 }
@@ -864,7 +893,7 @@ h3 {
   text-align: center;
   background: var(--accent);
   border: none;
-  color: var(--ink-0);
+  color: var(--accent-on);
 }
 
 .eliminated__title {
@@ -1065,12 +1094,33 @@ h3 {
   color: var(--ink-2);
 }
 
+/* Le motif d'URL est une donnée à recopier, pas une destination : il prend le
+   mono du reste des valeurs, et surtout pas le survol d'un lien. */
+.home__path {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-bold);
+  color: var(--ink-0);
+}
+
 .home__link {
   color: var(--ink-0);
   font-weight: var(--weight-bold);
 }
 
 .home__link:hover {
+  color: var(--accent-ink);
+}
+
+/* Refus du serveur — nom déjà pris, partie en cours. L'accent est réservé au
+   danger et une porte fermée en fait partie ; en encre accent, il reste lisible
+   là où le rouge plein ne le serait pas. */
+.home__refusal {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-mid);
+  text-transform: uppercase;
+  text-align: center;
   color: var(--accent-ink);
 }
 
@@ -1189,7 +1239,7 @@ h3 {
 
 .lb-modal__close:hover {
   background: var(--accent);
-  color: var(--ink-0);
+  color: var(--accent-on);
 }
 
 .lb-modal__empty {
@@ -1266,7 +1316,10 @@ h3 {
    — l'empilement le garde en tête, les instruments dessous, la référence en
    dernier. */
 @media (max-width: 880px) {
+  /* Empilé, le layout reprend la hauteur de son contenu : c'est la page qui
+     défile, le rail n'a plus de colonne à occuper. */
   .game-layout {
+    height: auto;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(4, auto);
     grid-template-areas:
@@ -1293,11 +1346,13 @@ h3 {
     align-items: center;
   }
 
+  /* Empilé, le rail n'a plus de colonne à remplir : les cartes reprennent leur
+     hauteur naturelle et la page défile normalement. */
   .opponents-stack {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    max-height: none;
+    flex: none;
     overflow: visible;
   }
 

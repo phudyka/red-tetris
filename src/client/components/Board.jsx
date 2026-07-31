@@ -285,26 +285,37 @@ const Board = ({ clearingRows = [], lockingCells = [], dropTrail = null }) => {
         rising={rise.rows > 0}
         riseSeq={rise.seq}
       />
-      {dropTrail && dropTrail.cols.map((c) => (
-        <div
-          key={`trail-${dropTrail.seq}-${c.x}`}
-          className="drop-trail"
-          aria-hidden="true"
-          style={{
-            gridColumn: c.x + 1,
-            gridRow: `${c.from + 1} / ${c.to + 2}`,
-            "--tint": `var(--block-${dropTrail.type})`,
-          }}
-        />
-      ))}
-      {pieceLayer.map((c) => (
-        <Cell
-          key={c.key}
-          value={c.value}
-          state={c.state}
-          style={{ gridColumn: c.x + 1, gridRow: c.y + 1 }}
-        />
-      ))}
+      {
+        /*
+        Grille jumelle posée sur le puits. Les 200 cellules du tas sont
+        auto-placées : mêler dans la même grille des cellules explicitement
+        positionnées leur volerait autant de cases libres et repousserait la fin
+        du tas dans une 21ᵉ rangée implicite — le bas du plateau décalé et hors
+        de l'écran. Le calque garde donc sa propre grille.
+      */
+      }
+      <div className="board__layer">
+        {dropTrail && dropTrail.cols.map((c) => (
+          <div
+            key={`trail-${dropTrail.seq}-${c.x}`}
+            className="drop-trail"
+            aria-hidden="true"
+            style={{
+              gridColumn: c.x + 1,
+              gridRow: `${c.from + 1} / ${c.to + 2}`,
+              "--tint": `var(--block-${dropTrail.type})`,
+            }}
+          />
+        ))}
+        {pieceLayer.map((c) => (
+          <Cell
+            key={c.key}
+            value={c.value}
+            state={c.state}
+            style={{ gridColumn: c.x + 1, gridRow: c.y + 1 }}
+          />
+        ))}
+      </div>
       <ParticleSystem clearingRows={clearingRows} />
     </div>
   );

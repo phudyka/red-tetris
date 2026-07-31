@@ -9,7 +9,7 @@
         var r = n(601), a = n.n(r), o = n(314), i = n.n(o)()(a());
         i.push([
           e.id,
-          "/* ─────────────────────────────────────────────────────────────────────────────\n   src/client/styles/global.css\n   Direction : brutalist arcade.\n   Fond charbon uni, blocs strictement plats, angles droits, bordures nettes,\n   hiérarchie portée par la taille et la graisse — jamais par une ombre ou un\n   dégradé. Aucune police distante : la pile système suffit et ne bloque rien.\n   ───────────────────────────────────────────────────────────────────────────── */\n\n/* ═══ Tokens ═══════════════════════════════════════════════════════════════ */\n:root {\n  /* ── Surfaces ─────────────────────────────────────────────────────────────\n     Quatre paliers seulement. Sans ombre pour séparer deux plans, c'est le\n     saut de valeur et la bordure qui font tout le travail : plus de paliers et\n     ils cessent d'être distinguables. */\n  --bg: #101010;\n  --surface-1: #171717;\n  --surface-2: #1e1e1e;\n  --surface-3: #262626;\n\n  /* ── Traits ────────────────────────────────────────────────────────────── */\n  --line: #2e2e2e; /* séparation discrète, quadrillage du puits */\n  --line-strong: #4d4d4d; /* contour d'un objet, ghost */\n\n  /* ── Encre — contrastes mesurés sur --bg ───────────────────────────────── */\n  --ink-0: #f2f2f2; /* 16.4:1 — titres, valeurs                */\n  --ink-1: #b9b9b9; /*  8.6:1 — texte courant                  */\n  --ink-2: #909090; /*  4.9:1 — libellés, plancher AA           */\n  --ink-inverse: #101010; /* sur fond clair (bouton primaire)  */\n\n  /* ── Accent ────────────────────────────────────────────────────────────────\n     Rouge réservé au danger : pénalité reçue, joueur éliminé, refus serveur.\n     Le bouton primaire est blanc — un bouton rouge et un tétromino Z rouge\n     dans le même écran diraient la même chose sans le même sens. */\n  --accent: #ff3b30;\n  --accent-ink: #ff7a72; /* 6.1:1 — la même famille, lisible en texte */\n\n  /* Voile des surcouches. Un noir franc et non le fond assombri : le classement\n     doit couper la partie, pas s'y fondre. */\n  --scrim: rgb(0 0 0 / 0.78);\n\n  /* ── Tétrominos ────────────────────────────────────────────────────────────\n     Teintes canoniques du sujet, remontées en luminosité pour le fond sombre.\n     Contrainte qui prime sur la fidélité : chacune doit rester distincte des\n     six autres ET du gris de pénalité, sinon un bloc posé se confond avec une\n     ligne indestructible. */\n  --block-I: #3ad6f0;\n  --block-O: #f7d047;\n  --block-T: #c058e0;\n  --block-S: #4bd763;\n  --block-Z: #f0453f;\n  --block-J: #4a7bf0;\n  --block-L: #f79433;\n  --block-penalty: #4f4f4f;\n\n  /* ── Typographie ───────────────────────────────────────────────────────────\n     Deux familles système, zéro requête réseau. Le mono porte tout ce qui se\n     compare (scores, niveau, noms de room, touches) : les chiffres y sont de\n     largeur fixe, une valeur qui change ne déplace donc jamais son voisin. */\n  --font-ui:\n    ui-sans-serif,\n    system-ui,\n    -apple-system,\n    \"Segoe UI\",\n    Roboto,\n    \"Helvetica Neue\",\n    Arial,\n    sans-serif;\n  --font-mono:\n    ui-monospace,\n    SFMono-Regular,\n    \"SF Mono\",\n    Menlo,\n    Consolas,\n    \"Liberation Mono\",\n    monospace;\n\n  /* Échelle modulaire ~1.25, sept pas nommés — plus aucune taille en dur. */\n  --text-2xs: 0.6875rem; /* 11px */\n  --text-xs: 0.8125rem; /* 13px */\n  --text-sm: 0.9375rem; /* 15px */\n  --text-md: 1.125rem; /* 18px */\n  --text-lg: 1.75rem; /* 28px */\n  --text-xl: 2.5rem; /* 40px */\n  --text-2xl: 4rem; /* 64px */\n\n  --weight-normal: 500;\n  --weight-bold: 700;\n  --weight-black: 900;\n\n  /* Interlettrage : négatif sur les gros titres (ils se resserrent), positif\n     sur les capitales de petite taille (elles s'étouffent sinon). */\n  --tracking-tight: -0.02em;\n  --tracking-mid: 0.06em; /* capitales de taille moyenne : nom de room, bouton */\n  --tracking-wide: 0.14em;\n\n  /* ── Espacement, base 4 ───────────────────────────────────────────────── */\n  --space-1: 4px;\n  --space-2: 8px;\n  --space-3: 12px;\n  --space-4: 16px;\n  --space-5: 20px;\n  --space-6: 24px;\n  --space-8: 32px;\n  --space-10: 40px;\n\n  /* ── Formes ────────────────────────────────────────────────────────────────\n     Zéro rayon, c'est la décision de fond de la direction. Le token existe\n     quand même : c'est le seul endroit où la revenir dessus est possible. */\n  --radius: 0;\n  --border: 1px solid var(--line);\n  --border-strong: 2px solid var(--line-strong);\n  /* Rail : le filet vertical qui qualifie une ligne de liste — soi-même dans le\n     lobby, la première place du classement. Sans ombre ni fond coloré, c'est le\n     seul marqueur d'appartenance dont la direction dispose. */\n  --rail: 3px;\n\n  /* ── Mouvement ────────────────────────────────────────────────────────── */\n  --duration-fast: 0.12s;\n  --duration-base: 0.2s;\n  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);\n\n  /* ── Puits ─────────────────────────────────────────────────────────────────\n     Le plateau ne défile jamais. Budget vertical hors puits : bandeau de stats\n     (66) + gouttière (12) + bordures (4) + padding de page (48) + marge (20).\n     Le terme en vw garde les 10 colonnes dans la largeur sur mobile.\n     Première déclaration en vh : repli pour les moteurs sans dvh. */\n  --cell-size: min(40px, calc((100vh - 150px) / 20), calc((100vw - 32px) / 10));\n  --cell-size: min(\n    40px,\n    calc((100dvh - 150px) / 20),\n    calc((100vw - 32px) / 10)\n  );\n  --board-width: calc(var(--cell-size) * 10 + 4px);\n\n  /* Puits miniature de l'adversaire : assez haut pour que ses 20 rangées se\n     distinguent, assez bas pour en empiler plusieurs sans faire défiler. */\n  --spectrum-height: 84px;\n\n  /* Panneau centré sur écran vide (lobby, accueil, fin de partie). Une seule\n     largeur : deux cartes du même rôle qui ne tombent pas d'aplomb entre deux\n     écrans, c'est la porte d'entrée du projet qui bouge sous le correcteur. */\n  --panel-width: 480px;\n\n  /* Cible tactile minimale (WCAG 2.5.5) */\n  --tap: 44px;\n}\n\n/* ═══ Reset ════════════════════════════════════════════════════════════════ */\n*,\n*::before,\n*::after {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n\nhtml,\nbody {\n  height: 100%;\n  background: var(--bg);\n  color: var(--ink-1);\n  font-family: var(--font-ui);\n  font-size: 16px;\n  font-weight: var(--weight-normal);\n  line-height: 1.5;\n  -webkit-font-smoothing: antialiased;\n}\n\n#root {\n  min-height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n\nh1,\nh2,\nh3 {\n  color: var(--ink-0);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  line-height: 1;\n}\n\n/* Le contour est le vocabulaire de toute la direction : ici il change juste de\n   couleur pour se voir par-dessus n'importe quelle surface. */\n:focus-visible {\n  outline: 2px solid var(--ink-0);\n  outline-offset: 2px;\n}\n\n/* Visible pour les lecteurs d'écran uniquement (régions live). */\n.sr-only {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  padding: 0;\n  margin: -1px;\n  overflow: hidden;\n  clip: rect(0, 0, 0, 0);\n  white-space: nowrap;\n  border: 0;\n}\n\n/* ═══ Primitives typographiques ════════════════════════════════════════════ */\n\n/* Intertitre : capitales espacées, la plus petite taille du système. Une seule\n   section du jeu en porte un — « Opponents ». Hold, Next et les raccourcis se\n   lisent sans qu'on les annonce. */\n.eyebrow {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  margin-bottom: var(--space-2);\n}\n\n/* Statistique : libellé au-dessus, valeur en dessous. Le seul motif de données\n   du jeu — score, lignes, niveau, score adverse en partagent la mécanique. */\n.stat {\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n  min-width: 0;\n}\n\n.stat__label {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n  max-width: 14ch;\n}\n\n.stat__value {\n  font-family: var(--font-mono);\n  font-size: var(--text-md);\n  font-weight: var(--weight-bold);\n  line-height: 1.1;\n  color: var(--ink-0);\n  font-variant-numeric: tabular-nums;\n}\n\n.stat--strong .stat__value {\n  font-size: var(--text-lg);\n  font-weight: var(--weight-black);\n}\n\n.stat__value--flash {\n  animation: statFlash var(--duration-base) var(--ease-out);\n}\n\n@keyframes statFlash {\n  from {\n    color: var(--accent-ink);\n  }\n  to {\n    color: var(--ink-0);\n  }\n}\n\n/* ═══ Structure ════════════════════════════════════════════════════════════ */\n.app-main {\n  flex: 1;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n\n.screen {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 100vh;\n  padding: var(--space-6) var(--space-4);\n}\n\n.screen__hint {\n  font-family: var(--font-mono);\n  font-size: var(--text-sm);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n}\n\n/* Grille à zones nommées : le puits mène et reste premier dans le DOM à toutes\n   les tailles, ce sont les zones qui le replacent au centre en large et en tête\n   en étroit. Deux rangées : les instruments (hold, next) collés au bord haut du\n   puits, la référence et les adversaires alignés sur son bord bas. */\n.game-layout {\n  display: grid;\n  grid-template-columns: minmax(0, 12rem) auto minmax(0, 13rem);\n  grid-template-rows: auto minmax(0, 1fr);\n  grid-template-areas:\n    \"hold stage next\"\n    \"meta stage foes\";\n  justify-content: center;\n  column-gap: var(--space-6);\n  row-gap: var(--space-8);\n  padding: var(--space-6) var(--space-4);\n  width: 100%;\n}\n\n.game-stage {\n  grid-area: stage;\n  align-self: start;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-3);\n}\n\n.game-hold {\n  grid-area: hold;\n  align-self: start;\n  justify-self: end;\n}\n\n.game-next {\n  grid-area: next;\n  align-self: start;\n}\n\n/* Le rail des adversaires part du haut de sa rangée et défile chez lui : à huit\n   joueurs il ne doit pas allonger la page sous le puits. */\n.game-foes {\n  grid-area: foes;\n  align-self: stretch;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-4);\n  min-height: 0;\n}\n\n/* L'intertitre reste hors de la pile qui défile — sinon il disparaît au premier\n   scroll et la colonne n'a plus de nom. */\n.game-foes__group {\n  display: flex;\n  flex-direction: column;\n  min-height: 0;\n}\n\n/* Référence (raccourcis, room) : posée sur le bord bas du puits, hors du champ\n   de jeu. */\n.game-meta {\n  grid-area: meta;\n  align-self: end;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-5);\n}\n\n/* ═══ Panneau ══════════════════════════════════════════════════════════════ */\n.panel {\n  background: var(--surface-1);\n  border: var(--border);\n  border-radius: var(--radius);\n  padding: var(--space-4);\n}\n\n/* ═══ Boutons ══════════════════════════════════════════════════════════════ */\n.btn {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  min-height: var(--tap);\n  padding: var(--space-3) var(--space-6);\n  border: var(--border-strong);\n  border-radius: var(--radius);\n  background: transparent;\n  color: var(--ink-0);\n  cursor: pointer;\n  transition:\n    background var(--duration-fast) linear,\n    color var(--duration-fast) linear,\n    border-color var(--duration-fast) linear;\n}\n\n/* L'inversion complète du couple fond/encre remplace l'ombre portée et le\n   soulèvement : l'état actif se voit de loin sans que rien ne bouge. */\n.btn--primary {\n  background: var(--ink-0);\n  color: var(--ink-inverse);\n  border-color: var(--ink-0);\n}\n\n.btn--primary:hover {\n  background: var(--accent);\n  border-color: var(--accent);\n  color: var(--ink-0);\n}\n\n.btn--secondary:hover {\n  background: var(--surface-3);\n  border-color: var(--ink-0);\n}\n\n/* Désactivé : lisible (WCAG n'exempte pas l'information portée par ce bouton). */\n.btn:disabled {\n  background: transparent;\n  color: var(--ink-2);\n  border-color: var(--line);\n  cursor: not-allowed;\n}\n\n.btn:disabled:hover {\n  background: transparent;\n  color: var(--ink-2);\n  border-color: var(--line);\n}\n\n/* ═══ Bandeau d'état ═══════════════════════════════════════════════════════\n   Coupure réseau ou refus du serveur, annoncé par-dessus la partie et jamais à\n   sa place : le joueur garde son plateau sous les yeux. */\n.notice {\n  position: fixed;\n  top: 0;\n  left: 50%;\n  transform: translateX(-50%);\n  z-index: 100;\n  max-width: min(92vw, 560px);\n  padding: var(--space-3) var(--space-5);\n  background: var(--accent);\n  color: var(--ink-0);\n  border: none;\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-mid);\n  text-align: center;\n  text-transform: uppercase;\n  overflow-wrap: anywhere;\n}\n\n/* ═══ Puits ════════════════════════════════════════════════════════════════ */\n.board {\n  position: relative;\n  display: grid;\n  grid-template-columns: repeat(10, var(--cell-size));\n  grid-template-rows: repeat(20, var(--cell-size));\n  background: var(--surface-1);\n  border: var(--border-strong);\n  border-radius: var(--radius);\n  overflow: hidden;\n  /* Isole les 200 cellules du reste du document : une pièce qui descend ne peut\n     plus provoquer de calcul de mise en page hors du plateau. Crée aussi le\n     contexte d'empilement dont ::before a besoin pour passer sous les cellules. */\n  contain: layout paint;\n  transition: filter 0.4s var(--ease-out);\n}\n\n/* Éliminé : le puits se vide de sa couleur au lieu de se figer sans rien dire.\n   La partie continue à côté, ce plateau-là est fini — l'encre le dit. */\n.board--dead {\n  filter: grayscale(1) brightness(0.55);\n}\n\n/* Le quadrillage est peint par le puits, pas par 200 cellules vides bordées :\n   une seule boîte à peindre. Il est franc, pas suggéré — c'est la grille de\n   lecture du jeu, elle doit se compter à l'œil. */\n.board::before {\n  content: \"\";\n  position: absolute;\n  inset: 0;\n  z-index: -1;\n  pointer-events: none;\n  background-image:\n    repeating-linear-gradient(\n      to right,\n      var(--line) 0 1px,\n      transparent 1px var(--cell-size)\n    ),\n    repeating-linear-gradient(\n    to bottom,\n    var(--line) 0 1px,\n    transparent 1px var(--cell-size)\n  );\n}\n\n/* Flash de ligne effacée — un seul élément, jamais dans le flux de la grille.\n   Piloté depuis Board.jsx (Web Animations API) : l'intensité dit combien de\n   lignes sont parties, un Tetris ne peut pas se confondre avec un simple. */\n.board__flash {\n  position: absolute;\n  inset: 0;\n  background: var(--ink-0);\n  opacity: 0;\n  pointer-events: none;\n  z-index: 60;\n}\n\n/* Lueur de pénalité — la seule chose du jeu qui vienne du sol : effacer une\n   ligne et en encaisser trois ne peuvent pas se ressembler. */\n.board__surge {\n  position: absolute;\n  inset: 0;\n  pointer-events: none;\n  opacity: 0;\n  z-index: 55;\n  background: linear-gradient(\n    to top,\n    var(--accent),\n    color-mix(in srgb, var(--accent) 25%, transparent) 22%,\n    transparent 46%\n  );\n}\n\n.board--penalty .board__surge {\n  animation: surge 0.4s var(--ease-out);\n}\n\n@keyframes surge {\n  0% {\n    opacity: 0;\n  }\n  16% {\n    opacity: 0.85;\n  }\n  100% {\n    opacity: 0;\n  }\n}\n\n/* Sillage du hard drop — une bande par colonne traversée, placée dans la grille\n   du puits comme les cellules. Sort plus vite qu'elle n'entre : la pièce est\n   déjà posée, la trace n'a rien à faire attendre. */\n.drop-trail {\n  pointer-events: none;\n  background: var(--tint);\n  animation: dropTrail 0.22s linear both;\n}\n\n@keyframes dropTrail {\n  from {\n    opacity: 0.45;\n  }\n  to {\n    opacity: 0;\n  }\n}\n\n/* ═══ Cellules ═════════════════════════════════════════════════════════════ */\n.cell {\n  width: var(--cell-size);\n  height: var(--cell-size);\n}\n\n/* Dans le puits, rien à peindre : la case vide n'est plus qu'un emplacement de\n   grille, le quadrillage vient de .board::before. Les aperçus Next/Hold gardent\n   leur lattice, eux ne se repeignent pas à 30 Hz. */\n.cell--empty {\n  background: transparent;\n  border: 1px solid var(--line);\n}\n\n.board .cell--empty {\n  border: none;\n}\n\n/* Le ghost porte la couleur de sa pièce : deux tétrominos ne se posent pas au\n   même endroit, la projection doit dire lequel arrive. */\n.cell--ghost {\n  background: transparent;\n  border: 2px solid var(--ghost, var(--line-strong));\n  opacity: 0.5;\n}\n\n.cell--ghost-I {\n  --ghost: var(--block-I);\n}\n.cell--ghost-O {\n  --ghost: var(--block-O);\n}\n.cell--ghost-T {\n  --ghost: var(--block-T);\n}\n.cell--ghost-S {\n  --ghost: var(--block-S);\n}\n.cell--ghost-Z {\n  --ghost: var(--block-Z);\n}\n.cell--ghost-J {\n  --ghost: var(--block-J);\n}\n.cell--ghost-L {\n  --ghost: var(--block-L);\n}\n\n/* Aplat strict. La bordure couleur du fond sépare deux blocs voisins de même\n   teinte sans rien simuler : c'est un trait, pas une lumière. */\n.cell--I,\n.cell--O,\n.cell--T,\n.cell--S,\n.cell--Z,\n.cell--J,\n.cell--L,\n.cell--penalty {\n  border: 1px solid var(--bg);\n}\n\n.cell--I {\n  background: var(--block-I);\n}\n.cell--O {\n  background: var(--block-O);\n}\n.cell--T {\n  background: var(--block-T);\n}\n.cell--S {\n  background: var(--block-S);\n}\n.cell--Z {\n  background: var(--block-Z);\n}\n.cell--J {\n  background: var(--block-J);\n}\n.cell--L {\n  background: var(--block-L);\n}\n\n/* Indestructible : hachures. Le gris seul se lirait comme un bloc terne, les\n   diagonales disent « ça ne partira pas » sans dépendre de la couleur. */\n.cell--penalty {\n  background: repeating-linear-gradient(\n    45deg,\n    var(--block-penalty) 0 3px,\n    var(--surface-3) 3px 7px\n  );\n}\n\n/* La pièce en cours est la seule chose vivante du puits : elle est franche,\n   le tas est d'un cran en retrait. */\n.cell--stacked {\n  filter: brightness(0.82);\n}\n\n/* Pénalité reçue : le tas ne se téléporte pas d'un cran vers le haut, il est\n   poussé. Chaque cellule pleine part de `--rise` rangées plus bas — la même\n   distance pour toutes, c'est un seul mouvement. Seules les cases pleines\n   portent la classe : une case vide ne peint rien. */\n.cell--rising {\n  animation: penaltyRise 0.3s var(--ease-out) both;\n}\n\n@keyframes penaltyRise {\n  from {\n    transform: translate3d(0, calc(var(--rise, 0) * 100%), 0);\n  }\n  to {\n    transform: translate3d(0, 0, 0);\n  }\n}\n\n/* ═══ Particules d'effacement ══════════════════════════════════════════════\n   Des éclats carrés, pas des étincelles : même vocabulaire de forme que les\n   blocs dont ils sortent. */\n.particles {\n  position: absolute;\n  inset: 0;\n  overflow: hidden;\n  pointer-events: none;\n  z-index: 50;\n}\n\n.particle {\n  position: absolute;\n  width: var(--size);\n  height: var(--size);\n  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);\n  background: var(--tint);\n  animation: burst var(--dur) linear both;\n  will-change: transform, opacity;\n}\n\n@keyframes burst {\n  from {\n    transform: translate3d(0, 0, 0);\n    opacity: 1;\n  }\n  to {\n    transform: translate3d(var(--dx), var(--dy), 0);\n    opacity: 0;\n  }\n}\n\n/* ═══ Bandeau de statistiques ══════════════════════════════════════════════\n   Calé sur la largeur exacte du puits, il en devient le bord haut et non un\n   panneau de plus. Même hauteur solo et multi : le puits ne remonte pas de\n   20px quand un adversaire arrive. */\n.score-panel {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: var(--space-4);\n  width: var(--board-width);\n  max-width: 100%;\n  padding: var(--space-3) 0;\n  border-bottom: var(--border);\n}\n\n.score-panel__group {\n  display: flex;\n  align-items: baseline;\n  gap: var(--space-6);\n  min-width: 0;\n}\n\n/* L'adversaire est aligné à droite : deux camps, deux bords. */\n.score-panel__group--rival {\n  text-align: right;\n}\n\n.score-panel__group--rival .stat {\n  align-items: flex-end;\n}\n\n/* ═══ Aperçus Next / Hold ══════════════════════════════════════════════════ */\n.preview__label {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  margin-bottom: var(--space-2);\n}\n\n.preview__grid {\n  display: flex;\n  flex-direction: column;\n  width: fit-content;\n  padding: var(--space-2);\n  background: var(--surface-1);\n  border: var(--border);\n  transition: opacity var(--duration-base) linear;\n}\n\n/* Hold déjà consommé : on grise la pièce, jamais son libellé. */\n.preview--spent .preview__grid {\n  opacity: 0.35;\n}\n\n.preview__row {\n  display: flex;\n}\n\n/* Plafonné à 22px mais jamais plus gros qu'une case du puits : sur un écran\n   court, un aperçu qui dépasse le plateau inverse la hiérarchie. */\n.preview__grid .cell {\n  width: min(22px, var(--cell-size));\n  height: min(22px, var(--cell-size));\n}\n\n/* ═══ Adversaires ══════════════════════════════════════════════════════════ */\n.opponent {\n  background: var(--surface-1);\n  border: var(--border);\n  padding: var(--space-3);\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n/* Éliminé : on éteint le spectrum, pas le texte. Baisser l'opacité du bloc\n   entier ferait tomber le nom sous le seuil de contraste. */\n.opponent--dead {\n  border-style: dashed;\n}\n\n.opponent__name {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n/* Depuis que le spectrum est la seule fenêtre sur l'adversaire, il est traité\n   comme un puits miniature et non comme un graphique : même fond, même\n   quadrillage sur 20 rangées. */\n.opponent__spectrum {\n  position: relative;\n  display: grid;\n  grid-template-columns: repeat(10, 1fr);\n  align-items: end;\n  gap: 1px;\n  height: var(--spectrum-height);\n  padding: 2px;\n  background: var(--bg);\n  border: var(--border);\n  overflow: hidden;\n  /* Les barres s'animent en hauteur : la containment enferme ce recalcul dans\n     le cadre au lieu de le laisser remonter la page. */\n  contain: layout paint;\n}\n\n/* Les 20 rangées du terrain adverse : une barre à mi-hauteur se lit « 10 lignes\n   empilées » sans compter, comme sur son propre plateau. */\n.opponent__spectrum::after {\n  content: \"\";\n  position: absolute;\n  inset: 2px;\n  pointer-events: none;\n  background: repeating-linear-gradient(\n    to bottom,\n    var(--line) 0 1px,\n    transparent 1px calc(100% / 20)\n  );\n}\n\n/* Encre neutre, jamais une couleur de pièce : la hauteur est la seule\n   information transmise, la teinte n'en porte aucune. La barre monte au lieu de\n   sauter — c'est la seule façon de voir que les lignes qu'on vient d'envoyer\n   sont bien tombées chez l'adversaire. */\n.opponent__bar {\n  height: 100%;\n  background: var(--ink-1);\n  /* Le remplissage passe par une mise à l'échelle, pas par la hauteur : dix\n     barres qui changent de `height` relayoutent le cadre à chaque verrouillage\n     adverse, et il y a un cadre par adversaire. `transform` ne touche que la\n     composition — même règle que le FLIP des lignes de pénalité. */\n  transform: scaleY(var(--fill, 0));\n  transform-origin: bottom;\n  transition: transform var(--duration-base) var(--ease-out);\n}\n\n.opponent--dead .opponent__name {\n  color: var(--ink-2);\n}\n\n.opponent--dead .opponent__bar {\n  background: var(--line-strong);\n}\n\n/* Une room n'a pas de limite de joueurs : au-delà de ce que l'écran tient, la\n   colonne défile au lieu d'étirer la page sous le plateau. */\n.opponents-stack {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-3);\n  min-height: 0;\n  max-height: 70vh;\n  overflow-y: auto;\n  padding-right: var(--space-1);\n}\n\n/* ═══ Éliminé ══════════════════════════════════════════════════════════════ */\n.eliminated {\n  text-align: center;\n  background: var(--accent);\n  border: none;\n  color: var(--ink-0);\n}\n\n.eliminated__title {\n  font-family: var(--font-mono);\n  font-size: var(--text-sm);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-wide);\n}\n\n.eliminated__hint {\n  font-size: var(--text-xs);\n  margin-top: var(--space-1);\n}\n\n/* ═══ Aide-mémoire clavier ═════════════════════════════════════════════════ */\n.controls {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n.controls__row {\n  display: flex;\n  align-items: center;\n  gap: var(--space-2);\n}\n\n.controls__keys {\n  display: flex;\n  gap: var(--space-1);\n  flex-shrink: 0;\n}\n\n.controls__key {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  line-height: 1;\n  color: var(--ink-0);\n  background: var(--surface-2);\n  border: var(--border);\n  padding: var(--space-1) var(--space-2);\n  min-width: var(--space-6);\n  text-align: center;\n}\n\n.controls__action {\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n}\n\n/* Room et mode : deux faits, pas deux sections. */\n.game-meta__facts {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n.game-meta__fact {\n  display: flex;\n  align-items: baseline;\n  gap: var(--space-2);\n}\n\n.game-meta__key {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  flex-shrink: 0;\n}\n\n.game-meta__value {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  overflow-wrap: anywhere;\n  min-width: 0;\n}\n\n/* ═══ Marque ═══════════════════════════════════════════════════════════════ */\n.brand {\n  font-size: var(--text-xl);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  text-transform: uppercase;\n  text-align: center;\n  text-wrap: balance;\n  color: var(--ink-0);\n}\n\n.brand__accent {\n  color: var(--accent);\n}\n\n/* ═══ Lobby ════════════════════════════════════════════════════════════════ */\n.lobby {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-6);\n  width: var(--panel-width);\n  max-width: 100%;\n  padding: var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.lobby__subtitle {\n  font-size: var(--text-sm);\n  color: var(--ink-2);\n  text-align: center;\n  max-width: 46ch;\n}\n\n.lobby__room {\n  text-align: center;\n}\n\n.lobby__room-name {\n  font-family: var(--font-mono);\n  font-size: var(--text-md);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-mid);\n  color: var(--ink-0);\n  overflow-wrap: anywhere;\n}\n\n.lobby__player-list {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-1);\n}\n\n.lobby__player {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: var(--space-2);\n  padding: var(--space-3);\n  background: var(--surface-2);\n  border-left: var(--rail) solid var(--line-strong);\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n}\n\n/* Soi-même : la barre passe à l'accent, pas le fond. Une ligne de liste ne\n   change pas de nature parce qu'elle vous concerne. */\n.lobby__player--self {\n  border-left-color: var(--accent);\n}\n\n.lobby__player-name--self {\n  color: var(--ink-0);\n  font-weight: var(--weight-bold);\n}\n\n.lobby__player-name {\n  color: var(--ink-1);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.lobby__badge {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  background: var(--ink-0);\n  color: var(--ink-inverse);\n  padding: var(--space-1) var(--space-2);\n  flex-shrink: 0;\n}\n\n.lobby__actions {\n  display: flex;\n  align-items: center;\n  gap: var(--space-3);\n  width: 100%;\n  justify-content: center;\n  flex-wrap: wrap;\n}\n\n/* ═══ Accueil (URL invalide) ═══════════════════════════════════════════════ */\n.home {\n  width: var(--panel-width);\n  max-width: 100%;\n}\n\n.home__example {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n}\n\n.home__link {\n  color: var(--ink-0);\n  font-weight: var(--weight-bold);\n}\n\n.home__link:hover {\n  color: var(--accent-ink);\n}\n\n/* ═══ Game Over ════════════════════════════════════════════════════════════ */\n.gameover {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-6);\n  text-align: center;\n  padding: var(--space-10) var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.gameover__title {\n  font-size: var(--text-2xl);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  color: var(--ink-0);\n}\n\n.gameover__winner {\n  font-size: var(--text-sm);\n  color: var(--ink-2);\n}\n\n/* Le nom vient de l'URL : il peut être long, accentué, en emoji ou sans espace.\n   Il coupe plutôt que de faire déborder le panneau. */\n.gameover__winner strong {\n  color: var(--ink-0);\n  font-weight: var(--weight-black);\n  overflow-wrap: anywhere;\n}\n\n.gameover__scoreblock {\n  margin-top: var(--space-6);\n}\n\n.gameover__score {\n  font-family: var(--font-mono);\n  font-weight: var(--weight-black);\n  line-height: 1;\n  font-variant-numeric: tabular-nums;\n}\n\n.gameover__score--winner {\n  font-size: var(--text-xl);\n  color: var(--block-S);\n}\n\n.gameover__score--loser {\n  font-size: var(--text-lg);\n  color: var(--ink-1);\n}\n\n.gameover__wait {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n}\n\n/* ═══ Leaderboard ══════════════════════════════════════════════════════════ */\n.lb-overlay {\n  position: fixed;\n  inset: 0;\n  background: var(--scrim);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: var(--space-4);\n  z-index: 1000;\n}\n\n.lb-modal {\n  position: relative;\n  width: min(460px, 100%);\n  max-height: 90vh;\n  overflow-y: auto;\n  padding: var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.lb-modal__title {\n  font-size: var(--text-md);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  text-align: center;\n  color: var(--ink-0);\n  margin-bottom: var(--space-6);\n}\n\n.lb-modal__close {\n  position: absolute;\n  top: 0;\n  right: 0;\n  width: var(--tap);\n  height: var(--tap);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: transparent;\n  border: none;\n  border-left: var(--border);\n  border-bottom: var(--border);\n  color: var(--ink-1);\n  font-size: var(--text-md);\n  line-height: 1;\n  cursor: pointer;\n  transition: background var(--duration-fast) linear;\n}\n\n.lb-modal__close:hover {\n  background: var(--accent);\n  color: var(--ink-0);\n}\n\n.lb-modal__empty {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n  text-align: center;\n  padding: var(--space-4) 0;\n}\n\n.lb-row {\n  display: flex;\n  align-items: center;\n  gap: var(--space-3);\n  padding: var(--space-3) var(--space-2);\n  border-bottom: var(--border);\n  font-family: var(--font-mono);\n}\n\n/* Première place : la barre latérale, pas un fond doré. Le classement se lit\n   déjà dans l'ordre — l'accent ne fait que pointer le sommet. */\n.lb-row--gold {\n  border-left: var(--rail) solid var(--accent);\n  padding-left: var(--space-3);\n}\n\n.lb-row__rank {\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-2);\n  width: var(--space-8);\n  flex-shrink: 0;\n  font-variant-numeric: tabular-nums;\n}\n\n.lb-row--gold .lb-row__rank {\n  color: var(--accent-ink);\n}\n\n.lb-row__name {\n  flex: 1;\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.lb-row__score {\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-1);\n  white-space: nowrap;\n  font-variant-numeric: tabular-nums;\n}\n\n/* ═══ Scrollbar ════════════════════════════════════════════════════════════ */\n::-webkit-scrollbar {\n  width: 10px;\n}\n\n::-webkit-scrollbar-track {\n  background: var(--bg);\n}\n\n::-webkit-scrollbar-thumb {\n  background: var(--line-strong);\n}\n\n/* ═══ Responsive ═══════════════════════════════════════════════════════════\n   Seuil calculé, pas rond : 192 + 24 + 404 + 24 + 208 = 852px pour les trois\n   colonnes. En dessous les rails écrasaient le plateau. Le puits reste premier\n   — l'empilement le garde en tête, les instruments dessous, la référence en\n   dernier. */\n@media (max-width: 880px) {\n  .game-layout {\n    grid-template-columns: repeat(2, minmax(0, 1fr));\n    grid-template-rows: repeat(4, auto);\n    grid-template-areas:\n      \"stage stage\"\n      \"hold  next\"\n      \"foes  foes\"\n      \"meta  meta\";\n    row-gap: var(--space-5);\n    padding: var(--space-4) var(--space-3);\n  }\n\n  /* Hold et Next épaule contre épaule au centre plutôt qu'aux deux bords. */\n  .game-hold {\n    justify-self: end;\n  }\n\n  .game-next {\n    justify-self: start;\n  }\n\n  .game-foes,\n  .game-meta {\n    align-self: start;\n    align-items: center;\n  }\n\n  .opponents-stack {\n    flex-direction: row;\n    flex-wrap: wrap;\n    justify-content: center;\n    max-height: none;\n    overflow: visible;\n  }\n\n  /* La référence passe en rangée : elle ne doit pas rallonger la page sous le\n     puits pour un contenu qu'on lit une fois. */\n  .game-meta {\n    flex-direction: row;\n    flex-wrap: wrap;\n    justify-content: center;\n    column-gap: var(--space-8);\n  }\n}\n\n@media (max-width: 640px) {\n  :root {\n    --text-2xl: 2.75rem;\n    --text-xl: 2rem;\n  }\n\n  .lobby,\n  .gameover,\n  .lb-modal {\n    padding: var(--space-6) var(--space-4);\n  }\n\n  .score-panel__group {\n    gap: var(--space-4);\n  }\n}\n\n/* ═══ Contraste forcé (Windows High Contrast) ══════════════════════════════\n   Le mode remplace toutes les couleurs par la palette système. Ici la couleur\n   d'une pièce est une information de jeu, pas de la décoration : sans exception\n   explicite les sept tétrominos deviennent identiques et la partie devient\n   injouable. */\n@media (forced-colors: active) {\n  .cell--I,\n  .cell--O,\n  .cell--T,\n  .cell--S,\n  .cell--Z,\n  .cell--J,\n  .cell--L,\n  .cell--penalty,\n  .opponent__bar {\n    forced-color-adjust: none;\n  }\n\n  .board,\n  .panel,\n  .notice,\n  .opponent,\n  .opponent__spectrum,\n  .preview__grid,\n  .lobby,\n  .gameover,\n  .lb-modal {\n    border: 1px solid CanvasText;\n  }\n}\n\n/* ═══ Mouvement réduit ═════════════════════════════════════════════════════\n   On garde les changements d'état (opacité, couleur) : ce sont des retours\n   d'information de jeu. On supprime les déplacements et les particules. */\n@media (prefers-reduced-motion: reduce) {\n  .stat__value--flash,\n  .cell--rising,\n  .drop-trail,\n  .board--penalty .board__surge {\n    animation: none;\n  }\n\n  /* La pénalité reste annoncée — région live, lignes hachurées au sol, spectrum\n     à jour ; c'est la poussée et la lueur qui disparaissent, pas l'information.\n     Le sillage sans animation ne doit rien laisser derrière lui. */\n  .drop-trail,\n  .particles {\n    display: none;\n  }\n\n  *,\n  *::before,\n  *::after {\n    transition-duration: var(--duration-fast) !important;\n    scroll-behavior: auto !important;\n  }\n}\n",
+          "/* ─────────────────────────────────────────────────────────────────────────────\n   src/client/styles/global.css\n   Direction : brutalist arcade.\n   Fond charbon uni, blocs strictement plats, angles droits, bordures nettes,\n   hiérarchie portée par la taille et la graisse — jamais par une ombre ou un\n   dégradé. Aucune police distante : la pile système suffit et ne bloque rien.\n   ───────────────────────────────────────────────────────────────────────────── */\n\n/* ═══ Tokens ═══════════════════════════════════════════════════════════════ */\n:root {\n  /* ── Surfaces ─────────────────────────────────────────────────────────────\n     Quatre paliers seulement. Sans ombre pour séparer deux plans, c'est le\n     saut de valeur et la bordure qui font tout le travail : plus de paliers et\n     ils cessent d'être distinguables. */\n  --bg: #101010;\n  --surface-1: #171717;\n  --surface-2: #1e1e1e;\n  --surface-3: #262626;\n\n  /* ── Traits ────────────────────────────────────────────────────────────── */\n  --line: #2e2e2e; /* séparation discrète, quadrillage du puits */\n  --line-strong: #4d4d4d; /* contour d'un objet, ghost */\n\n  /* ── Encre — contrastes mesurés sur --bg ───────────────────────────────── */\n  --ink-0: #f2f2f2; /* 16.4:1 — titres, valeurs                */\n  --ink-1: #b9b9b9; /*  8.6:1 — texte courant                  */\n  --ink-2: #909090; /*  4.9:1 — libellés, plancher AA           */\n  --ink-inverse: #101010; /* sur fond clair (bouton primaire)  */\n\n  /* ── Accent ────────────────────────────────────────────────────────────────\n     Rouge réservé au danger : pénalité reçue, joueur éliminé, refus serveur.\n     Le bouton primaire est blanc — un bouton rouge et un tétromino Z rouge\n     dans le même écran diraient la même chose sans le même sens. */\n  --accent: #ff3b30;\n  --accent-ink: #ff7a72; /* 6.1:1 — la même famille, lisible en texte */\n  /* Sur un aplat d'accent, l'encre s'inverse : blanc sur ce rouge ne donne que\n     3.2:1, l'encre sombre 5.4:1. Même mécanique que le bouton primaire — la\n     surface porte la couleur, le texte porte le contraste. */\n  --accent-on: var(--ink-inverse);\n\n  /* Voile des surcouches. Un noir franc et non le fond assombri : le classement\n     doit couper la partie, pas s'y fondre. */\n  --scrim: rgb(0 0 0 / 0.78);\n\n  /* ── Tétrominos ────────────────────────────────────────────────────────────\n     Teintes canoniques du sujet, remontées en luminosité pour le fond sombre.\n     Contrainte qui prime sur la fidélité : chacune doit rester distincte des\n     six autres ET du gris de pénalité, sinon un bloc posé se confond avec une\n     ligne indestructible. */\n  --block-I: #3ad6f0;\n  --block-O: #f7d047;\n  --block-T: #c058e0;\n  --block-S: #4bd763;\n  --block-Z: #f0453f;\n  --block-J: #4a7bf0;\n  --block-L: #f79433;\n  --block-penalty: #4f4f4f;\n\n  /* ── Typographie ───────────────────────────────────────────────────────────\n     Deux familles système, zéro requête réseau. Le mono porte tout ce qui se\n     compare (scores, niveau, noms de room, touches) : les chiffres y sont de\n     largeur fixe, une valeur qui change ne déplace donc jamais son voisin. */\n  --font-ui:\n    ui-sans-serif,\n    system-ui,\n    -apple-system,\n    \"Segoe UI\",\n    Roboto,\n    \"Helvetica Neue\",\n    Arial,\n    sans-serif;\n  --font-mono:\n    ui-monospace,\n    SFMono-Regular,\n    \"SF Mono\",\n    Menlo,\n    Consolas,\n    \"Liberation Mono\",\n    monospace;\n\n  /* Échelle modulaire ~1.25, sept pas nommés — plus aucune taille en dur. */\n  --text-2xs: 0.6875rem; /* 11px */\n  --text-xs: 0.8125rem; /* 13px */\n  --text-sm: 0.9375rem; /* 15px */\n  --text-md: 1.125rem; /* 18px */\n  --text-lg: 1.75rem; /* 28px */\n  --text-xl: 2.5rem; /* 40px */\n  --text-2xl: 4rem; /* 64px */\n\n  --weight-normal: 500;\n  --weight-bold: 700;\n  --weight-black: 900;\n\n  /* Interlettrage : négatif sur les gros titres (ils se resserrent), positif\n     sur les capitales de petite taille (elles s'étouffent sinon). */\n  --tracking-tight: -0.02em;\n  --tracking-mid: 0.06em; /* capitales de taille moyenne : nom de room, bouton */\n  --tracking-wide: 0.14em;\n\n  /* ── Espacement, base 4 ───────────────────────────────────────────────── */\n  --space-1: 4px;\n  --space-2: 8px;\n  --space-3: 12px;\n  --space-4: 16px;\n  --space-5: 20px;\n  --space-6: 24px;\n  --space-8: 32px;\n  --space-10: 40px;\n\n  /* ── Formes ────────────────────────────────────────────────────────────────\n     Zéro rayon, c'est la décision de fond de la direction. Le token existe\n     quand même : c'est le seul endroit où la revenir dessus est possible. */\n  --radius: 0;\n  --border: 1px solid var(--line);\n  --border-strong: 2px solid var(--line-strong);\n  /* Rail : le filet vertical qui qualifie une ligne de liste — soi-même dans le\n     lobby, la première place du classement. Sans ombre ni fond coloré, c'est le\n     seul marqueur d'appartenance dont la direction dispose. */\n  --rail: 3px;\n\n  /* ── Mouvement ────────────────────────────────────────────────────────── */\n  --duration-fast: 0.12s;\n  --duration-base: 0.2s;\n  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);\n\n  /* ── Puits ─────────────────────────────────────────────────────────────────\n     Le plateau ne défile jamais. Budget vertical hors puits, mesuré : bandeau\n     de stats (74) + gouttière (12) + bordures (4) + padding de page (48), soit\n     138 — la marge restante absorbe une valeur de score qui passe à la ligne.\n     Le terme en vw garde les 10 colonnes dans la largeur sur mobile.\n     Première déclaration en vh : repli pour les moteurs sans dvh. */\n  --cell-size: min(40px, calc((100vh - 150px) / 20), calc((100vw - 32px) / 10));\n  --cell-size: min(\n    40px,\n    calc((100dvh - 150px) / 20),\n    calc((100vw - 32px) / 10)\n  );\n  --board-width: calc(var(--cell-size) * 10 + 4px);\n\n  /* Puits miniature de l'adversaire : assez haut pour que ses 20 rangées se\n     distinguent, assez bas pour en empiler plusieurs sans faire défiler. */\n  --spectrum-height: 84px;\n\n  /* Panneau centré sur écran vide (lobby, accueil, fin de partie). Une seule\n     largeur : deux cartes du même rôle qui ne tombent pas d'aplomb entre deux\n     écrans, c'est la porte d'entrée du projet qui bouge sous le correcteur. */\n  --panel-width: 480px;\n\n  /* Cible tactile minimale (WCAG 2.5.5) */\n  --tap: 44px;\n}\n\n/* ═══ Reset ════════════════════════════════════════════════════════════════ */\n*,\n*::before,\n*::after {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n\nhtml,\nbody {\n  height: 100%;\n  background: var(--bg);\n  color: var(--ink-1);\n  font-family: var(--font-ui);\n  font-size: 16px;\n  font-weight: var(--weight-normal);\n  line-height: 1.5;\n  -webkit-font-smoothing: antialiased;\n}\n\n#root {\n  min-height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n\nh1,\nh2,\nh3 {\n  color: var(--ink-0);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  line-height: 1;\n}\n\n/* Le contour est le vocabulaire de toute la direction : ici il change juste de\n   couleur pour se voir par-dessus n'importe quelle surface. */\n:focus-visible {\n  outline: 2px solid var(--ink-0);\n  outline-offset: 2px;\n}\n\n/* Visible pour les lecteurs d'écran uniquement (régions live). */\n.sr-only {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  padding: 0;\n  margin: -1px;\n  overflow: hidden;\n  clip: rect(0, 0, 0, 0);\n  white-space: nowrap;\n  border: 0;\n}\n\n/* ═══ Primitives typographiques ════════════════════════════════════════════ */\n\n/* Intertitre : capitales espacées, la plus petite taille du système. Une seule\n   section du jeu en porte un — « Opponents ». Hold, Next et les raccourcis se\n   lisent sans qu'on les annonce. */\n.eyebrow {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  margin-bottom: var(--space-2);\n}\n\n/* Statistique : libellé au-dessus, valeur en dessous. Le seul motif de données\n   du jeu — score, lignes, niveau, score adverse en partagent la mécanique. */\n.stat {\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n  min-width: 0;\n}\n\n.stat__label {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n  max-width: 14ch;\n}\n\n.stat__value {\n  font-family: var(--font-mono);\n  font-size: var(--text-md);\n  font-weight: var(--weight-bold);\n  line-height: 1.1;\n  color: var(--ink-0);\n  font-variant-numeric: tabular-nums;\n}\n\n.stat--strong .stat__value {\n  font-size: var(--text-lg);\n  font-weight: var(--weight-black);\n}\n\n.stat__value--flash {\n  animation: statFlash var(--duration-base) var(--ease-out);\n}\n\n@keyframes statFlash {\n  from {\n    color: var(--accent-ink);\n  }\n  to {\n    color: var(--ink-0);\n  }\n}\n\n/* ═══ Structure ════════════════════════════════════════════════════════════ */\n.app-main {\n  flex: 1;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n\n.screen {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 100vh;\n  padding: var(--space-6) var(--space-4);\n}\n\n.screen__hint {\n  font-family: var(--font-mono);\n  font-size: var(--text-sm);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n}\n\n/* Grille à zones nommées : le puits mène et reste premier dans le DOM à toutes\n   les tailles, ce sont les zones qui le replacent au centre en large et en tête\n   en étroit. Deux rangées : les instruments (hold, next) collés au bord haut du\n   puits, la référence et les adversaires alignés sur son bord bas. */\n.game-layout {\n  display: grid;\n  /* Hauteur d'écran assumée : sans elle, `1fr` n'a rien à résoudre et la rangée\n     basse grandit avec son contenu — à sept adversaires le rail poussait le bas\n     de page sous le plateau au lieu de défiler chez lui. Repli en vh d'abord,\n     pour les moteurs sans dvh. */\n  height: 100vh;\n  height: 100dvh;\n  grid-template-columns: minmax(0, 12rem) auto minmax(0, 13rem);\n  grid-template-rows: auto minmax(0, 1fr);\n  grid-template-areas:\n    \"hold stage next\"\n    \"meta stage foes\";\n  justify-content: center;\n  column-gap: var(--space-6);\n  row-gap: var(--space-8);\n  padding: var(--space-6) var(--space-4);\n  width: 100%;\n}\n\n.game-stage {\n  grid-area: stage;\n  align-self: start;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-3);\n}\n\n.game-hold {\n  grid-area: hold;\n  align-self: start;\n  justify-self: end;\n}\n\n.game-next {\n  grid-area: next;\n  align-self: start;\n}\n\n/* Le rail des adversaires part du haut de sa rangée et défile chez lui : à huit\n   joueurs il ne doit pas allonger la page sous le puits. */\n.game-foes {\n  grid-area: foes;\n  align-self: stretch;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-4);\n  min-height: 0;\n}\n\n/* L'intertitre reste hors de la pile qui défile — sinon il disparaît au premier\n   scroll et la colonne n'a plus de nom. */\n.game-foes__group {\n  display: flex;\n  flex-direction: column;\n  flex: 1;\n  min-height: 0;\n}\n\n/* Référence (raccourcis, room) : posée sur le bord bas du puits, hors du champ\n   de jeu. */\n.game-meta {\n  grid-area: meta;\n  align-self: end;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-5);\n}\n\n/* ═══ Panneau ══════════════════════════════════════════════════════════════ */\n.panel {\n  background: var(--surface-1);\n  border: var(--border);\n  border-radius: var(--radius);\n  padding: var(--space-4);\n}\n\n/* ═══ Boutons ══════════════════════════════════════════════════════════════ */\n.btn {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  min-height: var(--tap);\n  padding: var(--space-3) var(--space-6);\n  border: var(--border-strong);\n  border-radius: var(--radius);\n  background: transparent;\n  color: var(--ink-0);\n  cursor: pointer;\n  transition:\n    background var(--duration-fast) linear,\n    color var(--duration-fast) linear,\n    border-color var(--duration-fast) linear;\n}\n\n/* L'inversion complète du couple fond/encre remplace l'ombre portée et le\n   soulèvement : l'état actif se voit de loin sans que rien ne bouge. */\n.btn--primary {\n  background: var(--ink-0);\n  color: var(--ink-inverse);\n  border-color: var(--ink-0);\n}\n\n.btn--primary:hover {\n  background: var(--accent);\n  border-color: var(--accent);\n  color: var(--accent-on);\n}\n\n.btn--secondary:hover {\n  background: var(--surface-3);\n  border-color: var(--ink-0);\n}\n\n/* Désactivé : lisible (WCAG n'exempte pas l'information portée par ce bouton). */\n.btn:disabled {\n  background: transparent;\n  color: var(--ink-2);\n  border-color: var(--line);\n  cursor: not-allowed;\n}\n\n.btn:disabled:hover {\n  background: transparent;\n  color: var(--ink-2);\n  border-color: var(--line);\n}\n\n/* ═══ Bandeau d'état ═══════════════════════════════════════════════════════\n   Coupure réseau ou refus du serveur, annoncé par-dessus la partie et jamais à\n   sa place : le joueur garde son plateau sous les yeux. */\n.notice {\n  position: fixed;\n  top: 0;\n  left: 50%;\n  transform: translateX(-50%);\n  z-index: 100;\n  max-width: min(92vw, 560px);\n  padding: var(--space-3) var(--space-5);\n  background: var(--accent);\n  color: var(--accent-on);\n  border: none;\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-mid);\n  text-align: center;\n  text-transform: uppercase;\n  overflow-wrap: anywhere;\n}\n\n/* ═══ Puits ════════════════════════════════════════════════════════════════ */\n.board {\n  position: relative;\n  display: grid;\n  grid-template-columns: repeat(10, var(--cell-size));\n  grid-template-rows: repeat(20, var(--cell-size));\n  background: var(--surface-1);\n  border: var(--border-strong);\n  border-radius: var(--radius);\n  overflow: hidden;\n  /* Isole les 200 cellules du reste du document : une pièce qui descend ne peut\n     plus provoquer de calcul de mise en page hors du plateau. Crée aussi le\n     contexte d'empilement dont ::before a besoin pour passer sous les cellules. */\n  contain: layout paint;\n  transition: filter 0.4s var(--ease-out);\n}\n\n/* Éliminé : le puits se vide de sa couleur au lieu de se figer sans rien dire.\n   La partie continue à côté, ce plateau-là est fini — l'encre le dit. */\n.board--dead {\n  filter: grayscale(1) brightness(0.55);\n}\n\n/* Le quadrillage est peint par le puits, pas par 200 cellules vides bordées :\n   une seule boîte à peindre. Il est franc, pas suggéré — c'est la grille de\n   lecture du jeu, elle doit se compter à l'œil. */\n.board::before {\n  content: \"\";\n  position: absolute;\n  inset: 0;\n  z-index: -1;\n  pointer-events: none;\n  background-image:\n    repeating-linear-gradient(\n      to right,\n      var(--line) 0 1px,\n      transparent 1px var(--cell-size)\n    ),\n    repeating-linear-gradient(\n    to bottom,\n    var(--line) 0 1px,\n    transparent 1px var(--cell-size)\n  );\n}\n\n/* Flash de ligne effacée — un seul élément, jamais dans le flux de la grille.\n   Piloté depuis Board.jsx (Web Animations API) : l'intensité dit combien de\n   lignes sont parties, un Tetris ne peut pas se confondre avec un simple. */\n.board__flash {\n  position: absolute;\n  inset: 0;\n  background: var(--ink-0);\n  opacity: 0;\n  pointer-events: none;\n  z-index: 60;\n}\n\n/* Lueur de pénalité — la seule chose du jeu qui vienne du sol : effacer une\n   ligne et en encaisser trois ne peuvent pas se ressembler. */\n.board__surge {\n  position: absolute;\n  inset: 0;\n  pointer-events: none;\n  opacity: 0;\n  z-index: 55;\n  background: linear-gradient(\n    to top,\n    var(--accent),\n    color-mix(in srgb, var(--accent) 25%, transparent) 22%,\n    transparent 46%\n  );\n}\n\n.board--penalty .board__surge {\n  animation: surge 0.4s var(--ease-out);\n}\n\n@keyframes surge {\n  0% {\n    opacity: 0;\n  }\n  16% {\n    opacity: 0.85;\n  }\n  100% {\n    opacity: 0;\n  }\n}\n\n/* Calque de la pièce en cours et du sillage : une grille jumelle du puits,\n   posée par-dessus. Le tas et ses 200 cellules sont auto-placés ; une cellule\n   explicitement positionnée dans la même grille leur retire une case libre et\n   pousse d'autant la fin du tas dans une rangée implicite — le plateau gagnait\n   une 21ᵉ rangée et sortait de l'écran. Les deux grilles restent séparées. */\n.board__layer {\n  position: absolute;\n  inset: 0;\n  z-index: 40;\n  display: grid;\n  grid-template-columns: repeat(10, var(--cell-size));\n  grid-template-rows: repeat(20, var(--cell-size));\n  pointer-events: none;\n}\n\n/* Sillage du hard drop — une bande par colonne traversée, placée dans la grille\n   du calque comme les cellules de la pièce. Sort plus vite qu'elle n'entre : la\n   pièce est déjà posée, la trace n'a rien à faire attendre. */\n.drop-trail {\n  pointer-events: none;\n  background: var(--tint);\n  animation: dropTrail 0.22s linear both;\n}\n\n@keyframes dropTrail {\n  from {\n    opacity: 0.45;\n  }\n  to {\n    opacity: 0;\n  }\n}\n\n/* ═══ Cellules ═════════════════════════════════════════════════════════════ */\n.cell {\n  width: var(--cell-size);\n  height: var(--cell-size);\n}\n\n/* Dans le puits, rien à peindre : la case vide n'est plus qu'un emplacement de\n   grille, le quadrillage vient de .board::before. Les aperçus Next/Hold gardent\n   leur lattice, eux ne se repeignent pas à 30 Hz. */\n.cell--empty {\n  background: transparent;\n  border: 1px solid var(--line);\n}\n\n.board .cell--empty {\n  border: none;\n}\n\n/* Le ghost porte la couleur de sa pièce : deux tétrominos ne se posent pas au\n   même endroit, la projection doit dire lequel arrive. */\n.cell--ghost {\n  background: transparent;\n  border: 2px solid var(--ghost, var(--line-strong));\n  opacity: 0.5;\n}\n\n.cell--ghost-I {\n  --ghost: var(--block-I);\n}\n.cell--ghost-O {\n  --ghost: var(--block-O);\n}\n.cell--ghost-T {\n  --ghost: var(--block-T);\n}\n.cell--ghost-S {\n  --ghost: var(--block-S);\n}\n.cell--ghost-Z {\n  --ghost: var(--block-Z);\n}\n.cell--ghost-J {\n  --ghost: var(--block-J);\n}\n.cell--ghost-L {\n  --ghost: var(--block-L);\n}\n\n/* Aplat strict. La bordure couleur du fond sépare deux blocs voisins de même\n   teinte sans rien simuler : c'est un trait, pas une lumière. */\n.cell--I,\n.cell--O,\n.cell--T,\n.cell--S,\n.cell--Z,\n.cell--J,\n.cell--L,\n.cell--penalty {\n  border: 1px solid var(--bg);\n}\n\n.cell--I {\n  background: var(--block-I);\n}\n.cell--O {\n  background: var(--block-O);\n}\n.cell--T {\n  background: var(--block-T);\n}\n.cell--S {\n  background: var(--block-S);\n}\n.cell--Z {\n  background: var(--block-Z);\n}\n.cell--J {\n  background: var(--block-J);\n}\n.cell--L {\n  background: var(--block-L);\n}\n\n/* Indestructible : hachures. Le gris seul se lirait comme un bloc terne, les\n   diagonales disent « ça ne partira pas » sans dépendre de la couleur. */\n.cell--penalty {\n  background: repeating-linear-gradient(\n    45deg,\n    var(--block-penalty) 0 3px,\n    var(--surface-3) 3px 7px\n  );\n}\n\n/* La pièce en cours est la seule chose vivante du puits : elle est franche,\n   le tas est d'un cran en retrait. */\n.cell--stacked {\n  filter: brightness(0.82);\n}\n\n/* Pénalité reçue : le tas ne se téléporte pas d'un cran vers le haut, il est\n   poussé. Chaque cellule pleine part de `--rise` rangées plus bas — la même\n   distance pour toutes, c'est un seul mouvement. Seules les cases pleines\n   portent la classe : une case vide ne peint rien. */\n.cell--rising {\n  animation: penaltyRise 0.3s var(--ease-out) both;\n}\n\n@keyframes penaltyRise {\n  from {\n    transform: translate3d(0, calc(var(--rise, 0) * 100%), 0);\n  }\n  to {\n    transform: translate3d(0, 0, 0);\n  }\n}\n\n/* ═══ Particules d'effacement ══════════════════════════════════════════════\n   Des éclats carrés, pas des étincelles : même vocabulaire de forme que les\n   blocs dont ils sortent. */\n.particles {\n  position: absolute;\n  inset: 0;\n  overflow: hidden;\n  pointer-events: none;\n  z-index: 50;\n}\n\n.particle {\n  position: absolute;\n  width: var(--size);\n  height: var(--size);\n  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);\n  background: var(--tint);\n  animation: burst var(--dur) linear both;\n  will-change: transform, opacity;\n}\n\n@keyframes burst {\n  from {\n    transform: translate3d(0, 0, 0);\n    opacity: 1;\n  }\n  to {\n    transform: translate3d(var(--dx), var(--dy), 0);\n    opacity: 0;\n  }\n}\n\n/* ═══ Bandeau de statistiques ══════════════════════════════════════════════\n   Calé sur la largeur exacte du puits, il en devient le bord haut et non un\n   panneau de plus. Même hauteur solo et multi : le puits ne remonte pas de\n   20px quand un adversaire arrive. */\n.score-panel {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: var(--space-4);\n  width: var(--board-width);\n  max-width: 100%;\n  padding: var(--space-3) 0;\n  border-bottom: var(--border);\n}\n\n.score-panel__group {\n  display: flex;\n  align-items: baseline;\n  gap: var(--space-6);\n  min-width: 0;\n}\n\n/* L'adversaire est aligné à droite : deux camps, deux bords. */\n.score-panel__group--rival {\n  text-align: right;\n}\n\n.score-panel__group--rival .stat {\n  align-items: flex-end;\n}\n\n/* ═══ Aperçus Next / Hold ══════════════════════════════════════════════════ */\n.preview__label {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  margin-bottom: var(--space-2);\n}\n\n.preview__grid {\n  display: flex;\n  flex-direction: column;\n  width: fit-content;\n  padding: var(--space-2);\n  background: var(--surface-1);\n  border: var(--border);\n  transition: opacity var(--duration-base) linear;\n}\n\n/* Hold déjà consommé : on grise la pièce, jamais son libellé. */\n.preview--spent .preview__grid {\n  opacity: 0.35;\n}\n\n.preview__row {\n  display: flex;\n}\n\n/* Plafonné à 22px mais jamais plus gros qu'une case du puits : sur un écran\n   court, un aperçu qui dépasse le plateau inverse la hiérarchie. */\n.preview__grid .cell {\n  width: min(22px, var(--cell-size));\n  height: min(22px, var(--cell-size));\n}\n\n/* ═══ Adversaires ══════════════════════════════════════════════════════════ */\n.opponent {\n  background: var(--surface-1);\n  border: var(--border);\n  padding: var(--space-3);\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n/* Éliminé : on éteint le spectrum, pas le texte. Baisser l'opacité du bloc\n   entier ferait tomber le nom sous le seuil de contraste. */\n.opponent--dead {\n  border-style: dashed;\n}\n\n.opponent__name {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n/* Depuis que le spectrum est la seule fenêtre sur l'adversaire, il est traité\n   comme un puits miniature et non comme un graphique : même fond, même\n   quadrillage sur 20 rangées. */\n.opponent__spectrum {\n  position: relative;\n  display: grid;\n  grid-template-columns: repeat(10, 1fr);\n  align-items: end;\n  gap: 1px;\n  height: var(--spectrum-height);\n  padding: 2px;\n  background: var(--bg);\n  border: var(--border);\n  overflow: hidden;\n  /* Les barres s'animent en hauteur : la containment enferme ce recalcul dans\n     le cadre au lieu de le laisser remonter la page. */\n  contain: layout paint;\n}\n\n/* Les 20 rangées du terrain adverse : une barre à mi-hauteur se lit « 10 lignes\n   empilées » sans compter, comme sur son propre plateau. */\n.opponent__spectrum::after {\n  content: \"\";\n  position: absolute;\n  inset: 2px;\n  pointer-events: none;\n  background: repeating-linear-gradient(\n    to bottom,\n    var(--line) 0 1px,\n    transparent 1px calc(100% / 20)\n  );\n}\n\n/* Encre neutre, jamais une couleur de pièce : la hauteur est la seule\n   information transmise, la teinte n'en porte aucune. La barre monte au lieu de\n   sauter — c'est la seule façon de voir que les lignes qu'on vient d'envoyer\n   sont bien tombées chez l'adversaire. */\n.opponent__bar {\n  height: 100%;\n  background: var(--ink-1);\n  /* Le remplissage passe par une mise à l'échelle, pas par la hauteur : dix\n     barres qui changent de `height` relayoutent le cadre à chaque verrouillage\n     adverse, et il y a un cadre par adversaire. `transform` ne touche que la\n     composition — même règle que le FLIP des lignes de pénalité. */\n  transform: scaleY(var(--fill, 0));\n  transform-origin: bottom;\n  transition: transform var(--duration-base) var(--ease-out);\n}\n\n.opponent--dead .opponent__name {\n  color: var(--ink-2);\n}\n\n.opponent--dead .opponent__bar {\n  background: var(--line-strong);\n}\n\n/* Une room n'a pas de limite de joueurs : au-delà de ce que l'écran tient, la\n   colonne défile au lieu d'étirer la page sous le plateau. Elle se cale sur la\n   hauteur de sa colonne — un plafond en vh l'ignore et, à sept joueurs sur un\n   écran court, repousse le bas de page sous le plateau. */\n.opponents-stack {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-3);\n  flex: 1;\n  min-height: 0;\n  overflow-y: auto;\n  padding-right: var(--space-1);\n}\n\n/* ═══ Éliminé ══════════════════════════════════════════════════════════════ */\n.eliminated {\n  text-align: center;\n  background: var(--accent);\n  border: none;\n  color: var(--accent-on);\n}\n\n.eliminated__title {\n  font-family: var(--font-mono);\n  font-size: var(--text-sm);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-wide);\n}\n\n.eliminated__hint {\n  font-size: var(--text-xs);\n  margin-top: var(--space-1);\n}\n\n/* ═══ Aide-mémoire clavier ═════════════════════════════════════════════════ */\n.controls {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n.controls__row {\n  display: flex;\n  align-items: center;\n  gap: var(--space-2);\n}\n\n.controls__keys {\n  display: flex;\n  gap: var(--space-1);\n  flex-shrink: 0;\n}\n\n.controls__key {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  line-height: 1;\n  color: var(--ink-0);\n  background: var(--surface-2);\n  border: var(--border);\n  padding: var(--space-1) var(--space-2);\n  min-width: var(--space-6);\n  text-align: center;\n}\n\n.controls__action {\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n}\n\n/* Room et mode : deux faits, pas deux sections. */\n.game-meta__facts {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n.game-meta__fact {\n  display: flex;\n  align-items: baseline;\n  gap: var(--space-2);\n}\n\n.game-meta__key {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  flex-shrink: 0;\n}\n\n.game-meta__value {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  overflow-wrap: anywhere;\n  min-width: 0;\n}\n\n/* ═══ Marque ═══════════════════════════════════════════════════════════════ */\n.brand {\n  font-size: var(--text-xl);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  text-transform: uppercase;\n  text-align: center;\n  text-wrap: balance;\n  color: var(--ink-0);\n}\n\n.brand__accent {\n  color: var(--accent);\n}\n\n/* ═══ Lobby ════════════════════════════════════════════════════════════════ */\n.lobby {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-6);\n  width: var(--panel-width);\n  max-width: 100%;\n  padding: var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.lobby__subtitle {\n  font-size: var(--text-sm);\n  color: var(--ink-2);\n  text-align: center;\n  max-width: 46ch;\n}\n\n.lobby__room {\n  text-align: center;\n}\n\n.lobby__room-name {\n  font-family: var(--font-mono);\n  font-size: var(--text-md);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-mid);\n  color: var(--ink-0);\n  overflow-wrap: anywhere;\n}\n\n.lobby__player-list {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-1);\n}\n\n.lobby__player {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: var(--space-2);\n  padding: var(--space-3);\n  background: var(--surface-2);\n  border-left: var(--rail) solid var(--line-strong);\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n}\n\n/* Soi-même : la barre passe à l'accent, pas le fond. Une ligne de liste ne\n   change pas de nature parce qu'elle vous concerne. */\n.lobby__player--self {\n  border-left-color: var(--accent);\n}\n\n.lobby__player-name--self {\n  color: var(--ink-0);\n  font-weight: var(--weight-bold);\n}\n\n.lobby__player-name {\n  color: var(--ink-1);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.lobby__badge {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  background: var(--ink-0);\n  color: var(--ink-inverse);\n  padding: var(--space-1) var(--space-2);\n  flex-shrink: 0;\n}\n\n.lobby__actions {\n  display: flex;\n  align-items: center;\n  gap: var(--space-3);\n  width: 100%;\n  justify-content: center;\n  flex-wrap: wrap;\n}\n\n/* ═══ Accueil (URL invalide) ═══════════════════════════════════════════════ */\n.home {\n  width: var(--panel-width);\n  max-width: 100%;\n}\n\n.home__example {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n}\n\n/* Le motif d'URL est une donnée à recopier, pas une destination : il prend le\n   mono du reste des valeurs, et surtout pas le survol d'un lien. */\n.home__path {\n  font-family: var(--font-mono);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n}\n\n.home__link {\n  color: var(--ink-0);\n  font-weight: var(--weight-bold);\n}\n\n.home__link:hover {\n  color: var(--accent-ink);\n}\n\n/* Refus du serveur — nom déjà pris, partie en cours. L'accent est réservé au\n   danger et une porte fermée en fait partie ; en encre accent, il reste lisible\n   là où le rouge plein ne le serait pas. */\n.home__refusal {\n  font-family: var(--font-mono);\n  font-size: var(--text-sm);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-mid);\n  text-transform: uppercase;\n  text-align: center;\n  color: var(--accent-ink);\n}\n\n/* ═══ Game Over ════════════════════════════════════════════════════════════ */\n.gameover {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-6);\n  text-align: center;\n  padding: var(--space-10) var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.gameover__title {\n  font-size: var(--text-2xl);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  color: var(--ink-0);\n}\n\n.gameover__winner {\n  font-size: var(--text-sm);\n  color: var(--ink-2);\n}\n\n/* Le nom vient de l'URL : il peut être long, accentué, en emoji ou sans espace.\n   Il coupe plutôt que de faire déborder le panneau. */\n.gameover__winner strong {\n  color: var(--ink-0);\n  font-weight: var(--weight-black);\n  overflow-wrap: anywhere;\n}\n\n.gameover__scoreblock {\n  margin-top: var(--space-6);\n}\n\n.gameover__score {\n  font-family: var(--font-mono);\n  font-weight: var(--weight-black);\n  line-height: 1;\n  font-variant-numeric: tabular-nums;\n}\n\n.gameover__score--winner {\n  font-size: var(--text-xl);\n  color: var(--block-S);\n}\n\n.gameover__score--loser {\n  font-size: var(--text-lg);\n  color: var(--ink-1);\n}\n\n.gameover__wait {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n}\n\n/* ═══ Leaderboard ══════════════════════════════════════════════════════════ */\n.lb-overlay {\n  position: fixed;\n  inset: 0;\n  background: var(--scrim);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: var(--space-4);\n  z-index: 1000;\n}\n\n.lb-modal {\n  position: relative;\n  width: min(460px, 100%);\n  max-height: 90vh;\n  overflow-y: auto;\n  padding: var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.lb-modal__title {\n  font-size: var(--text-md);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  text-align: center;\n  color: var(--ink-0);\n  margin-bottom: var(--space-6);\n}\n\n.lb-modal__close {\n  position: absolute;\n  top: 0;\n  right: 0;\n  width: var(--tap);\n  height: var(--tap);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: transparent;\n  border: none;\n  border-left: var(--border);\n  border-bottom: var(--border);\n  color: var(--ink-1);\n  font-size: var(--text-md);\n  line-height: 1;\n  cursor: pointer;\n  transition: background var(--duration-fast) linear;\n}\n\n.lb-modal__close:hover {\n  background: var(--accent);\n  color: var(--accent-on);\n}\n\n.lb-modal__empty {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n  text-align: center;\n  padding: var(--space-4) 0;\n}\n\n.lb-row {\n  display: flex;\n  align-items: center;\n  gap: var(--space-3);\n  padding: var(--space-3) var(--space-2);\n  border-bottom: var(--border);\n  font-family: var(--font-mono);\n}\n\n/* Première place : la barre latérale, pas un fond doré. Le classement se lit\n   déjà dans l'ordre — l'accent ne fait que pointer le sommet. */\n.lb-row--gold {\n  border-left: var(--rail) solid var(--accent);\n  padding-left: var(--space-3);\n}\n\n.lb-row__rank {\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-2);\n  width: var(--space-8);\n  flex-shrink: 0;\n  font-variant-numeric: tabular-nums;\n}\n\n.lb-row--gold .lb-row__rank {\n  color: var(--accent-ink);\n}\n\n.lb-row__name {\n  flex: 1;\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.lb-row__score {\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-1);\n  white-space: nowrap;\n  font-variant-numeric: tabular-nums;\n}\n\n/* ═══ Scrollbar ════════════════════════════════════════════════════════════ */\n::-webkit-scrollbar {\n  width: 10px;\n}\n\n::-webkit-scrollbar-track {\n  background: var(--bg);\n}\n\n::-webkit-scrollbar-thumb {\n  background: var(--line-strong);\n}\n\n/* ═══ Responsive ═══════════════════════════════════════════════════════════\n   Seuil calculé, pas rond : 192 + 24 + 404 + 24 + 208 = 852px pour les trois\n   colonnes. En dessous les rails écrasaient le plateau. Le puits reste premier\n   — l'empilement le garde en tête, les instruments dessous, la référence en\n   dernier. */\n@media (max-width: 880px) {\n  /* Empilé, le layout reprend la hauteur de son contenu : c'est la page qui\n     défile, le rail n'a plus de colonne à occuper. */\n  .game-layout {\n    height: auto;\n    grid-template-columns: repeat(2, minmax(0, 1fr));\n    grid-template-rows: repeat(4, auto);\n    grid-template-areas:\n      \"stage stage\"\n      \"hold  next\"\n      \"foes  foes\"\n      \"meta  meta\";\n    row-gap: var(--space-5);\n    padding: var(--space-4) var(--space-3);\n  }\n\n  /* Hold et Next épaule contre épaule au centre plutôt qu'aux deux bords. */\n  .game-hold {\n    justify-self: end;\n  }\n\n  .game-next {\n    justify-self: start;\n  }\n\n  .game-foes,\n  .game-meta {\n    align-self: start;\n    align-items: center;\n  }\n\n  /* Empilé, le rail n'a plus de colonne à remplir : les cartes reprennent leur\n     hauteur naturelle et la page défile normalement. */\n  .opponents-stack {\n    flex-direction: row;\n    flex-wrap: wrap;\n    justify-content: center;\n    flex: none;\n    overflow: visible;\n  }\n\n  /* La référence passe en rangée : elle ne doit pas rallonger la page sous le\n     puits pour un contenu qu'on lit une fois. */\n  .game-meta {\n    flex-direction: row;\n    flex-wrap: wrap;\n    justify-content: center;\n    column-gap: var(--space-8);\n  }\n}\n\n@media (max-width: 640px) {\n  :root {\n    --text-2xl: 2.75rem;\n    --text-xl: 2rem;\n  }\n\n  .lobby,\n  .gameover,\n  .lb-modal {\n    padding: var(--space-6) var(--space-4);\n  }\n\n  .score-panel__group {\n    gap: var(--space-4);\n  }\n}\n\n/* ═══ Contraste forcé (Windows High Contrast) ══════════════════════════════\n   Le mode remplace toutes les couleurs par la palette système. Ici la couleur\n   d'une pièce est une information de jeu, pas de la décoration : sans exception\n   explicite les sept tétrominos deviennent identiques et la partie devient\n   injouable. */\n@media (forced-colors: active) {\n  .cell--I,\n  .cell--O,\n  .cell--T,\n  .cell--S,\n  .cell--Z,\n  .cell--J,\n  .cell--L,\n  .cell--penalty,\n  .opponent__bar {\n    forced-color-adjust: none;\n  }\n\n  .board,\n  .panel,\n  .notice,\n  .opponent,\n  .opponent__spectrum,\n  .preview__grid,\n  .lobby,\n  .gameover,\n  .lb-modal {\n    border: 1px solid CanvasText;\n  }\n}\n\n/* ═══ Mouvement réduit ═════════════════════════════════════════════════════\n   On garde les changements d'état (opacité, couleur) : ce sont des retours\n   d'information de jeu. On supprime les déplacements et les particules. */\n@media (prefers-reduced-motion: reduce) {\n  .stat__value--flash,\n  .cell--rising,\n  .drop-trail,\n  .board--penalty .board__surge {\n    animation: none;\n  }\n\n  /* La pénalité reste annoncée — région live, lignes hachurées au sol, spectrum\n     à jour ; c'est la poussée et la lueur qui disparaissent, pas l'information.\n     Le sillage sans animation ne doit rien laisser derrière lui. */\n  .drop-trail,\n  .particles {\n    display: none;\n  }\n\n  *,\n  *::before,\n  *::after {\n    transition-duration: var(--duration-fast) !important;\n    scroll-behavior: auto !important;\n  }\n}\n",
           "",
         ]);
         const l = i;
@@ -264,8 +264,8 @@
           T = Symbol.for("react.forward_ref"),
           P = Symbol.for("react.suspense"),
           R = Symbol.for("react.suspense_list"),
-          O = Symbol.for("react.memo"),
-          L = Symbol.for("react.lazy");
+          L = Symbol.for("react.memo"),
+          O = Symbol.for("react.lazy");
         Symbol.for("react.scope"), Symbol.for("react.debug_trace_mode");
         var j = Symbol.for("react.offscreen");
         Symbol.for("react.legacy_hidden"),
@@ -415,11 +415,11 @@
                     ? "ForwardRef(" + e + ")"
                     : "ForwardRef"),
                   e;
-              case O:
+              case L:
                 return null !== (t = e.displayName || null)
                   ? t
                   : q(e.type) || "Memo";
-              case L:
+              case O:
                 t = e._payload, e = e._init;
                 try {
                   return q(e(t));
@@ -868,7 +868,7 @@
         }
         function Pe() {}
         var Re = !1;
-        function Oe(e, t, n) {
+        function Le(e, t, n) {
           if (Re) return e(t, n);
           Re = !0;
           try {
@@ -877,7 +877,7 @@
             Re = !1, (null !== _e || null !== Se) && (Pe(), Ne());
           }
         }
-        function Le(e, t) {
+        function Oe(e, t) {
           var n = e.stateNode;
           if (null === n) return null;
           var r = ka(n);
@@ -1196,8 +1196,8 @@
           Tt = null,
           Pt = null,
           Rt = null,
-          Ot = new Map(),
           Lt = new Map(),
+          Ot = new Map(),
           jt = [],
           zt =
             "mousedown mouseup touchcancel touchend touchstart auxclick dblclick pointercancel pointerdown pointerup dragend dragstart drop compositionend compositionstart keydown keypress keyup input textInput copy cut paste click change contextmenu reset submit"
@@ -1218,11 +1218,11 @@
               break;
             case "pointerover":
             case "pointerout":
-              Ot.delete(t.pointerId);
+              Lt.delete(t.pointerId);
               break;
             case "gotpointercapture":
             case "lostpointercapture":
-              Lt.delete(t.pointerId);
+              Ot.delete(t.pointerId);
           }
         }
         function Mt(e, t, n, r, a, o) {
@@ -1284,8 +1284,8 @@
             null !== Tt && Dt(Tt) && (Tt = null),
             null !== Pt && Dt(Pt) && (Pt = null),
             null !== Rt && Dt(Rt) && (Rt = null),
-            Ot.forEach(Ft),
-            Lt.forEach(Ft);
+            Lt.forEach(Ft),
+            Ot.forEach(Ft);
         }
         function Bt(e, t) {
           e.blockedOn === t &&
@@ -1309,8 +1309,8 @@
             null !== Tt && Bt(Tt, e),
               null !== Pt && Bt(Pt, e),
               null !== Rt && Bt(Rt, e),
-              Ot.forEach(t),
               Lt.forEach(t),
+              Ot.forEach(t),
               n = 0;
             n < jt.length;
             n++
@@ -1353,10 +1353,10 @@
                     return Rt = Mt(Rt, e, t, n, r, a), !0;
                   case "pointerover":
                     var o = a.pointerId;
-                    return Ot.set(o, Mt(Ot.get(o) || null, e, t, n, r, a)), !0;
+                    return Lt.set(o, Mt(Lt.get(o) || null, e, t, n, r, a)), !0;
                   case "gotpointercapture":
                     return o = a.pointerId,
-                      Lt.set(o, Mt(Lt.get(o) || null, e, t, n, r, a)),
+                      Ot.set(o, Mt(Ot.get(o) || null, e, t, n, r, a)),
                       !0;
                 }
                 return !1;
@@ -1750,7 +1750,7 @@
           Rn = an(
             I({}, un, { propertyName: 0, elapsedTime: 0, pseudoElement: 0 }),
           ),
-          On = I({}, pn, {
+          Ln = I({}, pn, {
             deltaX: function (e) {
               return "deltaX" in e
                 ? e.deltaX
@@ -1770,7 +1770,7 @@
             deltaZ: 0,
             deltaMode: 0,
           }),
-          Ln = an(On),
+          On = an(Ln),
           jn = [9, 13, 27, 32],
           zn = c && "CompositionEvent" in window,
           An = null;
@@ -1856,7 +1856,7 @@
         function nr(e) {
           if ("value" === e.propertyName && Yn(Qn)) {
             var t = [];
-            Vn(t, Qn, e, ke(e)), Oe(Kn, t);
+            Vn(t, Qn, e, ke(e)), Le(Kn, t);
           }
         }
         function rr(e, t, n) {
@@ -2062,23 +2062,23 @@
           Tr = Er("animationstart"),
           Pr = Er("transitionend"),
           Rr = new Map(),
-          Or =
+          Lr =
             "abort auxClick cancel canPlay canPlayThrough click close contextMenu copy cut drag dragEnd dragEnter dragExit dragLeave dragOver dragStart drop durationChange emptied encrypted ended error gotPointerCapture input invalid keyDown keyPress keyUp load loadedData loadedMetadata loadStart lostPointerCapture mouseDown mouseMove mouseOut mouseOver mouseUp paste pause play playing pointerCancel pointerDown pointerMove pointerOut pointerOver pointerUp progress rateChange reset resize seeked seeking stalled submit suspend timeUpdate touchCancel touchEnd touchStart volumeChange scroll toggle touchMove waiting wheel"
               .split(" ");
-        function Lr(e, t) {
+        function Or(e, t) {
           Rr.set(e, t), s(t, [e]);
         }
-        for (var jr = 0; jr < Or.length; jr++) {
-          var zr = Or[jr];
-          Lr(zr.toLowerCase(), "on" + (zr[0].toUpperCase() + zr.slice(1)));
+        for (var jr = 0; jr < Lr.length; jr++) {
+          var zr = Lr[jr];
+          Or(zr.toLowerCase(), "on" + (zr[0].toUpperCase() + zr.slice(1)));
         }
-        Lr(Cr, "onAnimationEnd"),
-          Lr(Nr, "onAnimationIteration"),
-          Lr(Tr, "onAnimationStart"),
-          Lr("dblclick", "onDoubleClick"),
-          Lr("focusin", "onFocus"),
-          Lr("focusout", "onBlur"),
-          Lr(Pr, "onTransitionEnd"),
+        Or(Cr, "onAnimationEnd"),
+          Or(Nr, "onAnimationIteration"),
+          Or(Tr, "onAnimationStart"),
+          Or("dblclick", "onDoubleClick"),
+          Or("focusin", "onFocus"),
+          Or("focusout", "onBlur"),
+          Or(Pr, "onTransitionEnd"),
           u("onMouseEnter", ["mouseout", "mouseover"]),
           u("onMouseLeave", ["mouseout", "mouseover"]),
           u("onPointerEnter", ["pointerout", "pointerover"]),
@@ -2240,7 +2240,7 @@
               r = r.return;
             }
           }
-          Oe(function () {
+          Le(function () {
             var r = o, a = ke(n), i = [];
             e: {
               var l = Rr.get(e);
@@ -2303,7 +2303,7 @@
                     s = fn;
                     break;
                   case "wheel":
-                    s = Ln;
+                    s = On;
                     break;
                   case "copy":
                   case "cut":
@@ -2329,7 +2329,7 @@
                   if (
                     5 === p.tag && null !== m &&
                     (p = m,
-                      null !== f && null != (m = Le(h, f)) &&
+                      null !== f && null != (m = Oe(h, f)) &&
                       c.push(Vr(h, m, p))), d
                   ) break;
                   h = h.return;
@@ -2522,8 +2522,8 @@
             var a = e, o = a.stateNode;
             5 === a.tag && null !== o &&
             (a = o,
-              null != (o = Le(e, n)) && r.unshift(Vr(e, o, a)),
-              null != (o = Le(e, t)) && r.push(Vr(e, o, a))), e = e.return;
+              null != (o = Oe(e, n)) && r.unshift(Vr(e, o, a)),
+              null != (o = Oe(e, t)) && r.push(Vr(e, o, a))), e = e.return;
           }
           return r;
         }
@@ -2541,8 +2541,8 @@
             5 === l.tag && null !== u &&
             (l = u,
               a
-                ? null != (s = Le(n, o)) && i.unshift(Vr(n, s, l))
-                : a || null != (s = Le(n, o)) && i.push(Vr(n, s, l))),
+                ? null != (s = Oe(n, o)) && i.unshift(Vr(n, s, l))
+                : a || null != (s = Oe(n, o)) && i.push(Vr(n, s, l))),
               n = n.return;
           }
           0 !== i.length && e.push({ event: t, listeners: i });
@@ -2673,7 +2673,7 @@
           _a++, xa[_a] = e.current, e.current = t;
         }
         var Na = {}, Ta = Sa(Na), Pa = Sa(!1), Ra = Na;
-        function Oa(e, t) {
+        function La(e, t) {
           var n = e.type.contextTypes;
           if (!n) return Na;
           var r = e.stateNode;
@@ -2687,7 +2687,7 @@
               e.__reactInternalMemoizedMaskedChildContext = o),
             o;
         }
-        function La(e) {
+        function Oa(e) {
           return null != e.childContextTypes;
         }
         function ja() {
@@ -2973,7 +2973,7 @@
             return e;
           }
           function a(e, t) {
-            return (e = Lu(e, t)).index = 0, e.sibling = null, e;
+            return (e = Ou(e, t)).index = 0, e.sibling = null, e;
           }
           function i(t, n, r) {
             return t.index = r,
@@ -2995,7 +2995,7 @@
             var o = n.type;
             return o === _ ? d(e, t, n.props.children, r, n.key) : null !== t &&
                 (t.elementType === o ||
-                  "object" == typeof o && null !== o && o.$$typeof === L &&
+                  "object" == typeof o && null !== o && o.$$typeof === O &&
                     bo(o) === t.type)
               ? ((r = a(t, n.props)).ref = vo(e, t, n), r.return = e, r)
               : ((r = ju(n.type, n.key, n.props, null, e.mode, r)).ref = vo(
@@ -3031,7 +3031,7 @@
                     n;
                 case x:
                   return (t = Iu(t, e.mode, n)).return = e, t;
-                case L:
+                case O:
                   return f(e, (0, t._init)(t._payload), n);
               }
               if (te(t) || A(t)) {
@@ -3052,7 +3052,7 @@
                   return n.key === a ? u(e, t, n, r) : null;
                 case x:
                   return n.key === a ? c(e, t, n, r) : null;
-                case L:
+                case O:
                   return p(e, t, (a = n._init)(n._payload), r);
               }
               if (te(n) || A(n)) return null !== a ? null : d(e, t, n, r, null);
@@ -3080,7 +3080,7 @@
                     r,
                     a,
                   );
-                case L:
+                case O:
                   return h(e, t, n, (0, r._init)(r._payload), a);
               }
               if (te(r) || A(r)) return d(t, e = e.get(n) || null, r, a, null);
@@ -3192,7 +3192,7 @@
                         } else if (
                           c.elementType === u ||
                           "object" == typeof u && null !== u &&
-                            u.$$typeof === L && bo(u) === c.type
+                            u.$$typeof === O && bo(u) === c.type
                         ) {
                           n(r, c.sibling),
                             (o = a(c, i.props)).ref = vo(r, c, i),
@@ -3237,7 +3237,7 @@
                     (o = Iu(i, r.mode, s)).return = r, r = o;
                   }
                   return l(r);
-                case L:
+                case O:
                   return e(r, o, (c = i._init)(i._payload), s);
               }
               if (te(i)) return m(r, o, i, s);
@@ -3284,7 +3284,7 @@
             null !== (e = e.dependencies) && null !== e.firstContext &&
             (0 !== (e.lanes & t) && (bl = !0), e.firstContext = null);
         }
-        function Oo(e) {
+        function Lo(e) {
           var t = e._currentValue;
           if (Co !== e) {
             if (e = { context: e, memoizedValue: t, next: null }, null === Eo) {
@@ -3296,9 +3296,9 @@
           }
           return t;
         }
-        var Lo = null;
+        var Oo = null;
         function jo(e) {
-          null === Lo ? Lo = [e] : Lo.push(e);
+          null === Oo ? Oo = [e] : Oo.push(e);
         }
         function zo(e, t, n, r) {
           var a = t.interleaved;
@@ -3736,7 +3736,7 @@
           ) {
             if (
               n.flags |= 2048,
-                Oi(9, Ci.bind(null, n, r, a, t), void 0, null),
+                Li(9, Ci.bind(null, n, r, a, t), void 0, null),
                 null === Ts
             ) throw Error(o(349));
             30 & ii || Ei(n, t, a);
@@ -3792,7 +3792,7 @@
             e = e.dispatch = Ki.bind(null, li, e),
             [t.memoizedState, e];
         }
-        function Oi(e, t, n, r) {
+        function Li(e, t, n, r) {
           return e = { tag: e, create: t, destroy: n, deps: r, next: null },
             null === (t = li.updateQueue)
               ? (t = { lastEffect: null, stores: null },
@@ -3803,13 +3803,13 @@
               : (r = n.next, n.next = e, e.next = r, t.lastEffect = e),
             e;
         }
-        function Li() {
+        function Oi() {
           return bi().memoizedState;
         }
         function ji(e, t, n, r) {
           var a = yi();
           li.flags |= e,
-            a.memoizedState = Oi(1 | t, n, void 0, void 0 === r ? null : r);
+            a.memoizedState = Li(1 | t, n, void 0, void 0 === r ? null : r);
         }
         function zi(e, t, n, r) {
           var a = bi();
@@ -3818,10 +3818,10 @@
           if (null !== si) {
             var i = si.memoizedState;
             if (o = i.destroy, null !== r && mi(r, i.deps)) {
-              return void (a.memoizedState = Oi(t, n, o, r));
+              return void (a.memoizedState = Li(t, n, o, r));
             }
           }
-          li.flags |= e, a.memoizedState = Oi(1 | t, n, o, r);
+          li.flags |= e, a.memoizedState = Li(1 | t, n, o, r);
         }
         function Ai(e, t) {
           return ji(8390656, 8, e, t);
@@ -3947,7 +3947,7 @@
           }
         }
         var Gi = {
-            readContext: Oo,
+            readContext: Lo,
             useCallback: hi,
             useContext: hi,
             useEffect: hi,
@@ -3967,11 +3967,11 @@
             unstable_isNewReconciler: !1,
           },
           Zi = {
-            readContext: Oo,
+            readContext: Lo,
             useCallback: function (e, t) {
               return yi().memoizedState = [e, void 0 === t ? null : t], e;
             },
-            useContext: Oo,
+            useContext: Lo,
             useEffect: Ai,
             useImperativeHandle: function (e, t, n) {
               return n = null != n ? n.concat([e]) : null,
@@ -4033,7 +4033,7 @@
               return a.queue = i,
                 Ai(Ni.bind(null, r, i, e), [e]),
                 r.flags |= 2048,
-                Oi(9, Ci.bind(null, r, i, n, t), void 0, null),
+                Li(9, Ci.bind(null, r, i, n, t), void 0, null),
                 n;
             },
             useId: function () {
@@ -4050,16 +4050,16 @@
             unstable_isNewReconciler: !1,
           },
           el = {
-            readContext: Oo,
+            readContext: Lo,
             useCallback: qi,
-            useContext: Oo,
+            useContext: Lo,
             useEffect: Mi,
             useImperativeHandle: Ui,
             useInsertionEffect: Ii,
             useLayoutEffect: Di,
             useMemo: $i,
             useReducer: ki,
-            useRef: Li,
+            useRef: Oi,
             useState: function () {
               return ki(wi);
             },
@@ -4076,16 +4076,16 @@
             unstable_isNewReconciler: !1,
           },
           tl = {
-            readContext: Oo,
+            readContext: Lo,
             useCallback: qi,
-            useContext: Oo,
+            useContext: Lo,
             useEffect: Mi,
             useImperativeHandle: Ui,
             useInsertionEffect: Ii,
             useLayoutEffect: Di,
             useMemo: $i,
             useReducer: xi,
-            useRef: Li,
+            useRef: Oi,
             useState: function () {
               return xi(wi);
             },
@@ -4154,9 +4154,9 @@
         function il(e, t, n) {
           var r = !1, a = Na, o = t.contextType;
           return "object" == typeof o && null !== o
-            ? o = Oo(o)
-            : (a = La(t) ? Ra : Ta.current,
-              o = (r = null != (r = t.contextTypes)) ? Oa(e, a) : Na),
+            ? o = Lo(o)
+            : (a = Oa(t) ? Ra : Ta.current,
+              o = (r = null != (r = t.contextTypes)) ? La(e, a) : Na),
             t = new t(n, o),
             e.memoizedState = null !== t.state && void 0 !== t.state
               ? t.state
@@ -4182,8 +4182,8 @@
           a.props = n, a.state = e.memoizedState, a.refs = {}, Io(e);
           var o = t.contextType;
           "object" == typeof o && null !== o
-            ? a.context = Oo(o)
-            : (o = La(t) ? Ra : Ta.current, a.context = Oa(e, o)),
+            ? a.context = Lo(o)
+            : (o = Oa(t) ? Ra : Ta.current, a.context = La(e, o)),
             a.state = e.memoizedState,
             "function" == typeof (o = t.getDerivedStateFromProps) &&
             (rl(e, t, o, n), a.state = e.memoizedState),
@@ -4318,7 +4318,7 @@
         function xl(e, t, n, r, a) {
           if (null === e) {
             var o = n.type;
-            return "function" != typeof o || Ou(o) ||
+            return "function" != typeof o || Lu(o) ||
                 void 0 !== o.defaultProps || null !== n.compare ||
                 void 0 !== n.defaultProps
               ? ((e = ju(n.type, null, r, t, t.mode, a)).ref = t.ref,
@@ -4333,7 +4333,7 @@
             ) return $l(e, t, a);
           }
           return t.flags |= 1,
-            (e = Lu(o, r)).ref = t.ref,
+            (e = Ou(o, r)).ref = t.ref,
             e.return = t,
             t.child = e;
         }
@@ -4364,8 +4364,8 @@
                     transitions: null,
                   },
                   t.updateQueue = null,
-                  Ca(Ls, Os),
-                  Os |= e,
+                  Ca(Os, Ls),
+                  Ls |= e,
                   null;
               }
               t.memoizedState = {
@@ -4374,20 +4374,20 @@
                 transitions: null,
               },
                 r = null !== o ? o.baseLanes : n,
-                Ca(Ls, Os),
-                Os |= r;
+                Ca(Os, Ls),
+                Ls |= r;
             } else {t.memoizedState = {
                 baseLanes: 0,
                 cachePool: null,
                 transitions: null,
               },
-                Ca(Ls, Os),
-                Os |= n;}
+                Ca(Os, Ls),
+                Ls |= n;}
           } else {null !== o
               ? (r = o.baseLanes | n, t.memoizedState = null)
               : r = n,
-              Ca(Ls, Os),
-              Os |= r;}
+              Ca(Os, Ls),
+              Ls |= r;}
           return wl(e, t, a, n), t.child;
         }
         function El(e, t) {
@@ -4396,8 +4396,8 @@
             (t.flags |= 512, t.flags |= 2097152);
         }
         function Cl(e, t, n, r, a) {
-          var o = La(n) ? Ra : Ta.current;
-          return o = Oa(t, o),
+          var o = Oa(n) ? Ra : Ta.current;
+          return o = La(t, o),
             Ro(t, a),
             n = gi(e, t, n, r, o, a),
             r = vi(),
@@ -4409,7 +4409,7 @@
                 $l(e, t, a));
         }
         function Nl(e, t, n, r, a) {
-          if (La(n)) {
+          if (Oa(n)) {
             var o = !0;
             Ma(t);
           } else o = !1;
@@ -4420,8 +4420,8 @@
             i.props = l;
             var s = i.context, u = n.contextType;
             u = "object" == typeof u && null !== u
-              ? Oo(u)
-              : Oa(t, u = La(n) ? Ra : Ta.current);
+              ? Lo(u)
+              : La(t, u = Oa(n) ? Ra : Ta.current);
             var c = n.getDerivedStateFromProps,
               d = "function" == typeof c ||
                 "function" == typeof i.getSnapshotBeforeUpdate;
@@ -4466,8 +4466,8 @@
               d = t.pendingProps,
               f = i.context,
               s = "object" == typeof (s = n.contextType) && null !== s
-                ? Oo(s)
-                : Oa(t, s = La(n) ? Ra : Ta.current);
+                ? Lo(s)
+                : La(t, s = Oa(n) ? Ra : Ta.current);
             var p = n.getDerivedStateFromProps;
             (c = "function" == typeof p ||
               "function" == typeof i.getSnapshotBeforeUpdate) ||
@@ -4540,8 +4540,8 @@
         function Rl(e, t, n, r, a) {
           return ho(), mo(a), t.flags |= 256, wl(e, t, n, r), t.child;
         }
-        var Ol,
-          Ll,
+        var Ll,
+          Ol,
           jl,
           zl = { dehydrated: null, treeContext: null, retryLane: 0 };
         function Al(e) {
@@ -4689,11 +4689,11 @@
             l = a.fallback, s = t.mode, r = (i = e.child).sibling;
             var u = { mode: "hidden", children: a.children };
             return 1 & s || t.child === i
-              ? (a = Lu(i, u)).subtreeFlags = 14680064 & i.subtreeFlags
+              ? (a = Ou(i, u)).subtreeFlags = 14680064 & i.subtreeFlags
               : ((a = t.child).childLanes = 0,
                 a.pendingProps = u,
                 t.deletions = null),
-              null !== r ? l = Lu(r, l) : (l = zu(l, s, n, null)).flags |= 2,
+              null !== r ? l = Ou(r, l) : (l = zu(l, s, n, null)).flags |= 2,
               l.return = t,
               a.return = t,
               a.sibling = l,
@@ -4711,7 +4711,7 @@
               a;
           }
           return e = (l = e.child).sibling,
-            a = Lu(l, { mode: "visible", children: a.children }),
+            a = Ou(l, { mode: "visible", children: a.children }),
             !(1 & t.mode) && (a.lanes = n),
             a.return = t,
             a.sibling = null,
@@ -4825,9 +4825,9 @@
           if (null !== e && t.child !== e.child) throw Error(o(153));
           if (null !== t.child) {
             for (
-              n = Lu(e = t.child, e.pendingProps), t.child = n, n.return = t;
+              n = Ou(e = t.child, e.pendingProps), t.child = n, n.return = t;
               null !== e.sibling;
-            ) e = e.sibling, (n = n.sibling = Lu(e, e.pendingProps)).return = t;
+            ) e = e.sibling, (n = n.sibling = Ou(e, e.pendingProps)).return = t;
             n.sibling = null;
           }
           return t.child;
@@ -4892,7 +4892,7 @@
               return Vl(t), null;
             case 1:
             case 17:
-              return La(t.type) && ja(), Vl(t), null;
+              return Oa(t.type) && ja(), Vl(t), null;
             case 3:
               return r = t.stateNode,
                 Xo(),
@@ -4911,7 +4911,7 @@
               Zo(t);
               var a = Yo(Ko.current);
               if (n = t.type, null !== e && null != t.stateNode) {
-                Ll(e, t, n, r),
+                Ol(e, t, n, r),
                   e.ref !== t.ref && (t.flags |= 512, t.flags |= 2097152);
               } else {
                 if (!r) {
@@ -5005,7 +5005,7 @@
                       : e = s.createElementNS(e, n),
                     e[fa] = t,
                     e[pa] = r,
-                    Ol(e, t),
+                    Ll(e, t),
                     t.stateNode = e;
                   e: {
                     switch (s = be(n, r), n) {
@@ -5268,7 +5268,7 @@
                 null !== e && null !== e.memoizedState !== r &&
                 (t.flags |= 8192),
                 r && 1 & t.mode
-                  ? !!(1073741824 & Os) &&
+                  ? !!(1073741824 & Ls) &&
                     (Vl(t), 6 & t.subtreeFlags && (t.flags |= 8192))
                   : Vl(t),
                 null;
@@ -5281,7 +5281,7 @@
         function Ql(e, t) {
           switch (to(t), t.tag) {
             case 1:
-              return La(t.type) && ja(),
+              return Oa(t.type) && ja(),
                 65536 & (e = t.flags) ? (t.flags = -65537 & e | 128, t) : null;
             case 3:
               return Xo(),
@@ -5316,7 +5316,7 @@
               return null;
           }
         }
-        Ol = function (e, t) {
+        Ll = function (e, t) {
           for (var n = t.child; null !== n;) {
             if (5 === n.tag || 6 === n.tag) e.appendChild(n.stateNode);
             else if (4 !== n.tag && null !== n.child) {
@@ -5331,7 +5331,7 @@
             n.sibling.return = n.return, n = n.sibling;
           }
         },
-          Ll = function (e, t, n, r) {
+          Ol = function (e, t, n, r) {
             var a = e.memoizedProps;
             if (a !== r) {
               e = t.stateNode, Yo(Wo.current);
@@ -6144,8 +6144,8 @@
           Ts = null,
           Ps = null,
           Rs = 0,
-          Os = 0,
-          Ls = Sa(0),
+          Ls = 0,
+          Os = Sa(0),
           js = 0,
           zs = null,
           As = 0,
@@ -6429,7 +6429,7 @@
           }
         }
         function cu() {
-          Os = Ls.current, Ea(Ls);
+          Ls = Os.current, Ea(Os);
         }
         function du(e, t) {
           e.finishedWork = null, e.finishedLanes = 0;
@@ -6466,16 +6466,16 @@
           }
           if (
             Ts = e,
-              Ps = e = Lu(e.current, null),
-              Rs = Os = t,
+              Ps = e = Ou(e.current, null),
+              Rs = Ls = t,
               js = 0,
               zs = null,
               Is = Ms = As = 0,
               Fs = Ds = null,
-              null !== Lo
+              null !== Oo
           ) {
-            for (t = 0; t < Lo.length; t++) {
-              if (null !== (r = (n = Lo[t]).interleaved)) {
+            for (t = 0; t < Oo.length; t++) {
+              if (null !== (r = (n = Oo[t]).interleaved)) {
                 n.interleaved = null;
                 var a = r.next, o = n.pending;
                 if (null !== o) {
@@ -6485,7 +6485,7 @@
                 n.pending = r;
               }
             }
-            Lo = null;
+            Oo = null;
           }
           return e;
         }
@@ -6625,7 +6625,7 @@
           for (; null !== Ps && !Ye();) yu(Ps);
         }
         function yu(e) {
-          var t = xs(e.alternate, e, Os);
+          var t = xs(e.alternate, e, Ls);
           e.memoizedProps = e.pendingProps,
             null === t ? bu(e) : Ps = t,
             Es.current = null;
@@ -6640,7 +6640,7 @@
               }
               if (null === e) return js = 6, void (Ps = null);
               e.flags |= 32768, e.subtreeFlags = 0, e.deletions = null;
-            } else if (null !== (n = Wl(n, t, Os))) return void (Ps = n);
+            } else if (null !== (n = Wl(n, t, Ls))) return void (Ps = n);
             if (null !== (t = t.sibling)) return void (Ps = t);
             Ps = t = e;
           } while (null !== t);
@@ -7076,10 +7076,10 @@
         function Ru(e, t, n, r) {
           return new Pu(e, t, n, r);
         }
-        function Ou(e) {
+        function Lu(e) {
           return !(!(e = e.prototype) || !e.isReactComponent);
         }
-        function Lu(e, t) {
+        function Ou(e, t) {
           var n = e.alternate;
           return null === n
             ? ((n = Ru(e.tag, t, e.key, e.mode)).elementType = e.elementType,
@@ -7110,7 +7110,7 @@
         }
         function ju(e, t, n, r, a, i) {
           var l = 2;
-          if (r = e, "function" == typeof e) Ou(e) && (l = 1);
+          if (r = e, "function" == typeof e) Lu(e) && (l = 1);
           else if ("string" == typeof e) l = 5;
           else {e: switch (e) {
               case _:
@@ -7140,10 +7140,10 @@
                     case T:
                       l = 11;
                       break e;
-                    case O:
+                    case L:
                       l = 14;
                       break e;
-                    case L:
+                    case O:
                       l = 16, r = null;
                       break e;
                   }
@@ -7232,7 +7232,7 @@
                   t = t.stateNode.context;
                   break e;
                 case 1:
-                  if (La(t.type)) {
+                  if (Oa(t.type)) {
                     t = t.stateNode.__reactInternalMemoizedMergedChildContext;
                     break e;
                   }
@@ -7243,7 +7243,7 @@
           }
           if (1 === e.tag) {
             var n = e.type;
-            if (La(n)) return Aa(e, n, t);
+            if (Oa(n)) return Aa(e, n, t);
           }
           return t;
         }
@@ -7296,7 +7296,7 @@
                         Go(t);
                         break;
                       case 1:
-                        La(t.type) && Ma(t);
+                        Oa(t.type) && Ma(t);
                         break;
                       case 4:
                         Jo(t, t.stateNode.containerInfo);
@@ -7344,7 +7344,7 @@
             case 2:
               var r = t.type;
               ql(e, t), e = t.pendingProps;
-              var a = Oa(t, Ta.current);
+              var a = La(t, Ta.current);
               Ro(t, n), a = gi(null, t, r, e, a, n);
               var i = vi();
               return t.flags |= 1,
@@ -7353,7 +7353,7 @@
                   ? (t.tag = 1,
                     t.memoizedState = null,
                     t.updateQueue = null,
-                    La(r) ? (i = !0, Ma(t)) : i = !1,
+                    Oa(r) ? (i = !0, Ma(t)) : i = !1,
                     t.memoizedState = null !== a.state && void 0 !== a.state
                       ? a.state
                       : null,
@@ -7377,10 +7377,10 @@
                     r = (a = r._init)(r._payload),
                     t.type = r,
                     a = t.tag = function (e) {
-                      if ("function" == typeof e) return Ou(e) ? 1 : 0;
+                      if ("function" == typeof e) return Lu(e) ? 1 : 0;
                       if (null != e) {
                         if ((e = e.$$typeof) === T) return 11;
-                        if (e === O) return 14;
+                        if (e === L) return 14;
                       }
                       return 2;
                     }(r),
@@ -7562,7 +7562,7 @@
               return a = t.type,
                 r = t.pendingProps.children,
                 Ro(t, n),
-                r = r(a = Oo(a)),
+                r = r(a = Lo(a)),
                 t.flags |= 1,
                 wl(e, t, r, n),
                 t.child;
@@ -7577,7 +7577,7 @@
                 a = t.elementType === r ? a : nl(r, a),
                 ql(e, t),
                 t.tag = 1,
-                La(r) ? (e = !0, Ma(t)) : e = !1,
+                Oa(r) ? (e = !0, Ma(t)) : e = !1,
                 Ro(t, n),
                 il(t, r, a),
                 sl(t, r, a, n),
@@ -8125,7 +8125,7 @@
           }),
             r;
         }
-        function O(e) {
+        function L(e) {
           if (-1 === e._status) {
             var t = e._result;
             (t = t()).then(function (t) {
@@ -8139,10 +8139,10 @@
           if (1 === e._status) return e._result.default;
           throw e._result;
         }
-        var L = { current: null },
+        var O = { current: null },
           j = { transition: null },
           z = {
-            ReactCurrentDispatcher: L,
+            ReactCurrentDispatcher: O,
             ReactCurrentBatchConfig: j,
             ReactCurrentOwner: _,
           };
@@ -8251,7 +8251,7 @@
             return {
               $$typeof: f,
               _payload: { _status: -1, _result: e },
-              _init: O,
+              _init: L,
             };
           },
           t.memo = function (e, t) {
@@ -8268,47 +8268,47 @@
           },
           t.unstable_act = A,
           t.useCallback = function (e, t) {
-            return L.current.useCallback(e, t);
+            return O.current.useCallback(e, t);
           },
           t.useContext = function (e) {
-            return L.current.useContext(e);
+            return O.current.useContext(e);
           },
           t.useDebugValue = function () {},
           t.useDeferredValue = function (e) {
-            return L.current.useDeferredValue(e);
+            return O.current.useDeferredValue(e);
           },
           t.useEffect = function (e, t) {
-            return L.current.useEffect(e, t);
+            return O.current.useEffect(e, t);
           },
           t.useId = function () {
-            return L.current.useId();
+            return O.current.useId();
           },
           t.useImperativeHandle = function (e, t, n) {
-            return L.current.useImperativeHandle(e, t, n);
+            return O.current.useImperativeHandle(e, t, n);
           },
           t.useInsertionEffect = function (e, t) {
-            return L.current.useInsertionEffect(e, t);
+            return O.current.useInsertionEffect(e, t);
           },
           t.useLayoutEffect = function (e, t) {
-            return L.current.useLayoutEffect(e, t);
+            return O.current.useLayoutEffect(e, t);
           },
           t.useMemo = function (e, t) {
-            return L.current.useMemo(e, t);
+            return O.current.useMemo(e, t);
           },
           t.useReducer = function (e, t, n) {
-            return L.current.useReducer(e, t, n);
+            return O.current.useReducer(e, t, n);
           },
           t.useRef = function (e) {
-            return L.current.useRef(e);
+            return O.current.useRef(e);
           },
           t.useState = function (e) {
-            return L.current.useState(e);
+            return O.current.useState(e);
           },
           t.useSyncExternalStore = function (e, t, n) {
-            return L.current.useSyncExternalStore(e, t, n);
+            return O.current.useSyncExternalStore(e, t, n);
           },
           t.useTransition = function () {
-            return L.current.useTransition();
+            return O.current.useTransition();
           },
           t.version = "18.3.1";
       },
@@ -8449,10 +8449,10 @@
             b(R);
           };
         } else if ("undefined" != typeof MessageChannel) {
-          var O = new MessageChannel(), L = O.port2;
-          O.port1.onmessage = R,
+          var L = new MessageChannel(), O = L.port2;
+          L.port1.onmessage = R,
             _ = function () {
-              L.postMessage(null);
+              O.postMessage(null);
             };
         } else {_ = function () {
             v(R, 0);
@@ -9010,14 +9010,14 @@
       (() =>
         "function" == typeof Symbol && Symbol.observable || "@@observable")(),
     R = () => Math.random().toString(36).substring(7).split("").join("."),
-    O = {
+    L = {
       INIT: `@@redux/INIT${R()}`,
       REPLACE: `@@redux/REPLACE${R()}`,
       PROBE_UNKNOWN_ACTION: () => `@@redux/PROBE_UNKNOWN_ACTION${R()}`,
     };
-  var L,
+  var O,
     j = ({ dispatch: e, getState: t }) => (n) => (r) =>
-      "function" == typeof r ? r(e, t, L) : n(r);
+      "function" == typeof r ? r(e, t, O) : n(r);
   const z = "GAME_JOINED",
     A = "PLAYER_JOINED",
     M = "PLAYER_LEFT",
@@ -9235,13 +9235,13 @@
         }),
           e;
       }
-      return p({ type: O.INIT }), {
+      return p({ type: L.INIT }), {
         dispatch: p,
         subscribe: f,
         getState: d,
         replaceReducer: function (e) {
           if ("function" != typeof e) throw new Error(T(10));
-          a = e, p({ type: O.REPLACE });
+          a = e, p({ type: L.REPLACE });
         },
         [P]: function () {
           const e = f;
@@ -9273,11 +9273,11 @@
           !function (e) {
             Object.keys(e).forEach((t) => {
               const n = e[t];
-              if (void 0 === n(void 0, { type: O.INIT })) {
+              if (void 0 === n(void 0, { type: L.INIT })) {
                 throw new Error(T(12));
               }
               if (
-                void 0 === n(void 0, { type: O.PROBE_UNKNOWN_ACTION() })
+                void 0 === n(void 0, { type: L.PROBE_UNKNOWN_ACTION() })
               ) throw new Error(T(13));
             });
           }(n);
@@ -9478,8 +9478,8 @@
   !function (e) {
     e.Pop = "POP", e.Push = "PUSH", e.Replace = "REPLACE";
   }(Re || (Re = {}));
-  const Oe = "popstate";
-  function Le(e, t) {
+  const Le = "popstate";
+  function Oe(e, t) {
     if (!1 === e || null == e) throw new Error(t);
   }
   function je(e, t) {
@@ -9565,7 +9565,7 @@
         route: e,
       };
       i.relativePath.startsWith("/") &&
-        (Le(
+        (Oe(
           i.relativePath.startsWith(r),
           'Absolute route path "' + i.relativePath + '" nested under path "' +
             r +
@@ -9574,7 +9574,7 @@
           i.relativePath = i.relativePath.slice(r.length));
       let l = ot([r, i.relativePath]), s = n.concat(i);
       e.children && e.children.length > 0 &&
-      (Le(
+      (Oe(
         !0 !== e.index,
         'Index routes must not have child routes. Please remove all child routes from route path "' +
           l + '".',
@@ -9756,15 +9756,15 @@
     let a;
     void 0 === r && (r = !1),
       "string" == typeof e ? a = Ie(e) : (a = Pe({}, e),
-        Le(
+        Oe(
           !a.pathname || !a.pathname.includes("?"),
           nt("?", "pathname", "search", a),
         ),
-        Le(
+        Oe(
           !a.pathname || !a.pathname.includes("#"),
           nt("#", "pathname", "hash", a),
         ),
-        Le(!a.search || !a.search.includes("#"), nt("#", "search", "hash", a)));
+        Oe(!a.search || !a.search.includes("#"), nt("#", "search", "hash", a)));
     let o, i = "" === e || "" === a.pathname, l = i ? "/" : a.pathname;
     if (null == l) o = n;
     else {
@@ -9837,7 +9837,7 @@
     return null != i.useContext(mt);
   }
   function bt() {
-    return yt() || Le(!1), i.useContext(mt).location;
+    return yt() || Oe(!1), i.useContext(mt).location;
   }
   function wt(e) {
     i.useContext(ht).static || i.useLayoutEffect(e);
@@ -9848,7 +9848,7 @@
       ? function () {
         let { router: e } = function () {
             let e = i.useContext(ft);
-            return e || Le(!1), e;
+            return e || Oe(!1), e;
           }(Nt.UseNavigateStable),
           t = Pt(Tt.UseNavigateStable),
           n = i.useRef(!1);
@@ -9864,7 +9864,7 @@
         return r;
       }()
       : function () {
-        yt() || Le(!1);
+        yt() || Oe(!1);
         let e = i.useContext(ft),
           { basename: t, future: n, navigator: r } = i.useContext(ht),
           { matches: a } = i.useContext(gt),
@@ -9886,7 +9886,7 @@
       }();
   }
   function xt(e, t, n, r) {
-    yt() || Le(!1);
+    yt() || Oe(!1);
     let { navigator: a } = i.useContext(ht),
       { matches: o } = i.useContext(gt),
       l = o[o.length - 1],
@@ -9898,7 +9898,7 @@
       var f;
       let e = "string" == typeof t ? Ie(t) : t;
       "/" === u || (null == (f = e.pathname) ? void 0 : f.startsWith(u)) ||
-      Le(!1), c = e;
+      Oe(!1), c = e;
     } else c = d;
     let p = c.pathname || "/", h = p;
     if ("/" !== u) {
@@ -9930,7 +9930,7 @@
           let e = l.findIndex((e) =>
             e.route.id && void 0 !== (null == s ? void 0 : s[e.route.id])
           );
-          e >= 0 || Le(!1), l = l.slice(0, Math.min(l.length, e + 1));
+          e >= 0 || Oe(!1), l = l.slice(0, Math.min(l.length, e + 1));
         }
         let u = !1, c = -1;
         if (n && r && r.v7_partialHydration) {
@@ -10037,7 +10037,7 @@
         let t = i.useContext(vt),
           n = function () {
             let e = i.useContext(pt);
-            return e || Le(!1), e;
+            return e || Oe(!1), e;
           }(Tt.UseRouteError),
           r = Pt(Tt.UseRouteError);
         return void 0 !== t ? t : null == (e = n.errors) ? void 0 : e[r];
@@ -10134,15 +10134,15 @@
   function Pt(e) {
     let t = function () {
         let e = i.useContext(gt);
-        return e || Le(!1), e;
+        return e || Oe(!1), e;
       }(),
       n = t.matches[t.matches.length - 1];
-    return n.route.id || Le(!1), n.route.id;
+    return n.route.id || Oe(!1), n.route.id;
   }
   const Rt = {};
-  function Ot(e) {
+  function Lt(e) {
     let { to: t, replace: n, state: r, relative: a } = e;
-    yt() || Le(!1);
+    yt() || Oe(!1);
     let { future: o, static: l } = i.useContext(ht),
       { matches: s } = i.useContext(gt),
       { pathname: u } = bt(),
@@ -10155,8 +10155,8 @@
     ),
       null;
   }
-  function Lt(e) {
-    Le(!1);
+  function Ot(e) {
+    Oe(!1);
   }
   function jt(e) {
     let {
@@ -10168,7 +10168,7 @@
       static: l = !1,
       future: s,
     } = e;
-    yt() && Le(!1);
+    yt() && Oe(!1);
     let u = t.replace(/^\/*/, "/"),
       c = i.useMemo(
         () => ({
@@ -10213,7 +10213,7 @@
       if (e.type === i.Fragment) {
         return void n.push.apply(n, At(e.props.children, a));
       }
-      e.type !== Lt && Le(!1), e.props.index && e.props.children && Le(!1);
+      e.type !== Ot && Oe(!1), e.props.index && e.props.children && Oe(!1);
       let o = {
         id: e.props.id || a.join("-"),
         caseSensitive: e.props.caseSensitive,
@@ -10272,7 +10272,7 @@
                 : a.location.href,
               n = "string" == typeof e ? e : Me(e);
             return n = n.replace(/ $/, "%20"),
-              Le(
+              Oe(
                 t,
                 "No window.location.(origin|href) available to create URL for href: " +
                   n,
@@ -10291,8 +10291,8 @@
               if (s) {
                 throw new Error("A history only accepts one active listener");
               }
-              return a.addEventListener(Oe, d), s = e, () => {
-                a.removeEventListener(Oe, d), s = null;
+              return a.addEventListener(Le, d), s = e, () => {
+                a.removeEventListener(Le, d), s = null;
               };
             },
             createHref: (e) => t(a, e),
@@ -10987,7 +10987,7 @@
     }
   }
   const Rn = cn.WebSocket || cn.MozWebSocket,
-    On = {
+    Ln = {
       websocket: class extends Pn {
         createSocket(e, t, n) {
           return Tn ? new Rn(e, t, n) : t ? new Rn(e, t) : new Rn(e);
@@ -11135,7 +11135,7 @@
         }
       },
     },
-    Ln =
+    On =
       /^(?:(?![^:@\/?#]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@\/?#]*)(?::([^:@\/?#]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/,
     jn = [
       "source",
@@ -11159,7 +11159,7 @@
     -1 != n && -1 != r &&
       (e = e.substring(0, n) + e.substring(n, r).replace(/:/g, ";") +
         e.substring(r, e.length));
-    let a = Ln.exec(e || ""), o = {}, i = 14;
+    let a = On.exec(e || ""), o = {}, i = 14;
     for (; i--;) o[jn[i]] = a[i] || "";
     return -1 != n && -1 != r &&
       (o.source = t,
@@ -11576,7 +11576,7 @@
       const n = "object" == typeof e ? e : t;
       (!n.transports || n.transports && "string" == typeof n.transports[0]) &&
       (n.transports = (n.transports || ["polling", "websocket", "webtransport"])
-        .map((e) => On[e]).filter((e) => !!e)), super(e, n);
+        .map((e) => Ln[e]).filter((e) => !!e)), super(e, n);
     }
   }
   const Un = "function" == typeof ArrayBuffer,
@@ -12895,31 +12895,35 @@
               rising: m.rows > 0,
               riseSeq: m.seq,
             }),
-            n &&
-            n.cols.map((e) =>
-              (0, vr.jsx)("div", {
-                className: "drop-trail",
-                "aria-hidden": "true",
-                style: {
-                  gridColumn: e.x + 1,
-                  gridRow: `${e.from + 1} / ${e.to + 2}`,
-                  "--tint": `var(--block-${n.type})`,
-                },
-              }, `trail-${n.seq}-${e.x}`)
-            ),
-            u.map((e) =>
-              (0, vr.jsx)(xr, {
-                value: e.value,
-                state: e.state,
-                style: { gridColumn: e.x + 1, gridRow: e.y + 1 },
-              }, e.key)
-            ),
+            (0, vr.jsxs)("div", {
+              className: "board__layer",
+              children: [
+                n && n.cols.map((e) =>
+                  (0, vr.jsx)("div", {
+                    className: "drop-trail",
+                    "aria-hidden": "true",
+                    style: {
+                      gridColumn: e.x + 1,
+                      gridRow: `${e.from + 1} / ${e.to + 2}`,
+                      "--tint": `var(--block-${n.type})`,
+                    },
+                  }, `trail-${n.seq}-${e.x}`)
+                ),
+                u.map((e) =>
+                  (0, vr.jsx)(xr, {
+                    value: e.value,
+                    state: e.state,
+                    style: { gridColumn: e.x + 1, gridRow: e.y + 1 },
+                  }, e.key)
+                ),
+              ],
+            }),
             (0, vr.jsx)(Sr, { clearingRows: e }),
           ],
         });
     },
-    Or = i.memo(Rr),
-    Lr = ({ name: e, spectrum: t, isAlive: n }) =>
+    Lr = i.memo(Rr),
+    Or = ({ name: e, spectrum: t, isAlive: n }) =>
       (0, vr.jsxs)("div", {
         className: "opponent" + (n ? "" : " opponent--dead"),
         children: [
@@ -12941,7 +12945,7 @@
           }),
         ],
       }),
-    jr = i.memo(Lr),
+    jr = i.memo(Or),
     zr = () => {
       const e = S(),
         t = N((e) => e.game.winner),
@@ -13176,23 +13180,23 @@
       const C = N((e) => e.scores[e.player.name] || 0),
         T = N((e) => e.player.penaltyLines),
         P = N((e) => e.player.penaltySeq),
-        [R, O] = (0, i.useState)(""),
-        L = (0, i.useRef)(C),
+        [R, L] = (0, i.useState)(""),
+        O = (0, i.useRef)(C),
         j = (0, i.useRef)(P),
         z = (0, i.useRef)("");
       (0, i.useEffect)(() => {
-        C > L.current && O(`Score ${C.toLocaleString()}`), L.current = C;
+        C > O.current && L(`Score ${C.toLocaleString()}`), O.current = C;
       }, [C]),
         (0, i.useEffect)(() => {
           if (P > j.current) {
             const e = `${T} penalty ${T > 1 ? "lines" : "line"} added`;
-            O(P % 2 ? e : `${e} `);
+            L(P % 2 ? e : `${e} `);
           }
           j.current = P;
         }, [P, T]);
       const A = o.filter((e) => !e.isAlive).map((e) => e.name).join(", ");
       (0, i.useEffect)(() => {
-        A.length > z.current.length && O(`${A} eliminated`), z.current = A;
+        A.length > z.current.length && L(`${A} eliminated`), z.current = A;
       }, [A]);
       const M = (0, i.useRef)(null),
         I = (0, i.useRef)(null),
@@ -13521,7 +13525,7 @@
               className: "game-stage",
               children: [
                 (0, vr.jsx)($r, { level: f, lines: c }),
-                (0, vr.jsx)(Or, {
+                (0, vr.jsx)(Lr, {
                   clearingRows: p,
                   lockingCells: m,
                   dropTrail: v,
@@ -13740,9 +13744,17 @@
                 ],
               }),
               (0, vr.jsx)("p", {
-                className: "screen__hint",
+                className: "home__refusal",
                 role: "alert",
                 children: o,
+              }),
+              (0, vr.jsx)("p", {
+                className: "home__example",
+                children: (0, vr.jsx)("a", {
+                  className: "home__link",
+                  href: "/",
+                  children: "Choose another room",
+                }),
               }),
             ],
           }),
@@ -13792,7 +13804,7 @@
               children: [
                 "Navigate to ",
                 (0, vr.jsx)("strong", {
-                  className: "home__link",
+                  className: "home__path",
                   children: "/:room/:playerName",
                 }),
                 " ",
@@ -13818,14 +13830,14 @@
         className: "app-main",
         children: (0, vr.jsxs)(zt, {
           children: [
-            (0, vr.jsx)(Lt, {
+            (0, vr.jsx)(Ot, {
               path: "/:room/:playerName",
               element: (0, vr.jsx)(Wr, {}),
             }),
-            (0, vr.jsx)(Lt, { path: "/", element: (0, vr.jsx)(Qr, {}) }),
-            (0, vr.jsx)(Lt, {
+            (0, vr.jsx)(Ot, { path: "/", element: (0, vr.jsx)(Qr, {}) }),
+            (0, vr.jsx)(Ot, {
               path: "*",
-              element: (0, vr.jsx)(Ot, { to: "/", replace: !0 }),
+              element: (0, vr.jsx)(Lt, { to: "/", replace: !0 }),
             }),
           ],
         }),

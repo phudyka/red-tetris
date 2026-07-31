@@ -33,6 +33,7 @@ const RoomEntry = () => {
   }, [room, playerName, dispatch]);
 
   // Refus d'entrée : rien à afficher derrière, l'écran entier porte le message.
+  // Il porte aussi la sortie — sans elle, une URL refusée est un cul-de-sac.
   if (error && !gameRoom) {
     return (
       <div className="screen">
@@ -40,7 +41,10 @@ const RoomEntry = () => {
           <h1 className="brand">
             <span className="brand__accent">RED</span> TETRIS
           </h1>
-          <p className="screen__hint" role="alert">{error}</p>
+          <p className="home__refusal" role="alert">{error}</p>
+          <p className="home__example">
+            <a className="home__link" href="/">Choose another room</a>
+          </p>
         </div>
       </div>
     );
@@ -79,7 +83,7 @@ const Home = () => (
         <span className="brand__accent">RED</span> TETRIS
       </h1>
       <p className="lobby__subtitle">
-        Navigate to <strong className="home__link">/:room/:playerName</strong>
+        Navigate to <strong className="home__path">/:room/:playerName</strong>
         {" "}
         to start.
       </p>
