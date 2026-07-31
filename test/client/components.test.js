@@ -81,9 +81,15 @@ describe("React Components", () => {
       const bars = spectrumContainer.children;
       expect(bars.length).toBe(10);
 
-      // La hauteur est calculée en % (height / 20 * 100%)
-      // Ex: 5 -> (5/20)*100 = 25%
-      expect(bars[1]).toHaveStyle({ height: "25%" });
+      // Le remplissage est un facteur d'échelle (height / 20), appliqué en
+      // scaleY : une transition de hauteur relayouterait le cadre à chaque
+      // spectrum reçu. Ex : 5 → 5/20 = 0.25
+      expect(bars[1].style.getPropertyValue("--fill")).toBe("0.25");
+
+      // Une colonne vide garde un liseré au lieu de disparaître.
+      expect(Number(bars[2].style.getPropertyValue("--fill"))).toBeGreaterThan(
+        0,
+      );
     });
 
     it("should apply dead class when isAlive is false", () => {

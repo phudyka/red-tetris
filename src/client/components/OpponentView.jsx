@@ -6,6 +6,11 @@
 import React from "react";
 import { BOARD_HEIGHT } from "../../shared/constants";
 
+// Plancher de remplissage — ≈ 2 px sur la hauteur du cadre. Une colonne vide
+// garde un liseré : sans lui elle disparaît, et dix colonnes vides ne se
+// distinguent plus d'un spectrum qui n'est pas encore arrivé.
+const MIN_FILL = 0.025;
+
 /**
  * Affiche le nom + spectrum d'un adversaire.
  * Le spectrum donne la hauteur de la colonne la plus haute, colonne par colonne.
@@ -23,7 +28,7 @@ const OpponentView = ({ name, spectrum, isAlive }) => (
         <div
           key={i}
           className="opponent__bar"
-          style={{ height: `${(h / BOARD_HEIGHT) * 100}%` }}
+          style={{ "--fill": Math.max(h / BOARD_HEIGHT, MIN_FILL) }}
         />
       ))}
     </div>

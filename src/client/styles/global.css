@@ -828,9 +828,15 @@ h3 {
    sauter — c'est la seule façon de voir que les lignes qu'on vient d'envoyer
    sont bien tombées chez l'adversaire. */
 .opponent__bar {
+  height: 100%;
   background: var(--ink-1);
-  min-height: 2px;
-  transition: height var(--duration-base) var(--ease-out);
+  /* Le remplissage passe par une mise à l'échelle, pas par la hauteur : dix
+     barres qui changent de `height` relayoutent le cadre à chaque verrouillage
+     adverse, et il y a un cadre par adversaire. `transform` ne touche que la
+     composition — même règle que le FLIP des lignes de pénalité. */
+  transform: scaleY(var(--fill, 0));
+  transform-origin: bottom;
+  transition: transform var(--duration-base) var(--ease-out);
 }
 
 .opponent--dead .opponent__name {
