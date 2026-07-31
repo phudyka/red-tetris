@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Red Tetris — 42 school project, v5.2",
   "main": "src/server/index.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node src/server/index.js",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",

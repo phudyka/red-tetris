@@ -34,6 +34,10 @@
   --accent: #ff3b30;
   --accent-ink: #ff7a72; /* 6.1:1 — la même famille, lisible en texte */
 
+  /* Voile des surcouches. Un noir franc et non le fond assombri : le classement
+     doit couper la partie, pas s'y fondre. */
+  --scrim: rgb(0 0 0 / 0.78);
+
   /* ── Tétrominos ────────────────────────────────────────────────────────────
      Teintes canoniques du sujet, remontées en luminosité pour le fond sombre.
      Contrainte qui prime sur la fidélité : chacune doit rester distincte des
@@ -86,6 +90,7 @@
   /* Interlettrage : négatif sur les gros titres (ils se resserrent), positif
      sur les capitales de petite taille (elles s'étouffent sinon). */
   --tracking-tight: -0.02em;
+  --tracking-mid: 0.06em; /* capitales de taille moyenne : nom de room, bouton */
   --tracking-wide: 0.14em;
 
   /* ── Espacement, base 4 ───────────────────────────────────────────────── */
@@ -104,6 +109,10 @@
   --radius: 0;
   --border: 1px solid var(--line);
   --border-strong: 2px solid var(--line-strong);
+  /* Rail : le filet vertical qui qualifie une ligne de liste — soi-même dans le
+     lobby, la première place du classement. Sans ombre ni fond coloré, c'est le
+     seul marqueur d'appartenance dont la direction dispose. */
+  --rail: 3px;
 
   /* ── Mouvement ────────────────────────────────────────────────────────── */
   --duration-fast: 0.12s;
@@ -122,6 +131,15 @@
     calc((100vw - 32px) / 10)
   );
   --board-width: calc(var(--cell-size) * 10 + 4px);
+
+  /* Puits miniature de l'adversaire : assez haut pour que ses 20 rangées se
+     distinguent, assez bas pour en empiler plusieurs sans faire défiler. */
+  --spectrum-height: 84px;
+
+  /* Panneau centré sur écran vide (lobby, accueil, fin de partie). Une seule
+     largeur : deux cartes du même rôle qui ne tombent pas d'aplomb entre deux
+     écrans, c'est la porte d'entrée du projet qui bouge sous le correcteur. */
+  --panel-width: 480px;
 
   /* Cible tactile minimale (WCAG 2.5.5) */
   --tap: 44px;
@@ -417,7 +435,7 @@ h3 {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   font-weight: var(--weight-bold);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-mid);
   text-align: center;
   text-transform: uppercase;
   overflow-wrap: anywhere;
@@ -490,8 +508,8 @@ h3 {
   z-index: 55;
   background: linear-gradient(
     to top,
-    rgba(255, 59, 48, 1),
-    rgba(255, 59, 48, 0.25) 22%,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 25%, transparent) 22%,
     transparent 46%
   );
 }
@@ -781,7 +799,7 @@ h3 {
   grid-template-columns: repeat(10, 1fr);
   align-items: end;
   gap: 1px;
-  height: 84px;
+  height: var(--spectrum-height);
   padding: 2px;
   background: var(--bg);
   border: var(--border);
@@ -882,8 +900,8 @@ h3 {
   color: var(--ink-0);
   background: var(--surface-2);
   border: var(--border);
-  padding: 5px 6px;
-  min-width: 22px;
+  padding: var(--space-1) var(--space-2);
+  min-width: var(--space-6);
   text-align: center;
 }
 
@@ -945,7 +963,7 @@ h3 {
   flex-direction: column;
   align-items: center;
   gap: var(--space-6);
-  width: 440px;
+  width: var(--panel-width);
   max-width: 100%;
   padding: var(--space-8);
   background: var(--surface-1);
@@ -967,7 +985,7 @@ h3 {
   font-family: var(--font-mono);
   font-size: var(--text-md);
   font-weight: var(--weight-bold);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-mid);
   color: var(--ink-0);
   overflow-wrap: anywhere;
 }
@@ -986,7 +1004,7 @@ h3 {
   gap: var(--space-2);
   padding: var(--space-3);
   background: var(--surface-2);
-  border-left: 3px solid var(--line-strong);
+  border-left: var(--rail) solid var(--line-strong);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
 }
@@ -1016,7 +1034,7 @@ h3 {
   letter-spacing: var(--tracking-wide);
   background: var(--ink-0);
   color: var(--ink-inverse);
-  padding: 2px var(--space-2);
+  padding: var(--space-1) var(--space-2);
   flex-shrink: 0;
 }
 
@@ -1031,7 +1049,7 @@ h3 {
 
 /* ═══ Accueil (URL invalide) ═══════════════════════════════════════════════ */
 .home {
-  width: 480px;
+  width: var(--panel-width);
   max-width: 100%;
 }
 
@@ -1115,7 +1133,7 @@ h3 {
 .lb-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: var(--scrim);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1188,7 +1206,7 @@ h3 {
 /* Première place : la barre latérale, pas un fond doré. Le classement se lit
    déjà dans l'ordre — l'accent ne fait que pointer le sommet. */
 .lb-row--gold {
-  border-left: 3px solid var(--accent);
+  border-left: var(--rail) solid var(--accent);
   padding-left: var(--space-3);
 }
 
@@ -1196,7 +1214,7 @@ h3 {
   font-size: var(--text-xs);
   font-weight: var(--weight-bold);
   color: var(--ink-2);
-  width: 32px;
+  width: var(--space-8);
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }

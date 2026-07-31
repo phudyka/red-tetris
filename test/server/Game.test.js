@@ -126,6 +126,36 @@ describe("Game Class", () => {
     expect(game.checkWinCondition()).toBe(null); // Tous morts simultanément = pas de gagnant
   });
 
+  it("checkWinCondition should crown the last player left after the others quit", () => {
+    // Un adversaire qui ferme son onglet ne meurt pas : il disparaît. Sans quoi
+    // le survivant continue seul une partie que plus personne ne peut finir.
+    const game = new Game("quitRoom");
+    const p1 = new Player("1", "A", "quitRoom");
+    const p2 = new Player("2", "B", "quitRoom");
+    game.addPlayer(p1);
+    game.addPlayer(p2);
+    game.start();
+
+    game.removePlayer("2");
+    expect(game.checkWinCondition()).toBe(p1);
+  });
+
+  it("checkWinCondition should not crown anyone while a third player is still in", () => {
+    const game = new Game("trioRoom");
+    const players = ["1", "2", "3"].map((id) => {
+      const p = new Player(id, `P${id}`, "trioRoom");
+      game.addPlayer(p);
+      return p;
+    });
+    game.start();
+
+    game.removePlayer("3");
+    expect(game.checkWinCondition()).toBe(null); // deux encore en lice
+
+    players[1].isAlive = false;
+    expect(game.checkWinCondition()).toBe(players[0]);
+  });
+
   it("should prevent removing a player that is not in the game", () => {
     const game = new Game("r2");
     const removed = game.removePlayer("unknown_id");

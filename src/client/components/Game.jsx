@@ -262,6 +262,12 @@ const Game = () => {
     const currentBoard = boardOverride || boardRef.current;
     if (!type || !currentBoard) return false;
 
+    // Un lock delay armé pour la pièce précédente verrouillerait la nouvelle en
+    // plein vol, 500 ms après son apparition. Le verrouillage passe déjà par
+    // ici, mais le hold sur réserve vide spawne sans être passé par lui.
+    clearLockTimeout();
+    moveResetsRef.current = 0;
+
     const spawned = {
       type,
       shape: PIECES[type].shape,
@@ -284,7 +290,7 @@ const Game = () => {
     dispatch(setPlayer({ canHold: true }));
     emitRequestNextPiece(roomRef.current);
     return true;
-  }, [dispatch]);
+  }, [dispatch, clearLockTimeout]);
 
   // ── Lock piece ────────────────────────────────────────────────────────────
   /**
@@ -316,9 +322,7 @@ const Game = () => {
 
     const colorIndex = TYPE_TO_COLOR_INDEX[type];
     const placed = placePiece(currentBoard, shape, x, y, colorIndex);
-    const { newBoard: cleared, linesCleared, clearedIndexes } = clearLines(
-      placed,
-    );
+    const { linesCleared, clearedIndexes } = clearLines(placed);
 
     const isHard = hardCells !== undefined;
     emitPieceLocked(roomRef.current, {
@@ -337,8 +341,13 @@ const Game = () => {
       clearTimerRef.current = setTimeout(() => {
         clearingRef.current = false;
         setClearingRows([]);
-        dispatch(setBoard(cleared));
-        spawnNextPiece(cleared);
+        // Le plateau peut avoir bougé pendant les 300 ms — une pénalité reçue
+        // entre-temps a remonté le tas. Réappliquer un instantané calculé avant
+        // l'animation l'effacerait ; on rejoue l'effacement sur le plateau
+        // courant, où les lignes pleines ont juste changé de rangée.
+        const { newBoard } = clearLines(boardRef.current || placed);
+        dispatch(setBoard(newBoard));
+        spawnNextPiece(newBoard);
       }, CLEAR_ANIM_MS);
     } else {
       dispatch(setBoard(placed));
@@ -497,12 +506,16 @@ const Game = () => {
       return;
     }
 
+    // Même raison que dans spawnNextPiece : la pièce rangée en réserve peut
+    // avoir armé le lock delay juste avant l'échange.
+    clearLockTimeout();
+    moveResetsRef.current = 0;
     softDropRef.current = 0;
     rotatedLastRef.current = false;
     setSpawnSeq((n) => n + 1);
     dispatch(setPlayer({ holdPieceType: p.type, canHold: false }));
     dispatch({ type: "SET_PIECE", payload: swapped });
-  }, [dispatch, spawnNextPiece]);
+  }, [dispatch, spawnNextPiece, clearLockTimeout]);
 
   // ── Clavier avec DAS ─────────────────────────────────────────────────────
   useEffect(() => {

@@ -9,7 +9,7 @@
         var r = n(601), a = n.n(r), o = n(314), i = n.n(o)()(a());
         i.push([
           e.id,
-          "/* ─────────────────────────────────────────────────────────────────────────────\n   src/client/styles/global.css\n   Direction : brutalist arcade.\n   Fond charbon uni, blocs strictement plats, angles droits, bordures nettes,\n   hiérarchie portée par la taille et la graisse — jamais par une ombre ou un\n   dégradé. Aucune police distante : la pile système suffit et ne bloque rien.\n   ───────────────────────────────────────────────────────────────────────────── */\n\n/* ═══ Tokens ═══════════════════════════════════════════════════════════════ */\n:root {\n  /* ── Surfaces ─────────────────────────────────────────────────────────────\n     Quatre paliers seulement. Sans ombre pour séparer deux plans, c'est le\n     saut de valeur et la bordure qui font tout le travail : plus de paliers et\n     ils cessent d'être distinguables. */\n  --bg: #101010;\n  --surface-1: #171717;\n  --surface-2: #1e1e1e;\n  --surface-3: #262626;\n\n  /* ── Traits ────────────────────────────────────────────────────────────── */\n  --line: #2e2e2e; /* séparation discrète, quadrillage du puits */\n  --line-strong: #4d4d4d; /* contour d'un objet, ghost */\n\n  /* ── Encre — contrastes mesurés sur --bg ───────────────────────────────── */\n  --ink-0: #f2f2f2; /* 16.4:1 — titres, valeurs                */\n  --ink-1: #b9b9b9; /*  8.6:1 — texte courant                  */\n  --ink-2: #909090; /*  4.9:1 — libellés, plancher AA           */\n  --ink-inverse: #101010; /* sur fond clair (bouton primaire)  */\n\n  /* ── Accent ────────────────────────────────────────────────────────────────\n     Rouge réservé au danger : pénalité reçue, joueur éliminé, refus serveur.\n     Le bouton primaire est blanc — un bouton rouge et un tétromino Z rouge\n     dans le même écran diraient la même chose sans le même sens. */\n  --accent: #ff3b30;\n  --accent-ink: #ff7a72; /* 6.1:1 — la même famille, lisible en texte */\n\n  /* ── Tétrominos ────────────────────────────────────────────────────────────\n     Teintes canoniques du sujet, remontées en luminosité pour le fond sombre.\n     Contrainte qui prime sur la fidélité : chacune doit rester distincte des\n     six autres ET du gris de pénalité, sinon un bloc posé se confond avec une\n     ligne indestructible. */\n  --block-I: #3ad6f0;\n  --block-O: #f7d047;\n  --block-T: #c058e0;\n  --block-S: #4bd763;\n  --block-Z: #f0453f;\n  --block-J: #4a7bf0;\n  --block-L: #f79433;\n  --block-penalty: #4f4f4f;\n\n  /* ── Typographie ───────────────────────────────────────────────────────────\n     Deux familles système, zéro requête réseau. Le mono porte tout ce qui se\n     compare (scores, niveau, noms de room, touches) : les chiffres y sont de\n     largeur fixe, une valeur qui change ne déplace donc jamais son voisin. */\n  --font-ui: ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto,\n    \"Helvetica Neue\", Arial, sans-serif;\n  --font-mono: ui-monospace, SFMono-Regular, \"SF Mono\", Menlo, Consolas,\n    \"Liberation Mono\", monospace;\n\n  /* Échelle modulaire ~1.25, sept pas nommés — plus aucune taille en dur. */\n  --text-2xs: 0.6875rem; /* 11px */\n  --text-xs: 0.8125rem; /* 13px */\n  --text-sm: 0.9375rem; /* 15px */\n  --text-md: 1.125rem; /* 18px */\n  --text-lg: 1.75rem; /* 28px */\n  --text-xl: 2.5rem; /* 40px */\n  --text-2xl: 4rem; /* 64px */\n\n  --weight-normal: 500;\n  --weight-bold: 700;\n  --weight-black: 900;\n\n  /* Interlettrage : négatif sur les gros titres (ils se resserrent), positif\n     sur les capitales de petite taille (elles s'étouffent sinon). */\n  --tracking-tight: -0.02em;\n  --tracking-wide: 0.14em;\n\n  /* ── Espacement, base 4 ───────────────────────────────────────────────── */\n  --space-1: 4px;\n  --space-2: 8px;\n  --space-3: 12px;\n  --space-4: 16px;\n  --space-5: 20px;\n  --space-6: 24px;\n  --space-8: 32px;\n  --space-10: 40px;\n\n  /* ── Formes ────────────────────────────────────────────────────────────────\n     Zéro rayon, c'est la décision de fond de la direction. Le token existe\n     quand même : c'est le seul endroit où la revenir dessus est possible. */\n  --radius: 0;\n  --border: 1px solid var(--line);\n  --border-strong: 2px solid var(--line-strong);\n\n  /* ── Mouvement ────────────────────────────────────────────────────────── */\n  --duration-fast: 0.12s;\n  --duration-base: 0.2s;\n  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);\n\n  /* ── Puits ─────────────────────────────────────────────────────────────────\n     Le plateau ne défile jamais. Budget vertical hors puits : bandeau de stats\n     (66) + gouttière (12) + bordures (4) + padding de page (48) + marge (20).\n     Le terme en vw garde les 10 colonnes dans la largeur sur mobile.\n     Première déclaration en vh : repli pour les moteurs sans dvh. */\n  --cell-size: min(40px, calc((100vh - 150px) / 20), calc((100vw - 32px) / 10));\n  --cell-size: min(\n    40px,\n    calc((100dvh - 150px) / 20),\n    calc((100vw - 32px) / 10)\n  );\n  --board-width: calc(var(--cell-size) * 10 + 4px);\n\n  /* Cible tactile minimale (WCAG 2.5.5) */\n  --tap: 44px;\n}\n\n/* ═══ Reset ════════════════════════════════════════════════════════════════ */\n*,\n*::before,\n*::after {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n\nhtml,\nbody {\n  height: 100%;\n  background: var(--bg);\n  color: var(--ink-1);\n  font-family: var(--font-ui);\n  font-size: 16px;\n  font-weight: var(--weight-normal);\n  line-height: 1.5;\n  -webkit-font-smoothing: antialiased;\n}\n\n#root {\n  min-height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n\nh1,\nh2,\nh3 {\n  color: var(--ink-0);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  line-height: 1;\n}\n\n/* Le contour est le vocabulaire de toute la direction : ici il change juste de\n   couleur pour se voir par-dessus n'importe quelle surface. */\n:focus-visible {\n  outline: 2px solid var(--ink-0);\n  outline-offset: 2px;\n}\n\n/* Visible pour les lecteurs d'écran uniquement (régions live). */\n.sr-only {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  padding: 0;\n  margin: -1px;\n  overflow: hidden;\n  clip: rect(0, 0, 0, 0);\n  white-space: nowrap;\n  border: 0;\n}\n\n/* ═══ Primitives typographiques ════════════════════════════════════════════ */\n\n/* Intertitre : capitales espacées, la plus petite taille du système. Une seule\n   section du jeu en porte un — « Opponents ». Hold, Next et les raccourcis se\n   lisent sans qu'on les annonce. */\n.eyebrow {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  margin-bottom: var(--space-2);\n}\n\n/* Statistique : libellé au-dessus, valeur en dessous. Le seul motif de données\n   du jeu — score, lignes, niveau, score adverse en partagent la mécanique. */\n.stat {\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n  min-width: 0;\n}\n\n.stat__label {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n  max-width: 14ch;\n}\n\n.stat__value {\n  font-family: var(--font-mono);\n  font-size: var(--text-md);\n  font-weight: var(--weight-bold);\n  line-height: 1.1;\n  color: var(--ink-0);\n  font-variant-numeric: tabular-nums;\n}\n\n.stat--strong .stat__value {\n  font-size: var(--text-lg);\n  font-weight: var(--weight-black);\n}\n\n.stat__value--flash {\n  animation: statFlash var(--duration-base) var(--ease-out);\n}\n\n@keyframes statFlash {\n  from {\n    color: var(--accent-ink);\n  }\n  to {\n    color: var(--ink-0);\n  }\n}\n\n/* ═══ Structure ════════════════════════════════════════════════════════════ */\n.app-main {\n  flex: 1;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n\n.screen {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 100vh;\n  padding: var(--space-6) var(--space-4);\n}\n\n.screen__hint {\n  font-family: var(--font-mono);\n  font-size: var(--text-sm);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n}\n\n/* Grille à zones nommées : le puits mène et reste premier dans le DOM à toutes\n   les tailles, ce sont les zones qui le replacent au centre en large et en tête\n   en étroit. Deux rangées : les instruments (hold, next) collés au bord haut du\n   puits, la référence et les adversaires alignés sur son bord bas. */\n.game-layout {\n  display: grid;\n  grid-template-columns: minmax(0, 12rem) auto minmax(0, 13rem);\n  grid-template-rows: auto minmax(0, 1fr);\n  grid-template-areas:\n    \"hold stage next\"\n    \"meta stage foes\";\n  justify-content: center;\n  column-gap: var(--space-6);\n  row-gap: var(--space-8);\n  padding: var(--space-6) var(--space-4);\n  width: 100%;\n}\n\n.game-stage {\n  grid-area: stage;\n  align-self: start;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-3);\n}\n\n.game-hold {\n  grid-area: hold;\n  align-self: start;\n  justify-self: end;\n}\n\n.game-next {\n  grid-area: next;\n  align-self: start;\n}\n\n/* Le rail des adversaires part du haut de sa rangée et défile chez lui : à huit\n   joueurs il ne doit pas allonger la page sous le puits. */\n.game-foes {\n  grid-area: foes;\n  align-self: stretch;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-4);\n  min-height: 0;\n}\n\n/* L'intertitre reste hors de la pile qui défile — sinon il disparaît au premier\n   scroll et la colonne n'a plus de nom. */\n.game-foes__group {\n  display: flex;\n  flex-direction: column;\n  min-height: 0;\n}\n\n/* Référence (raccourcis, room) : posée sur le bord bas du puits, hors du champ\n   de jeu. */\n.game-meta {\n  grid-area: meta;\n  align-self: end;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-5);\n}\n\n/* ═══ Panneau ══════════════════════════════════════════════════════════════ */\n.panel {\n  background: var(--surface-1);\n  border: var(--border);\n  border-radius: var(--radius);\n  padding: var(--space-4);\n}\n\n/* ═══ Boutons ══════════════════════════════════════════════════════════════ */\n.btn {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  min-height: var(--tap);\n  padding: var(--space-3) var(--space-6);\n  border: var(--border-strong);\n  border-radius: var(--radius);\n  background: transparent;\n  color: var(--ink-0);\n  cursor: pointer;\n  transition:\n    background var(--duration-fast) linear,\n    color var(--duration-fast) linear,\n    border-color var(--duration-fast) linear;\n}\n\n/* L'inversion complète du couple fond/encre remplace l'ombre portée et le\n   soulèvement : l'état actif se voit de loin sans que rien ne bouge. */\n.btn--primary {\n  background: var(--ink-0);\n  color: var(--ink-inverse);\n  border-color: var(--ink-0);\n}\n\n.btn--primary:hover {\n  background: var(--accent);\n  border-color: var(--accent);\n  color: var(--ink-0);\n}\n\n.btn--secondary:hover {\n  background: var(--surface-3);\n  border-color: var(--ink-0);\n}\n\n/* Désactivé : lisible (WCAG n'exempte pas l'information portée par ce bouton). */\n.btn:disabled {\n  background: transparent;\n  color: var(--ink-2);\n  border-color: var(--line);\n  cursor: not-allowed;\n}\n\n.btn:disabled:hover {\n  background: transparent;\n  color: var(--ink-2);\n  border-color: var(--line);\n}\n\n/* ═══ Bandeau d'état ═══════════════════════════════════════════════════════\n   Coupure réseau ou refus du serveur, annoncé par-dessus la partie et jamais à\n   sa place : le joueur garde son plateau sous les yeux. */\n.notice {\n  position: fixed;\n  top: 0;\n  left: 50%;\n  transform: translateX(-50%);\n  z-index: 100;\n  max-width: min(92vw, 560px);\n  padding: var(--space-3) var(--space-5);\n  background: var(--accent);\n  color: var(--ink-0);\n  border: none;\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: 0.06em;\n  text-align: center;\n  text-transform: uppercase;\n  overflow-wrap: anywhere;\n}\n\n/* ═══ Puits ════════════════════════════════════════════════════════════════ */\n.board {\n  position: relative;\n  display: grid;\n  grid-template-columns: repeat(10, var(--cell-size));\n  grid-template-rows: repeat(20, var(--cell-size));\n  background: var(--surface-1);\n  border: var(--border-strong);\n  border-radius: var(--radius);\n  overflow: hidden;\n  /* Isole les 200 cellules du reste du document : une pièce qui descend ne peut\n     plus provoquer de calcul de mise en page hors du plateau. Crée aussi le\n     contexte d'empilement dont ::before a besoin pour passer sous les cellules. */\n  contain: layout paint;\n  transition: filter 0.4s var(--ease-out);\n}\n\n/* Éliminé : le puits se vide de sa couleur au lieu de se figer sans rien dire.\n   La partie continue à côté, ce plateau-là est fini — l'encre le dit. */\n.board--dead {\n  filter: grayscale(1) brightness(0.55);\n}\n\n/* Le quadrillage est peint par le puits, pas par 200 cellules vides bordées :\n   une seule boîte à peindre. Il est franc, pas suggéré — c'est la grille de\n   lecture du jeu, elle doit se compter à l'œil. */\n.board::before {\n  content: \"\";\n  position: absolute;\n  inset: 0;\n  z-index: -1;\n  pointer-events: none;\n  background-image:\n    repeating-linear-gradient(\n      to right,\n      var(--line) 0 1px,\n      transparent 1px var(--cell-size)\n    ),\n    repeating-linear-gradient(\n      to bottom,\n      var(--line) 0 1px,\n      transparent 1px var(--cell-size)\n    );\n}\n\n/* Flash de ligne effacée — un seul élément, jamais dans le flux de la grille.\n   Piloté depuis Board.jsx (Web Animations API) : l'intensité dit combien de\n   lignes sont parties, un Tetris ne peut pas se confondre avec un simple. */\n.board__flash {\n  position: absolute;\n  inset: 0;\n  background: var(--ink-0);\n  opacity: 0;\n  pointer-events: none;\n  z-index: 60;\n}\n\n/* Lueur de pénalité — la seule chose du jeu qui vienne du sol : effacer une\n   ligne et en encaisser trois ne peuvent pas se ressembler. */\n.board__surge {\n  position: absolute;\n  inset: 0;\n  pointer-events: none;\n  opacity: 0;\n  z-index: 55;\n  background: linear-gradient(\n    to top,\n    rgba(255, 59, 48, 1),\n    rgba(255, 59, 48, 0.25) 22%,\n    transparent 46%\n  );\n}\n\n.board--penalty .board__surge {\n  animation: surge 0.4s var(--ease-out);\n}\n\n@keyframes surge {\n  0% {\n    opacity: 0;\n  }\n  16% {\n    opacity: 0.85;\n  }\n  100% {\n    opacity: 0;\n  }\n}\n\n/* Sillage du hard drop — une bande par colonne traversée, placée dans la grille\n   du puits comme les cellules. Sort plus vite qu'elle n'entre : la pièce est\n   déjà posée, la trace n'a rien à faire attendre. */\n.drop-trail {\n  pointer-events: none;\n  background: var(--tint);\n  animation: dropTrail 0.22s linear both;\n}\n\n@keyframes dropTrail {\n  from {\n    opacity: 0.45;\n  }\n  to {\n    opacity: 0;\n  }\n}\n\n/* ═══ Cellules ═════════════════════════════════════════════════════════════ */\n.cell {\n  width: var(--cell-size);\n  height: var(--cell-size);\n}\n\n/* Dans le puits, rien à peindre : la case vide n'est plus qu'un emplacement de\n   grille, le quadrillage vient de .board::before. Les aperçus Next/Hold gardent\n   leur lattice, eux ne se repeignent pas à 30 Hz. */\n.cell--empty {\n  background: transparent;\n  border: 1px solid var(--line);\n}\n\n.board .cell--empty {\n  border: none;\n}\n\n/* Le ghost porte la couleur de sa pièce : deux tétrominos ne se posent pas au\n   même endroit, la projection doit dire lequel arrive. */\n.cell--ghost {\n  background: transparent;\n  border: 2px solid var(--ghost, var(--line-strong));\n  opacity: 0.5;\n}\n\n.cell--ghost-I {\n  --ghost: var(--block-I);\n}\n.cell--ghost-O {\n  --ghost: var(--block-O);\n}\n.cell--ghost-T {\n  --ghost: var(--block-T);\n}\n.cell--ghost-S {\n  --ghost: var(--block-S);\n}\n.cell--ghost-Z {\n  --ghost: var(--block-Z);\n}\n.cell--ghost-J {\n  --ghost: var(--block-J);\n}\n.cell--ghost-L {\n  --ghost: var(--block-L);\n}\n\n/* Aplat strict. La bordure couleur du fond sépare deux blocs voisins de même\n   teinte sans rien simuler : c'est un trait, pas une lumière. */\n.cell--I,\n.cell--O,\n.cell--T,\n.cell--S,\n.cell--Z,\n.cell--J,\n.cell--L,\n.cell--penalty {\n  border: 1px solid var(--bg);\n}\n\n.cell--I {\n  background: var(--block-I);\n}\n.cell--O {\n  background: var(--block-O);\n}\n.cell--T {\n  background: var(--block-T);\n}\n.cell--S {\n  background: var(--block-S);\n}\n.cell--Z {\n  background: var(--block-Z);\n}\n.cell--J {\n  background: var(--block-J);\n}\n.cell--L {\n  background: var(--block-L);\n}\n\n/* Indestructible : hachures. Le gris seul se lirait comme un bloc terne, les\n   diagonales disent « ça ne partira pas » sans dépendre de la couleur. */\n.cell--penalty {\n  background: repeating-linear-gradient(\n    45deg,\n    var(--block-penalty) 0 3px,\n    var(--surface-3) 3px 7px\n  );\n}\n\n/* La pièce en cours est la seule chose vivante du puits : elle est franche,\n   le tas est d'un cran en retrait. */\n.cell--stacked {\n  filter: brightness(0.82);\n}\n\n/* Pénalité reçue : le tas ne se téléporte pas d'un cran vers le haut, il est\n   poussé. Chaque cellule pleine part de `--rise` rangées plus bas — la même\n   distance pour toutes, c'est un seul mouvement. Seules les cases pleines\n   portent la classe : une case vide ne peint rien. */\n.cell--rising {\n  animation: penaltyRise 0.3s var(--ease-out) both;\n}\n\n@keyframes penaltyRise {\n  from {\n    transform: translate3d(0, calc(var(--rise, 0) * 100%), 0);\n  }\n  to {\n    transform: translate3d(0, 0, 0);\n  }\n}\n\n/* ═══ Particules d'effacement ══════════════════════════════════════════════\n   Des éclats carrés, pas des étincelles : même vocabulaire de forme que les\n   blocs dont ils sortent. */\n.particles {\n  position: absolute;\n  inset: 0;\n  overflow: hidden;\n  pointer-events: none;\n  z-index: 50;\n}\n\n.particle {\n  position: absolute;\n  width: var(--size);\n  height: var(--size);\n  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);\n  background: var(--tint);\n  animation: burst var(--dur) linear both;\n  will-change: transform, opacity;\n}\n\n@keyframes burst {\n  from {\n    transform: translate3d(0, 0, 0);\n    opacity: 1;\n  }\n  to {\n    transform: translate3d(var(--dx), var(--dy), 0);\n    opacity: 0;\n  }\n}\n\n/* ═══ Bandeau de statistiques ══════════════════════════════════════════════\n   Calé sur la largeur exacte du puits, il en devient le bord haut et non un\n   panneau de plus. Même hauteur solo et multi : le puits ne remonte pas de\n   20px quand un adversaire arrive. */\n.score-panel {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: var(--space-4);\n  width: var(--board-width);\n  max-width: 100%;\n  padding: var(--space-3) 0;\n  border-bottom: var(--border);\n}\n\n.score-panel__group {\n  display: flex;\n  align-items: baseline;\n  gap: var(--space-6);\n  min-width: 0;\n}\n\n/* L'adversaire est aligné à droite : deux camps, deux bords. */\n.score-panel__group--rival {\n  text-align: right;\n}\n\n.score-panel__group--rival .stat {\n  align-items: flex-end;\n}\n\n/* ═══ Aperçus Next / Hold ══════════════════════════════════════════════════ */\n.preview__label {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  margin-bottom: var(--space-2);\n}\n\n.preview__grid {\n  display: flex;\n  flex-direction: column;\n  width: fit-content;\n  padding: var(--space-2);\n  background: var(--surface-1);\n  border: var(--border);\n  transition: opacity var(--duration-base) linear;\n}\n\n/* Hold déjà consommé : on grise la pièce, jamais son libellé. */\n.preview--spent .preview__grid {\n  opacity: 0.35;\n}\n\n.preview__row {\n  display: flex;\n}\n\n/* Plafonné à 22px mais jamais plus gros qu'une case du puits : sur un écran\n   court, un aperçu qui dépasse le plateau inverse la hiérarchie. */\n.preview__grid .cell {\n  width: min(22px, var(--cell-size));\n  height: min(22px, var(--cell-size));\n}\n\n/* ═══ Adversaires ══════════════════════════════════════════════════════════ */\n.opponent {\n  background: var(--surface-1);\n  border: var(--border);\n  padding: var(--space-3);\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n/* Éliminé : on éteint le spectrum, pas le texte. Baisser l'opacité du bloc\n   entier ferait tomber le nom sous le seuil de contraste. */\n.opponent--dead {\n  border-style: dashed;\n}\n\n.opponent__name {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n/* Depuis que le spectrum est la seule fenêtre sur l'adversaire, il est traité\n   comme un puits miniature et non comme un graphique : même fond, même\n   quadrillage sur 20 rangées. */\n.opponent__spectrum {\n  position: relative;\n  display: grid;\n  grid-template-columns: repeat(10, 1fr);\n  align-items: end;\n  gap: 1px;\n  height: 84px;\n  padding: 2px;\n  background: var(--bg);\n  border: var(--border);\n  overflow: hidden;\n  /* Les barres s'animent en hauteur : la containment enferme ce recalcul dans\n     le cadre au lieu de le laisser remonter la page. */\n  contain: layout paint;\n}\n\n/* Les 20 rangées du terrain adverse : une barre à mi-hauteur se lit « 10 lignes\n   empilées » sans compter, comme sur son propre plateau. */\n.opponent__spectrum::after {\n  content: \"\";\n  position: absolute;\n  inset: 2px;\n  pointer-events: none;\n  background: repeating-linear-gradient(\n    to bottom,\n    var(--line) 0 1px,\n    transparent 1px calc(100% / 20)\n  );\n}\n\n/* Encre neutre, jamais une couleur de pièce : la hauteur est la seule\n   information transmise, la teinte n'en porte aucune. La barre monte au lieu de\n   sauter — c'est la seule façon de voir que les lignes qu'on vient d'envoyer\n   sont bien tombées chez l'adversaire. */\n.opponent__bar {\n  background: var(--ink-1);\n  min-height: 2px;\n  transition: height var(--duration-base) var(--ease-out);\n}\n\n.opponent--dead .opponent__name {\n  color: var(--ink-2);\n}\n\n.opponent--dead .opponent__bar {\n  background: var(--line-strong);\n}\n\n/* Une room n'a pas de limite de joueurs : au-delà de ce que l'écran tient, la\n   colonne défile au lieu d'étirer la page sous le plateau. */\n.opponents-stack {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-3);\n  min-height: 0;\n  max-height: 70vh;\n  overflow-y: auto;\n  padding-right: var(--space-1);\n}\n\n/* ═══ Éliminé ══════════════════════════════════════════════════════════════ */\n.eliminated {\n  text-align: center;\n  background: var(--accent);\n  border: none;\n  color: var(--ink-0);\n}\n\n.eliminated__title {\n  font-family: var(--font-mono);\n  font-size: var(--text-sm);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-wide);\n}\n\n.eliminated__hint {\n  font-size: var(--text-xs);\n  margin-top: var(--space-1);\n}\n\n/* ═══ Aide-mémoire clavier ═════════════════════════════════════════════════ */\n.controls {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n.controls__row {\n  display: flex;\n  align-items: center;\n  gap: var(--space-2);\n}\n\n.controls__keys {\n  display: flex;\n  gap: var(--space-1);\n  flex-shrink: 0;\n}\n\n.controls__key {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  line-height: 1;\n  color: var(--ink-0);\n  background: var(--surface-2);\n  border: var(--border);\n  padding: 5px 6px;\n  min-width: 22px;\n  text-align: center;\n}\n\n.controls__action {\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n}\n\n/* Room et mode : deux faits, pas deux sections. */\n.game-meta__facts {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n.game-meta__fact {\n  display: flex;\n  align-items: baseline;\n  gap: var(--space-2);\n}\n\n.game-meta__key {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  flex-shrink: 0;\n}\n\n.game-meta__value {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  overflow-wrap: anywhere;\n  min-width: 0;\n}\n\n/* ═══ Marque ═══════════════════════════════════════════════════════════════ */\n.brand {\n  font-size: var(--text-xl);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  text-transform: uppercase;\n  text-align: center;\n  text-wrap: balance;\n  color: var(--ink-0);\n}\n\n.brand__accent {\n  color: var(--accent);\n}\n\n/* ═══ Lobby ════════════════════════════════════════════════════════════════ */\n.lobby {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-6);\n  width: 440px;\n  max-width: 100%;\n  padding: var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.lobby__subtitle {\n  font-size: var(--text-sm);\n  color: var(--ink-2);\n  text-align: center;\n  max-width: 46ch;\n}\n\n.lobby__room {\n  text-align: center;\n}\n\n.lobby__room-name {\n  font-family: var(--font-mono);\n  font-size: var(--text-md);\n  font-weight: var(--weight-bold);\n  letter-spacing: 0.06em;\n  color: var(--ink-0);\n  overflow-wrap: anywhere;\n}\n\n.lobby__player-list {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-1);\n}\n\n.lobby__player {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: var(--space-2);\n  padding: var(--space-3);\n  background: var(--surface-2);\n  border-left: 3px solid var(--line-strong);\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n}\n\n/* Soi-même : la barre passe à l'accent, pas le fond. Une ligne de liste ne\n   change pas de nature parce qu'elle vous concerne. */\n.lobby__player--self {\n  border-left-color: var(--accent);\n}\n\n.lobby__player-name--self {\n  color: var(--ink-0);\n  font-weight: var(--weight-bold);\n}\n\n.lobby__player-name {\n  color: var(--ink-1);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.lobby__badge {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  background: var(--ink-0);\n  color: var(--ink-inverse);\n  padding: 2px var(--space-2);\n  flex-shrink: 0;\n}\n\n.lobby__actions {\n  display: flex;\n  align-items: center;\n  gap: var(--space-3);\n  width: 100%;\n  justify-content: center;\n  flex-wrap: wrap;\n}\n\n/* ═══ Accueil (URL invalide) ═══════════════════════════════════════════════ */\n.home {\n  width: 480px;\n  max-width: 100%;\n}\n\n.home__example {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n}\n\n.home__link {\n  color: var(--ink-0);\n  font-weight: var(--weight-bold);\n}\n\n.home__link:hover {\n  color: var(--accent-ink);\n}\n\n/* ═══ Game Over ════════════════════════════════════════════════════════════ */\n.gameover {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-6);\n  text-align: center;\n  padding: var(--space-10) var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.gameover__title {\n  font-size: var(--text-2xl);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  color: var(--ink-0);\n}\n\n.gameover__winner {\n  font-size: var(--text-sm);\n  color: var(--ink-2);\n}\n\n/* Le nom vient de l'URL : il peut être long, accentué, en emoji ou sans espace.\n   Il coupe plutôt que de faire déborder le panneau. */\n.gameover__winner strong {\n  color: var(--ink-0);\n  font-weight: var(--weight-black);\n  overflow-wrap: anywhere;\n}\n\n.gameover__scoreblock {\n  margin-top: var(--space-6);\n}\n\n.gameover__score {\n  font-family: var(--font-mono);\n  font-weight: var(--weight-black);\n  line-height: 1;\n  font-variant-numeric: tabular-nums;\n}\n\n.gameover__score--winner {\n  font-size: var(--text-xl);\n  color: var(--block-S);\n}\n\n.gameover__score--loser {\n  font-size: var(--text-lg);\n  color: var(--ink-1);\n}\n\n.gameover__wait {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n}\n\n/* ═══ Leaderboard ══════════════════════════════════════════════════════════ */\n.lb-overlay {\n  position: fixed;\n  inset: 0;\n  background: rgba(0, 0, 0, 0.78);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: var(--space-4);\n  z-index: 1000;\n}\n\n.lb-modal {\n  position: relative;\n  width: min(460px, 100%);\n  max-height: 90vh;\n  overflow-y: auto;\n  padding: var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.lb-modal__title {\n  font-size: var(--text-md);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  text-align: center;\n  color: var(--ink-0);\n  margin-bottom: var(--space-6);\n}\n\n.lb-modal__close {\n  position: absolute;\n  top: 0;\n  right: 0;\n  width: var(--tap);\n  height: var(--tap);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: transparent;\n  border: none;\n  border-left: var(--border);\n  border-bottom: var(--border);\n  color: var(--ink-1);\n  font-size: var(--text-md);\n  line-height: 1;\n  cursor: pointer;\n  transition: background var(--duration-fast) linear;\n}\n\n.lb-modal__close:hover {\n  background: var(--accent);\n  color: var(--ink-0);\n}\n\n.lb-modal__empty {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n  text-align: center;\n  padding: var(--space-4) 0;\n}\n\n.lb-row {\n  display: flex;\n  align-items: center;\n  gap: var(--space-3);\n  padding: var(--space-3) var(--space-2);\n  border-bottom: var(--border);\n  font-family: var(--font-mono);\n}\n\n/* Première place : la barre latérale, pas un fond doré. Le classement se lit\n   déjà dans l'ordre — l'accent ne fait que pointer le sommet. */\n.lb-row--gold {\n  border-left: 3px solid var(--accent);\n  padding-left: var(--space-3);\n}\n\n.lb-row__rank {\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-2);\n  width: 32px;\n  flex-shrink: 0;\n  font-variant-numeric: tabular-nums;\n}\n\n.lb-row--gold .lb-row__rank {\n  color: var(--accent-ink);\n}\n\n.lb-row__name {\n  flex: 1;\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.lb-row__score {\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-1);\n  white-space: nowrap;\n  font-variant-numeric: tabular-nums;\n}\n\n/* ═══ Scrollbar ════════════════════════════════════════════════════════════ */\n::-webkit-scrollbar {\n  width: 10px;\n}\n\n::-webkit-scrollbar-track {\n  background: var(--bg);\n}\n\n::-webkit-scrollbar-thumb {\n  background: var(--line-strong);\n}\n\n/* ═══ Responsive ═══════════════════════════════════════════════════════════\n   Seuil calculé, pas rond : 192 + 24 + 404 + 24 + 208 = 852px pour les trois\n   colonnes. En dessous les rails écrasaient le plateau. Le puits reste premier\n   — l'empilement le garde en tête, les instruments dessous, la référence en\n   dernier. */\n@media (max-width: 880px) {\n  .game-layout {\n    grid-template-columns: repeat(2, minmax(0, 1fr));\n    grid-template-rows: repeat(4, auto);\n    grid-template-areas:\n      \"stage stage\"\n      \"hold  next\"\n      \"foes  foes\"\n      \"meta  meta\";\n    row-gap: var(--space-5);\n    padding: var(--space-4) var(--space-3);\n  }\n\n  /* Hold et Next épaule contre épaule au centre plutôt qu'aux deux bords. */\n  .game-hold {\n    justify-self: end;\n  }\n\n  .game-next {\n    justify-self: start;\n  }\n\n  .game-foes,\n  .game-meta {\n    align-self: start;\n    align-items: center;\n  }\n\n  .opponents-stack {\n    flex-direction: row;\n    flex-wrap: wrap;\n    justify-content: center;\n    max-height: none;\n    overflow: visible;\n  }\n\n  /* La référence passe en rangée : elle ne doit pas rallonger la page sous le\n     puits pour un contenu qu'on lit une fois. */\n  .game-meta {\n    flex-direction: row;\n    flex-wrap: wrap;\n    justify-content: center;\n    column-gap: var(--space-8);\n  }\n}\n\n@media (max-width: 640px) {\n  :root {\n    --text-2xl: 2.75rem;\n    --text-xl: 2rem;\n  }\n\n  .lobby,\n  .gameover,\n  .lb-modal {\n    padding: var(--space-6) var(--space-4);\n  }\n\n  .score-panel__group {\n    gap: var(--space-4);\n  }\n}\n\n/* ═══ Contraste forcé (Windows High Contrast) ══════════════════════════════\n   Le mode remplace toutes les couleurs par la palette système. Ici la couleur\n   d'une pièce est une information de jeu, pas de la décoration : sans exception\n   explicite les sept tétrominos deviennent identiques et la partie devient\n   injouable. */\n@media (forced-colors: active) {\n  .cell--I,\n  .cell--O,\n  .cell--T,\n  .cell--S,\n  .cell--Z,\n  .cell--J,\n  .cell--L,\n  .cell--penalty,\n  .opponent__bar {\n    forced-color-adjust: none;\n  }\n\n  .board,\n  .panel,\n  .notice,\n  .opponent,\n  .opponent__spectrum,\n  .preview__grid,\n  .lobby,\n  .gameover,\n  .lb-modal {\n    border: 1px solid CanvasText;\n  }\n}\n\n/* ═══ Mouvement réduit ═════════════════════════════════════════════════════\n   On garde les changements d'état (opacité, couleur) : ce sont des retours\n   d'information de jeu. On supprime les déplacements et les particules. */\n@media (prefers-reduced-motion: reduce) {\n  .stat__value--flash,\n  .cell--rising,\n  .drop-trail,\n  .board--penalty .board__surge {\n    animation: none;\n  }\n\n  /* La pénalité reste annoncée — région live, lignes hachurées au sol, spectrum\n     à jour ; c'est la poussée et la lueur qui disparaissent, pas l'information.\n     Le sillage sans animation ne doit rien laisser derrière lui. */\n  .drop-trail,\n  .particles {\n    display: none;\n  }\n\n  *,\n  *::before,\n  *::after {\n    transition-duration: var(--duration-fast) !important;\n    scroll-behavior: auto !important;\n  }\n}\n",
+          "/* ─────────────────────────────────────────────────────────────────────────────\n   src/client/styles/global.css\n   Direction : brutalist arcade.\n   Fond charbon uni, blocs strictement plats, angles droits, bordures nettes,\n   hiérarchie portée par la taille et la graisse — jamais par une ombre ou un\n   dégradé. Aucune police distante : la pile système suffit et ne bloque rien.\n   ───────────────────────────────────────────────────────────────────────────── */\n\n/* ═══ Tokens ═══════════════════════════════════════════════════════════════ */\n:root {\n  /* ── Surfaces ─────────────────────────────────────────────────────────────\n     Quatre paliers seulement. Sans ombre pour séparer deux plans, c'est le\n     saut de valeur et la bordure qui font tout le travail : plus de paliers et\n     ils cessent d'être distinguables. */\n  --bg: #101010;\n  --surface-1: #171717;\n  --surface-2: #1e1e1e;\n  --surface-3: #262626;\n\n  /* ── Traits ────────────────────────────────────────────────────────────── */\n  --line: #2e2e2e; /* séparation discrète, quadrillage du puits */\n  --line-strong: #4d4d4d; /* contour d'un objet, ghost */\n\n  /* ── Encre — contrastes mesurés sur --bg ───────────────────────────────── */\n  --ink-0: #f2f2f2; /* 16.4:1 — titres, valeurs                */\n  --ink-1: #b9b9b9; /*  8.6:1 — texte courant                  */\n  --ink-2: #909090; /*  4.9:1 — libellés, plancher AA           */\n  --ink-inverse: #101010; /* sur fond clair (bouton primaire)  */\n\n  /* ── Accent ────────────────────────────────────────────────────────────────\n     Rouge réservé au danger : pénalité reçue, joueur éliminé, refus serveur.\n     Le bouton primaire est blanc — un bouton rouge et un tétromino Z rouge\n     dans le même écran diraient la même chose sans le même sens. */\n  --accent: #ff3b30;\n  --accent-ink: #ff7a72; /* 6.1:1 — la même famille, lisible en texte */\n\n  /* Voile des surcouches. Un noir franc et non le fond assombri : le classement\n     doit couper la partie, pas s'y fondre. */\n  --scrim: rgb(0 0 0 / 0.78);\n\n  /* ── Tétrominos ────────────────────────────────────────────────────────────\n     Teintes canoniques du sujet, remontées en luminosité pour le fond sombre.\n     Contrainte qui prime sur la fidélité : chacune doit rester distincte des\n     six autres ET du gris de pénalité, sinon un bloc posé se confond avec une\n     ligne indestructible. */\n  --block-I: #3ad6f0;\n  --block-O: #f7d047;\n  --block-T: #c058e0;\n  --block-S: #4bd763;\n  --block-Z: #f0453f;\n  --block-J: #4a7bf0;\n  --block-L: #f79433;\n  --block-penalty: #4f4f4f;\n\n  /* ── Typographie ───────────────────────────────────────────────────────────\n     Deux familles système, zéro requête réseau. Le mono porte tout ce qui se\n     compare (scores, niveau, noms de room, touches) : les chiffres y sont de\n     largeur fixe, une valeur qui change ne déplace donc jamais son voisin. */\n  --font-ui:\n    ui-sans-serif,\n    system-ui,\n    -apple-system,\n    \"Segoe UI\",\n    Roboto,\n    \"Helvetica Neue\",\n    Arial,\n    sans-serif;\n  --font-mono:\n    ui-monospace,\n    SFMono-Regular,\n    \"SF Mono\",\n    Menlo,\n    Consolas,\n    \"Liberation Mono\",\n    monospace;\n\n  /* Échelle modulaire ~1.25, sept pas nommés — plus aucune taille en dur. */\n  --text-2xs: 0.6875rem; /* 11px */\n  --text-xs: 0.8125rem; /* 13px */\n  --text-sm: 0.9375rem; /* 15px */\n  --text-md: 1.125rem; /* 18px */\n  --text-lg: 1.75rem; /* 28px */\n  --text-xl: 2.5rem; /* 40px */\n  --text-2xl: 4rem; /* 64px */\n\n  --weight-normal: 500;\n  --weight-bold: 700;\n  --weight-black: 900;\n\n  /* Interlettrage : négatif sur les gros titres (ils se resserrent), positif\n     sur les capitales de petite taille (elles s'étouffent sinon). */\n  --tracking-tight: -0.02em;\n  --tracking-mid: 0.06em; /* capitales de taille moyenne : nom de room, bouton */\n  --tracking-wide: 0.14em;\n\n  /* ── Espacement, base 4 ───────────────────────────────────────────────── */\n  --space-1: 4px;\n  --space-2: 8px;\n  --space-3: 12px;\n  --space-4: 16px;\n  --space-5: 20px;\n  --space-6: 24px;\n  --space-8: 32px;\n  --space-10: 40px;\n\n  /* ── Formes ────────────────────────────────────────────────────────────────\n     Zéro rayon, c'est la décision de fond de la direction. Le token existe\n     quand même : c'est le seul endroit où la revenir dessus est possible. */\n  --radius: 0;\n  --border: 1px solid var(--line);\n  --border-strong: 2px solid var(--line-strong);\n  /* Rail : le filet vertical qui qualifie une ligne de liste — soi-même dans le\n     lobby, la première place du classement. Sans ombre ni fond coloré, c'est le\n     seul marqueur d'appartenance dont la direction dispose. */\n  --rail: 3px;\n\n  /* ── Mouvement ────────────────────────────────────────────────────────── */\n  --duration-fast: 0.12s;\n  --duration-base: 0.2s;\n  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);\n\n  /* ── Puits ─────────────────────────────────────────────────────────────────\n     Le plateau ne défile jamais. Budget vertical hors puits : bandeau de stats\n     (66) + gouttière (12) + bordures (4) + padding de page (48) + marge (20).\n     Le terme en vw garde les 10 colonnes dans la largeur sur mobile.\n     Première déclaration en vh : repli pour les moteurs sans dvh. */\n  --cell-size: min(40px, calc((100vh - 150px) / 20), calc((100vw - 32px) / 10));\n  --cell-size: min(\n    40px,\n    calc((100dvh - 150px) / 20),\n    calc((100vw - 32px) / 10)\n  );\n  --board-width: calc(var(--cell-size) * 10 + 4px);\n\n  /* Puits miniature de l'adversaire : assez haut pour que ses 20 rangées se\n     distinguent, assez bas pour en empiler plusieurs sans faire défiler. */\n  --spectrum-height: 84px;\n\n  /* Panneau centré sur écran vide (lobby, accueil, fin de partie). Une seule\n     largeur : deux cartes du même rôle qui ne tombent pas d'aplomb entre deux\n     écrans, c'est la porte d'entrée du projet qui bouge sous le correcteur. */\n  --panel-width: 480px;\n\n  /* Cible tactile minimale (WCAG 2.5.5) */\n  --tap: 44px;\n}\n\n/* ═══ Reset ════════════════════════════════════════════════════════════════ */\n*,\n*::before,\n*::after {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n\nhtml,\nbody {\n  height: 100%;\n  background: var(--bg);\n  color: var(--ink-1);\n  font-family: var(--font-ui);\n  font-size: 16px;\n  font-weight: var(--weight-normal);\n  line-height: 1.5;\n  -webkit-font-smoothing: antialiased;\n}\n\n#root {\n  min-height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n\nh1,\nh2,\nh3 {\n  color: var(--ink-0);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  line-height: 1;\n}\n\n/* Le contour est le vocabulaire de toute la direction : ici il change juste de\n   couleur pour se voir par-dessus n'importe quelle surface. */\n:focus-visible {\n  outline: 2px solid var(--ink-0);\n  outline-offset: 2px;\n}\n\n/* Visible pour les lecteurs d'écran uniquement (régions live). */\n.sr-only {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  padding: 0;\n  margin: -1px;\n  overflow: hidden;\n  clip: rect(0, 0, 0, 0);\n  white-space: nowrap;\n  border: 0;\n}\n\n/* ═══ Primitives typographiques ════════════════════════════════════════════ */\n\n/* Intertitre : capitales espacées, la plus petite taille du système. Une seule\n   section du jeu en porte un — « Opponents ». Hold, Next et les raccourcis se\n   lisent sans qu'on les annonce. */\n.eyebrow {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  margin-bottom: var(--space-2);\n}\n\n/* Statistique : libellé au-dessus, valeur en dessous. Le seul motif de données\n   du jeu — score, lignes, niveau, score adverse en partagent la mécanique. */\n.stat {\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n  min-width: 0;\n}\n\n.stat__label {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n  max-width: 14ch;\n}\n\n.stat__value {\n  font-family: var(--font-mono);\n  font-size: var(--text-md);\n  font-weight: var(--weight-bold);\n  line-height: 1.1;\n  color: var(--ink-0);\n  font-variant-numeric: tabular-nums;\n}\n\n.stat--strong .stat__value {\n  font-size: var(--text-lg);\n  font-weight: var(--weight-black);\n}\n\n.stat__value--flash {\n  animation: statFlash var(--duration-base) var(--ease-out);\n}\n\n@keyframes statFlash {\n  from {\n    color: var(--accent-ink);\n  }\n  to {\n    color: var(--ink-0);\n  }\n}\n\n/* ═══ Structure ════════════════════════════════════════════════════════════ */\n.app-main {\n  flex: 1;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n\n.screen {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 100vh;\n  padding: var(--space-6) var(--space-4);\n}\n\n.screen__hint {\n  font-family: var(--font-mono);\n  font-size: var(--text-sm);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n}\n\n/* Grille à zones nommées : le puits mène et reste premier dans le DOM à toutes\n   les tailles, ce sont les zones qui le replacent au centre en large et en tête\n   en étroit. Deux rangées : les instruments (hold, next) collés au bord haut du\n   puits, la référence et les adversaires alignés sur son bord bas. */\n.game-layout {\n  display: grid;\n  grid-template-columns: minmax(0, 12rem) auto minmax(0, 13rem);\n  grid-template-rows: auto minmax(0, 1fr);\n  grid-template-areas:\n    \"hold stage next\"\n    \"meta stage foes\";\n  justify-content: center;\n  column-gap: var(--space-6);\n  row-gap: var(--space-8);\n  padding: var(--space-6) var(--space-4);\n  width: 100%;\n}\n\n.game-stage {\n  grid-area: stage;\n  align-self: start;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-3);\n}\n\n.game-hold {\n  grid-area: hold;\n  align-self: start;\n  justify-self: end;\n}\n\n.game-next {\n  grid-area: next;\n  align-self: start;\n}\n\n/* Le rail des adversaires part du haut de sa rangée et défile chez lui : à huit\n   joueurs il ne doit pas allonger la page sous le puits. */\n.game-foes {\n  grid-area: foes;\n  align-self: stretch;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-4);\n  min-height: 0;\n}\n\n/* L'intertitre reste hors de la pile qui défile — sinon il disparaît au premier\n   scroll et la colonne n'a plus de nom. */\n.game-foes__group {\n  display: flex;\n  flex-direction: column;\n  min-height: 0;\n}\n\n/* Référence (raccourcis, room) : posée sur le bord bas du puits, hors du champ\n   de jeu. */\n.game-meta {\n  grid-area: meta;\n  align-self: end;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-5);\n}\n\n/* ═══ Panneau ══════════════════════════════════════════════════════════════ */\n.panel {\n  background: var(--surface-1);\n  border: var(--border);\n  border-radius: var(--radius);\n  padding: var(--space-4);\n}\n\n/* ═══ Boutons ══════════════════════════════════════════════════════════════ */\n.btn {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  min-height: var(--tap);\n  padding: var(--space-3) var(--space-6);\n  border: var(--border-strong);\n  border-radius: var(--radius);\n  background: transparent;\n  color: var(--ink-0);\n  cursor: pointer;\n  transition:\n    background var(--duration-fast) linear,\n    color var(--duration-fast) linear,\n    border-color var(--duration-fast) linear;\n}\n\n/* L'inversion complète du couple fond/encre remplace l'ombre portée et le\n   soulèvement : l'état actif se voit de loin sans que rien ne bouge. */\n.btn--primary {\n  background: var(--ink-0);\n  color: var(--ink-inverse);\n  border-color: var(--ink-0);\n}\n\n.btn--primary:hover {\n  background: var(--accent);\n  border-color: var(--accent);\n  color: var(--ink-0);\n}\n\n.btn--secondary:hover {\n  background: var(--surface-3);\n  border-color: var(--ink-0);\n}\n\n/* Désactivé : lisible (WCAG n'exempte pas l'information portée par ce bouton). */\n.btn:disabled {\n  background: transparent;\n  color: var(--ink-2);\n  border-color: var(--line);\n  cursor: not-allowed;\n}\n\n.btn:disabled:hover {\n  background: transparent;\n  color: var(--ink-2);\n  border-color: var(--line);\n}\n\n/* ═══ Bandeau d'état ═══════════════════════════════════════════════════════\n   Coupure réseau ou refus du serveur, annoncé par-dessus la partie et jamais à\n   sa place : le joueur garde son plateau sous les yeux. */\n.notice {\n  position: fixed;\n  top: 0;\n  left: 50%;\n  transform: translateX(-50%);\n  z-index: 100;\n  max-width: min(92vw, 560px);\n  padding: var(--space-3) var(--space-5);\n  background: var(--accent);\n  color: var(--ink-0);\n  border: none;\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-mid);\n  text-align: center;\n  text-transform: uppercase;\n  overflow-wrap: anywhere;\n}\n\n/* ═══ Puits ════════════════════════════════════════════════════════════════ */\n.board {\n  position: relative;\n  display: grid;\n  grid-template-columns: repeat(10, var(--cell-size));\n  grid-template-rows: repeat(20, var(--cell-size));\n  background: var(--surface-1);\n  border: var(--border-strong);\n  border-radius: var(--radius);\n  overflow: hidden;\n  /* Isole les 200 cellules du reste du document : une pièce qui descend ne peut\n     plus provoquer de calcul de mise en page hors du plateau. Crée aussi le\n     contexte d'empilement dont ::before a besoin pour passer sous les cellules. */\n  contain: layout paint;\n  transition: filter 0.4s var(--ease-out);\n}\n\n/* Éliminé : le puits se vide de sa couleur au lieu de se figer sans rien dire.\n   La partie continue à côté, ce plateau-là est fini — l'encre le dit. */\n.board--dead {\n  filter: grayscale(1) brightness(0.55);\n}\n\n/* Le quadrillage est peint par le puits, pas par 200 cellules vides bordées :\n   une seule boîte à peindre. Il est franc, pas suggéré — c'est la grille de\n   lecture du jeu, elle doit se compter à l'œil. */\n.board::before {\n  content: \"\";\n  position: absolute;\n  inset: 0;\n  z-index: -1;\n  pointer-events: none;\n  background-image:\n    repeating-linear-gradient(\n      to right,\n      var(--line) 0 1px,\n      transparent 1px var(--cell-size)\n    ),\n    repeating-linear-gradient(\n    to bottom,\n    var(--line) 0 1px,\n    transparent 1px var(--cell-size)\n  );\n}\n\n/* Flash de ligne effacée — un seul élément, jamais dans le flux de la grille.\n   Piloté depuis Board.jsx (Web Animations API) : l'intensité dit combien de\n   lignes sont parties, un Tetris ne peut pas se confondre avec un simple. */\n.board__flash {\n  position: absolute;\n  inset: 0;\n  background: var(--ink-0);\n  opacity: 0;\n  pointer-events: none;\n  z-index: 60;\n}\n\n/* Lueur de pénalité — la seule chose du jeu qui vienne du sol : effacer une\n   ligne et en encaisser trois ne peuvent pas se ressembler. */\n.board__surge {\n  position: absolute;\n  inset: 0;\n  pointer-events: none;\n  opacity: 0;\n  z-index: 55;\n  background: linear-gradient(\n    to top,\n    var(--accent),\n    color-mix(in srgb, var(--accent) 25%, transparent) 22%,\n    transparent 46%\n  );\n}\n\n.board--penalty .board__surge {\n  animation: surge 0.4s var(--ease-out);\n}\n\n@keyframes surge {\n  0% {\n    opacity: 0;\n  }\n  16% {\n    opacity: 0.85;\n  }\n  100% {\n    opacity: 0;\n  }\n}\n\n/* Sillage du hard drop — une bande par colonne traversée, placée dans la grille\n   du puits comme les cellules. Sort plus vite qu'elle n'entre : la pièce est\n   déjà posée, la trace n'a rien à faire attendre. */\n.drop-trail {\n  pointer-events: none;\n  background: var(--tint);\n  animation: dropTrail 0.22s linear both;\n}\n\n@keyframes dropTrail {\n  from {\n    opacity: 0.45;\n  }\n  to {\n    opacity: 0;\n  }\n}\n\n/* ═══ Cellules ═════════════════════════════════════════════════════════════ */\n.cell {\n  width: var(--cell-size);\n  height: var(--cell-size);\n}\n\n/* Dans le puits, rien à peindre : la case vide n'est plus qu'un emplacement de\n   grille, le quadrillage vient de .board::before. Les aperçus Next/Hold gardent\n   leur lattice, eux ne se repeignent pas à 30 Hz. */\n.cell--empty {\n  background: transparent;\n  border: 1px solid var(--line);\n}\n\n.board .cell--empty {\n  border: none;\n}\n\n/* Le ghost porte la couleur de sa pièce : deux tétrominos ne se posent pas au\n   même endroit, la projection doit dire lequel arrive. */\n.cell--ghost {\n  background: transparent;\n  border: 2px solid var(--ghost, var(--line-strong));\n  opacity: 0.5;\n}\n\n.cell--ghost-I {\n  --ghost: var(--block-I);\n}\n.cell--ghost-O {\n  --ghost: var(--block-O);\n}\n.cell--ghost-T {\n  --ghost: var(--block-T);\n}\n.cell--ghost-S {\n  --ghost: var(--block-S);\n}\n.cell--ghost-Z {\n  --ghost: var(--block-Z);\n}\n.cell--ghost-J {\n  --ghost: var(--block-J);\n}\n.cell--ghost-L {\n  --ghost: var(--block-L);\n}\n\n/* Aplat strict. La bordure couleur du fond sépare deux blocs voisins de même\n   teinte sans rien simuler : c'est un trait, pas une lumière. */\n.cell--I,\n.cell--O,\n.cell--T,\n.cell--S,\n.cell--Z,\n.cell--J,\n.cell--L,\n.cell--penalty {\n  border: 1px solid var(--bg);\n}\n\n.cell--I {\n  background: var(--block-I);\n}\n.cell--O {\n  background: var(--block-O);\n}\n.cell--T {\n  background: var(--block-T);\n}\n.cell--S {\n  background: var(--block-S);\n}\n.cell--Z {\n  background: var(--block-Z);\n}\n.cell--J {\n  background: var(--block-J);\n}\n.cell--L {\n  background: var(--block-L);\n}\n\n/* Indestructible : hachures. Le gris seul se lirait comme un bloc terne, les\n   diagonales disent « ça ne partira pas » sans dépendre de la couleur. */\n.cell--penalty {\n  background: repeating-linear-gradient(\n    45deg,\n    var(--block-penalty) 0 3px,\n    var(--surface-3) 3px 7px\n  );\n}\n\n/* La pièce en cours est la seule chose vivante du puits : elle est franche,\n   le tas est d'un cran en retrait. */\n.cell--stacked {\n  filter: brightness(0.82);\n}\n\n/* Pénalité reçue : le tas ne se téléporte pas d'un cran vers le haut, il est\n   poussé. Chaque cellule pleine part de `--rise` rangées plus bas — la même\n   distance pour toutes, c'est un seul mouvement. Seules les cases pleines\n   portent la classe : une case vide ne peint rien. */\n.cell--rising {\n  animation: penaltyRise 0.3s var(--ease-out) both;\n}\n\n@keyframes penaltyRise {\n  from {\n    transform: translate3d(0, calc(var(--rise, 0) * 100%), 0);\n  }\n  to {\n    transform: translate3d(0, 0, 0);\n  }\n}\n\n/* ═══ Particules d'effacement ══════════════════════════════════════════════\n   Des éclats carrés, pas des étincelles : même vocabulaire de forme que les\n   blocs dont ils sortent. */\n.particles {\n  position: absolute;\n  inset: 0;\n  overflow: hidden;\n  pointer-events: none;\n  z-index: 50;\n}\n\n.particle {\n  position: absolute;\n  width: var(--size);\n  height: var(--size);\n  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);\n  background: var(--tint);\n  animation: burst var(--dur) linear both;\n  will-change: transform, opacity;\n}\n\n@keyframes burst {\n  from {\n    transform: translate3d(0, 0, 0);\n    opacity: 1;\n  }\n  to {\n    transform: translate3d(var(--dx), var(--dy), 0);\n    opacity: 0;\n  }\n}\n\n/* ═══ Bandeau de statistiques ══════════════════════════════════════════════\n   Calé sur la largeur exacte du puits, il en devient le bord haut et non un\n   panneau de plus. Même hauteur solo et multi : le puits ne remonte pas de\n   20px quand un adversaire arrive. */\n.score-panel {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: var(--space-4);\n  width: var(--board-width);\n  max-width: 100%;\n  padding: var(--space-3) 0;\n  border-bottom: var(--border);\n}\n\n.score-panel__group {\n  display: flex;\n  align-items: baseline;\n  gap: var(--space-6);\n  min-width: 0;\n}\n\n/* L'adversaire est aligné à droite : deux camps, deux bords. */\n.score-panel__group--rival {\n  text-align: right;\n}\n\n.score-panel__group--rival .stat {\n  align-items: flex-end;\n}\n\n/* ═══ Aperçus Next / Hold ══════════════════════════════════════════════════ */\n.preview__label {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  margin-bottom: var(--space-2);\n}\n\n.preview__grid {\n  display: flex;\n  flex-direction: column;\n  width: fit-content;\n  padding: var(--space-2);\n  background: var(--surface-1);\n  border: var(--border);\n  transition: opacity var(--duration-base) linear;\n}\n\n/* Hold déjà consommé : on grise la pièce, jamais son libellé. */\n.preview--spent .preview__grid {\n  opacity: 0.35;\n}\n\n.preview__row {\n  display: flex;\n}\n\n/* Plafonné à 22px mais jamais plus gros qu'une case du puits : sur un écran\n   court, un aperçu qui dépasse le plateau inverse la hiérarchie. */\n.preview__grid .cell {\n  width: min(22px, var(--cell-size));\n  height: min(22px, var(--cell-size));\n}\n\n/* ═══ Adversaires ══════════════════════════════════════════════════════════ */\n.opponent {\n  background: var(--surface-1);\n  border: var(--border);\n  padding: var(--space-3);\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n/* Éliminé : on éteint le spectrum, pas le texte. Baisser l'opacité du bloc\n   entier ferait tomber le nom sous le seuil de contraste. */\n.opponent--dead {\n  border-style: dashed;\n}\n\n.opponent__name {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n/* Depuis que le spectrum est la seule fenêtre sur l'adversaire, il est traité\n   comme un puits miniature et non comme un graphique : même fond, même\n   quadrillage sur 20 rangées. */\n.opponent__spectrum {\n  position: relative;\n  display: grid;\n  grid-template-columns: repeat(10, 1fr);\n  align-items: end;\n  gap: 1px;\n  height: var(--spectrum-height);\n  padding: 2px;\n  background: var(--bg);\n  border: var(--border);\n  overflow: hidden;\n  /* Les barres s'animent en hauteur : la containment enferme ce recalcul dans\n     le cadre au lieu de le laisser remonter la page. */\n  contain: layout paint;\n}\n\n/* Les 20 rangées du terrain adverse : une barre à mi-hauteur se lit « 10 lignes\n   empilées » sans compter, comme sur son propre plateau. */\n.opponent__spectrum::after {\n  content: \"\";\n  position: absolute;\n  inset: 2px;\n  pointer-events: none;\n  background: repeating-linear-gradient(\n    to bottom,\n    var(--line) 0 1px,\n    transparent 1px calc(100% / 20)\n  );\n}\n\n/* Encre neutre, jamais une couleur de pièce : la hauteur est la seule\n   information transmise, la teinte n'en porte aucune. La barre monte au lieu de\n   sauter — c'est la seule façon de voir que les lignes qu'on vient d'envoyer\n   sont bien tombées chez l'adversaire. */\n.opponent__bar {\n  background: var(--ink-1);\n  min-height: 2px;\n  transition: height var(--duration-base) var(--ease-out);\n}\n\n.opponent--dead .opponent__name {\n  color: var(--ink-2);\n}\n\n.opponent--dead .opponent__bar {\n  background: var(--line-strong);\n}\n\n/* Une room n'a pas de limite de joueurs : au-delà de ce que l'écran tient, la\n   colonne défile au lieu d'étirer la page sous le plateau. */\n.opponents-stack {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-3);\n  min-height: 0;\n  max-height: 70vh;\n  overflow-y: auto;\n  padding-right: var(--space-1);\n}\n\n/* ═══ Éliminé ══════════════════════════════════════════════════════════════ */\n.eliminated {\n  text-align: center;\n  background: var(--accent);\n  border: none;\n  color: var(--ink-0);\n}\n\n.eliminated__title {\n  font-family: var(--font-mono);\n  font-size: var(--text-sm);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-wide);\n}\n\n.eliminated__hint {\n  font-size: var(--text-xs);\n  margin-top: var(--space-1);\n}\n\n/* ═══ Aide-mémoire clavier ═════════════════════════════════════════════════ */\n.controls {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n.controls__row {\n  display: flex;\n  align-items: center;\n  gap: var(--space-2);\n}\n\n.controls__keys {\n  display: flex;\n  gap: var(--space-1);\n  flex-shrink: 0;\n}\n\n.controls__key {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  line-height: 1;\n  color: var(--ink-0);\n  background: var(--surface-2);\n  border: var(--border);\n  padding: var(--space-1) var(--space-2);\n  min-width: var(--space-6);\n  text-align: center;\n}\n\n.controls__action {\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n}\n\n/* Room et mode : deux faits, pas deux sections. */\n.game-meta__facts {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n}\n\n.game-meta__fact {\n  display: flex;\n  align-items: baseline;\n  gap: var(--space-2);\n}\n\n.game-meta__key {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n  flex-shrink: 0;\n}\n\n.game-meta__value {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  overflow-wrap: anywhere;\n  min-width: 0;\n}\n\n/* ═══ Marque ═══════════════════════════════════════════════════════════════ */\n.brand {\n  font-size: var(--text-xl);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  text-transform: uppercase;\n  text-align: center;\n  text-wrap: balance;\n  color: var(--ink-0);\n}\n\n.brand__accent {\n  color: var(--accent);\n}\n\n/* ═══ Lobby ════════════════════════════════════════════════════════════════ */\n.lobby {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-6);\n  width: var(--panel-width);\n  max-width: 100%;\n  padding: var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.lobby__subtitle {\n  font-size: var(--text-sm);\n  color: var(--ink-2);\n  text-align: center;\n  max-width: 46ch;\n}\n\n.lobby__room {\n  text-align: center;\n}\n\n.lobby__room-name {\n  font-family: var(--font-mono);\n  font-size: var(--text-md);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-mid);\n  color: var(--ink-0);\n  overflow-wrap: anywhere;\n}\n\n.lobby__player-list {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-1);\n}\n\n.lobby__player {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: var(--space-2);\n  padding: var(--space-3);\n  background: var(--surface-2);\n  border-left: var(--rail) solid var(--line-strong);\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n}\n\n/* Soi-même : la barre passe à l'accent, pas le fond. Une ligne de liste ne\n   change pas de nature parce qu'elle vous concerne. */\n.lobby__player--self {\n  border-left-color: var(--accent);\n}\n\n.lobby__player-name--self {\n  color: var(--ink-0);\n  font-weight: var(--weight-bold);\n}\n\n.lobby__player-name {\n  color: var(--ink-1);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.lobby__badge {\n  font-family: var(--font-mono);\n  font-size: var(--text-2xs);\n  font-weight: var(--weight-bold);\n  letter-spacing: var(--tracking-wide);\n  background: var(--ink-0);\n  color: var(--ink-inverse);\n  padding: var(--space-1) var(--space-2);\n  flex-shrink: 0;\n}\n\n.lobby__actions {\n  display: flex;\n  align-items: center;\n  gap: var(--space-3);\n  width: 100%;\n  justify-content: center;\n  flex-wrap: wrap;\n}\n\n/* ═══ Accueil (URL invalide) ═══════════════════════════════════════════════ */\n.home {\n  width: var(--panel-width);\n  max-width: 100%;\n}\n\n.home__example {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n}\n\n.home__link {\n  color: var(--ink-0);\n  font-weight: var(--weight-bold);\n}\n\n.home__link:hover {\n  color: var(--accent-ink);\n}\n\n/* ═══ Game Over ════════════════════════════════════════════════════════════ */\n.gameover {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: var(--space-6);\n  text-align: center;\n  padding: var(--space-10) var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.gameover__title {\n  font-size: var(--text-2xl);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-tight);\n  color: var(--ink-0);\n}\n\n.gameover__winner {\n  font-size: var(--text-sm);\n  color: var(--ink-2);\n}\n\n/* Le nom vient de l'URL : il peut être long, accentué, en emoji ou sans espace.\n   Il coupe plutôt que de faire déborder le panneau. */\n.gameover__winner strong {\n  color: var(--ink-0);\n  font-weight: var(--weight-black);\n  overflow-wrap: anywhere;\n}\n\n.gameover__scoreblock {\n  margin-top: var(--space-6);\n}\n\n.gameover__score {\n  font-family: var(--font-mono);\n  font-weight: var(--weight-black);\n  line-height: 1;\n  font-variant-numeric: tabular-nums;\n}\n\n.gameover__score--winner {\n  font-size: var(--text-xl);\n  color: var(--block-S);\n}\n\n.gameover__score--loser {\n  font-size: var(--text-lg);\n  color: var(--ink-1);\n}\n\n.gameover__wait {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  color: var(--ink-2);\n}\n\n/* ═══ Leaderboard ══════════════════════════════════════════════════════════ */\n.lb-overlay {\n  position: fixed;\n  inset: 0;\n  background: var(--scrim);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: var(--space-4);\n  z-index: 1000;\n}\n\n.lb-modal {\n  position: relative;\n  width: min(460px, 100%);\n  max-height: 90vh;\n  overflow-y: auto;\n  padding: var(--space-8);\n  background: var(--surface-1);\n  border: var(--border-strong);\n}\n\n.lb-modal__title {\n  font-size: var(--text-md);\n  font-weight: var(--weight-black);\n  letter-spacing: var(--tracking-wide);\n  text-transform: uppercase;\n  text-align: center;\n  color: var(--ink-0);\n  margin-bottom: var(--space-6);\n}\n\n.lb-modal__close {\n  position: absolute;\n  top: 0;\n  right: 0;\n  width: var(--tap);\n  height: var(--tap);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: transparent;\n  border: none;\n  border-left: var(--border);\n  border-bottom: var(--border);\n  color: var(--ink-1);\n  font-size: var(--text-md);\n  line-height: 1;\n  cursor: pointer;\n  transition: background var(--duration-fast) linear;\n}\n\n.lb-modal__close:hover {\n  background: var(--accent);\n  color: var(--ink-0);\n}\n\n.lb-modal__empty {\n  font-family: var(--font-mono);\n  font-size: var(--text-xs);\n  color: var(--ink-2);\n  text-align: center;\n  padding: var(--space-4) 0;\n}\n\n.lb-row {\n  display: flex;\n  align-items: center;\n  gap: var(--space-3);\n  padding: var(--space-3) var(--space-2);\n  border-bottom: var(--border);\n  font-family: var(--font-mono);\n}\n\n/* Première place : la barre latérale, pas un fond doré. Le classement se lit\n   déjà dans l'ordre — l'accent ne fait que pointer le sommet. */\n.lb-row--gold {\n  border-left: var(--rail) solid var(--accent);\n  padding-left: var(--space-3);\n}\n\n.lb-row__rank {\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-2);\n  width: var(--space-8);\n  flex-shrink: 0;\n  font-variant-numeric: tabular-nums;\n}\n\n.lb-row--gold .lb-row__rank {\n  color: var(--accent-ink);\n}\n\n.lb-row__name {\n  flex: 1;\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-0);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.lb-row__score {\n  font-size: var(--text-xs);\n  font-weight: var(--weight-bold);\n  color: var(--ink-1);\n  white-space: nowrap;\n  font-variant-numeric: tabular-nums;\n}\n\n/* ═══ Scrollbar ════════════════════════════════════════════════════════════ */\n::-webkit-scrollbar {\n  width: 10px;\n}\n\n::-webkit-scrollbar-track {\n  background: var(--bg);\n}\n\n::-webkit-scrollbar-thumb {\n  background: var(--line-strong);\n}\n\n/* ═══ Responsive ═══════════════════════════════════════════════════════════\n   Seuil calculé, pas rond : 192 + 24 + 404 + 24 + 208 = 852px pour les trois\n   colonnes. En dessous les rails écrasaient le plateau. Le puits reste premier\n   — l'empilement le garde en tête, les instruments dessous, la référence en\n   dernier. */\n@media (max-width: 880px) {\n  .game-layout {\n    grid-template-columns: repeat(2, minmax(0, 1fr));\n    grid-template-rows: repeat(4, auto);\n    grid-template-areas:\n      \"stage stage\"\n      \"hold  next\"\n      \"foes  foes\"\n      \"meta  meta\";\n    row-gap: var(--space-5);\n    padding: var(--space-4) var(--space-3);\n  }\n\n  /* Hold et Next épaule contre épaule au centre plutôt qu'aux deux bords. */\n  .game-hold {\n    justify-self: end;\n  }\n\n  .game-next {\n    justify-self: start;\n  }\n\n  .game-foes,\n  .game-meta {\n    align-self: start;\n    align-items: center;\n  }\n\n  .opponents-stack {\n    flex-direction: row;\n    flex-wrap: wrap;\n    justify-content: center;\n    max-height: none;\n    overflow: visible;\n  }\n\n  /* La référence passe en rangée : elle ne doit pas rallonger la page sous le\n     puits pour un contenu qu'on lit une fois. */\n  .game-meta {\n    flex-direction: row;\n    flex-wrap: wrap;\n    justify-content: center;\n    column-gap: var(--space-8);\n  }\n}\n\n@media (max-width: 640px) {\n  :root {\n    --text-2xl: 2.75rem;\n    --text-xl: 2rem;\n  }\n\n  .lobby,\n  .gameover,\n  .lb-modal {\n    padding: var(--space-6) var(--space-4);\n  }\n\n  .score-panel__group {\n    gap: var(--space-4);\n  }\n}\n\n/* ═══ Contraste forcé (Windows High Contrast) ══════════════════════════════\n   Le mode remplace toutes les couleurs par la palette système. Ici la couleur\n   d'une pièce est une information de jeu, pas de la décoration : sans exception\n   explicite les sept tétrominos deviennent identiques et la partie devient\n   injouable. */\n@media (forced-colors: active) {\n  .cell--I,\n  .cell--O,\n  .cell--T,\n  .cell--S,\n  .cell--Z,\n  .cell--J,\n  .cell--L,\n  .cell--penalty,\n  .opponent__bar {\n    forced-color-adjust: none;\n  }\n\n  .board,\n  .panel,\n  .notice,\n  .opponent,\n  .opponent__spectrum,\n  .preview__grid,\n  .lobby,\n  .gameover,\n  .lb-modal {\n    border: 1px solid CanvasText;\n  }\n}\n\n/* ═══ Mouvement réduit ═════════════════════════════════════════════════════\n   On garde les changements d'état (opacité, couleur) : ce sont des retours\n   d'information de jeu. On supprime les déplacements et les particules. */\n@media (prefers-reduced-motion: reduce) {\n  .stat__value--flash,\n  .cell--rising,\n  .drop-trail,\n  .board--penalty .board__surge {\n    animation: none;\n  }\n\n  /* La pénalité reste annoncée — région live, lignes hachurées au sol, spectrum\n     à jour ; c'est la poussée et la lueur qui disparaissent, pas l'information.\n     Le sillage sans animation ne doit rien laisser derrière lui. */\n  .drop-trail,\n  .particles {\n    display: none;\n  }\n\n  *,\n  *::before,\n  *::after {\n    transition-duration: var(--duration-fast) !important;\n    scroll-behavior: auto !important;\n  }\n}\n",
           "",
         ]);
         const l = i;
@@ -292,7 +292,7 @@
           return "\n" + M + e;
         }
         var F = !1;
-        function B(e, t) {
+        function U(e, t) {
           if (!e || F) return "";
           F = !0;
           var n = Error.prepareStackTrace;
@@ -362,7 +362,7 @@
           }
           return (e = e ? e.displayName || e.name : "") ? D(e) : "";
         }
-        function U(e) {
+        function B(e) {
           switch (e.tag) {
             case 5:
               return D(e.type);
@@ -375,11 +375,11 @@
             case 0:
             case 2:
             case 15:
-              return B(e.type, !1);
+              return U(e.type, !1);
             case 11:
-              return B(e.type.render, !1);
+              return U(e.type.render, !1);
             case 1:
-              return B(e.type, !0);
+              return U(e.type, !0);
             default:
               return "";
           }
@@ -933,13 +933,13 @@
           Ie = null,
           De = !1,
           Fe = null,
-          Be = {
+          Ue = {
             onError: function (e) {
               Me = !0, Ie = e;
             },
           };
-        function Ue(e, t, n, r, a, o, i, l, s) {
-          Me = !1, Ie = null, Ae.apply(Be, arguments);
+        function Be(e, t, n, r, a, o, i, l, s) {
+          Me = !1, Ie = null, Ae.apply(Ue, arguments);
         }
         function $e(e) {
           var t = e, n = e;
@@ -1279,7 +1279,7 @@
         function Ft(e, t, n) {
           Dt(e) && n.delete(t);
         }
-        function Bt() {
+        function Ut() {
           Ct = !1,
             null !== Tt && Dt(Tt) && (Tt = null),
             null !== Pt && Dt(Pt) && (Pt = null),
@@ -1287,28 +1287,28 @@
             Ot.forEach(Ft),
             Lt.forEach(Ft);
         }
-        function Ut(e, t) {
+        function Bt(e, t) {
           e.blockedOn === t &&
             (e.blockedOn = null,
               Ct ||
               (Ct = !0,
-                a.unstable_scheduleCallback(a.unstable_NormalPriority, Bt)));
+                a.unstable_scheduleCallback(a.unstable_NormalPriority, Ut)));
         }
         function $t(e) {
           function t(t) {
-            return Ut(t, e);
+            return Bt(t, e);
           }
           if (0 < Nt.length) {
-            Ut(Nt[0], e);
+            Bt(Nt[0], e);
             for (var n = 1; n < Nt.length; n++) {
               var r = Nt[n];
               r.blockedOn === e && (r.blockedOn = null);
             }
           }
           for (
-            null !== Tt && Ut(Tt, e),
-              null !== Pt && Ut(Pt, e),
-              null !== Rt && Ut(Rt, e),
+            null !== Tt && Bt(Tt, e),
+              null !== Pt && Bt(Pt, e),
+              null !== Rt && Bt(Rt, e),
               Ot.forEach(t),
               Lt.forEach(t),
               n = 0;
@@ -1779,7 +1779,7 @@
           In = c && (!zn || An && 8 < An && 11 >= An),
           Dn = String.fromCharCode(32),
           Fn = !1;
-        function Bn(e, t) {
+        function Un(e, t) {
           switch (e) {
             case "keyup":
               return -1 !== jn.indexOf(t.keyCode);
@@ -1793,7 +1793,7 @@
               return !1;
           }
         }
-        function Un(e) {
+        function Bn(e) {
           return "object" == typeof (e = e.detail) && "data" in e
             ? e.data
             : null;
@@ -2127,7 +2127,7 @@
           var r = e.type || "unknown-event";
           e.currentTarget = n,
             function (e, t, n, r, a, i, l, s, u) {
-              if (Ue.apply(this, arguments), Me) {
+              if (Be.apply(this, arguments), Me) {
                 if (!Me) throw Error(o(198));
                 var c = Ie;
                 Me = !1, Ie = null, De || (De = !0, Fe = c);
@@ -2169,20 +2169,20 @@
           var r = e + "__bubble";
           n.has(r) || (qr(t, e, 2, !1), n.add(r));
         }
-        function Br(e, t, n) {
+        function Ur(e, t, n) {
           var r = 0;
           t && (r |= 4), qr(n, e, r, t);
         }
-        var Ur = "_reactListening" + Math.random().toString(36).slice(2);
+        var Br = "_reactListening" + Math.random().toString(36).slice(2);
         function $r(e) {
-          if (!e[Ur]) {
-            e[Ur] = !0,
+          if (!e[Br]) {
+            e[Br] = !0,
               i.forEach(function (t) {
                 "selectionchange" !== t &&
-                  (Mr.has(t) || Br(t, !1, e), Br(t, !0, e));
+                  (Mr.has(t) || Ur(t, !1, e), Ur(t, !0, e));
               });
             var t = 9 === e.nodeType ? e : e.ownerDocument;
-            null === t || t[Ur] || (t[Ur] = !0, Br("selectionchange", !1, t));
+            null === t || t[Br] || (t[Br] = !0, Ur("selectionchange", !1, t));
           }
         }
         function qr(e, t, n, r) {
@@ -2457,7 +2457,7 @@
                   b = void 0;
                 }
               } else {$n
-                  ? Bn(e, n) && (b = "onCompositionEnd")
+                  ? Un(e, n) && (b = "onCompositionEnd")
                   : "keydown" === e && 229 === n.keyCode &&
                     (b = "onCompositionStart");}
               b &&
@@ -2469,12 +2469,12 @@
                 0 < (v = Wr(r, b)).length &&
                 (b = new wn(b, e, null, n, a),
                   i.push({ event: b, listeners: v }),
-                  (y || null !== (y = Un(n))) && (b.data = y))),
+                  (y || null !== (y = Bn(n))) && (b.data = y))),
                 (y = Mn
                   ? function (e, t) {
                     switch (e) {
                       case "compositionend":
-                        return Un(t);
+                        return Bn(t);
                       case "keypress":
                         return 32 !== t.which ? null : (Fn = !0, Dn);
                       case "textInput":
@@ -2485,7 +2485,7 @@
                   }(e, n)
                   : function (e, t) {
                     if ($n) {
-                      return "compositionend" === e || !zn && Bn(e, t)
+                      return "compositionend" === e || !zn && Un(e, t)
                         ? (e = en(), Zt = Gt = Xt = null, $n = !1, e)
                         : null;
                     }
@@ -2727,13 +2727,13 @@
               Ca(Ta, e))
             : Ea(Pa), Ca(Pa, n);
         }
-        var Da = null, Fa = !1, Ba = !1;
-        function Ua(e) {
+        var Da = null, Fa = !1, Ua = !1;
+        function Ba(e) {
           null === Da ? Da = [e] : Da.push(e);
         }
         function $a() {
-          if (!Ba && null !== Da) {
-            Ba = !0;
+          if (!Ua && null !== Da) {
+            Ua = !0;
             var e = 0, t = bt;
             try {
               var n = Da;
@@ -2747,7 +2747,7 @@
             } catch (t) {
               throw null !== Da && (Da = Da.slice(e + 1)), Qe(Ze, $a), t;
             } finally {
-              bt = t, Ba = !1;
+              bt = t, Ua = !1;
             }
           }
           return null;
@@ -3350,7 +3350,7 @@
             next: null,
           };
         }
-        function Bo(e, t, n) {
+        function Uo(e, t, n) {
           var r = e.updateQueue;
           if (null === r) return null;
           if (r = r.shared, 2 & Ns) {
@@ -3365,7 +3365,7 @@
             r.interleaved = t,
             Ao(e, n);
         }
-        function Uo(e, t, n) {
+        function Bo(e, t, n) {
           if (null !== (t = t.updateQueue) && (t = t.shared, 4194240 & n)) {
             var r = t.lanes;
             n |= r &= e.pendingLanes, t.lanes = n, yt(e, n);
@@ -3846,11 +3846,11 @@
             })
             : void 0;
         }
-        function Bi(e, t, n) {
+        function Ui(e, t, n) {
           return n = null != n ? n.concat([e]) : null,
             zi(4, 4, Fi.bind(null, t, e), n);
         }
-        function Ui() {}
+        function Bi() {}
         function $i(e, t) {
           var n = bi();
           t = void 0 === t ? null : t;
@@ -4010,7 +4010,7 @@
               return e = { current: e }, yi().memoizedState = e;
             },
             useState: Ri,
-            useDebugValue: Ui,
+            useDebugValue: Bi,
             useDeferredValue: function (e) {
               return yi().memoizedState = e;
             },
@@ -4054,7 +4054,7 @@
             useCallback: $i,
             useContext: Oo,
             useEffect: Mi,
-            useImperativeHandle: Bi,
+            useImperativeHandle: Ui,
             useInsertionEffect: Ii,
             useLayoutEffect: Di,
             useMemo: qi,
@@ -4063,7 +4063,7 @@
             useState: function () {
               return ki(wi);
             },
-            useDebugValue: Ui,
+            useDebugValue: Bi,
             useDeferredValue: function (e) {
               return Hi(bi(), si.memoizedState, e);
             },
@@ -4080,7 +4080,7 @@
             useCallback: $i,
             useContext: Oo,
             useEffect: Mi,
-            useImperativeHandle: Bi,
+            useImperativeHandle: Ui,
             useInsertionEffect: Ii,
             useLayoutEffect: Di,
             useMemo: qi,
@@ -4089,7 +4089,7 @@
             useState: function () {
               return xi(wi);
             },
-            useDebugValue: Ui,
+            useDebugValue: Bi,
             useDeferredValue: function (e) {
               var t = bi();
               return null === si
@@ -4127,7 +4127,7 @@
             var r = Zs(), a = eu(e), o = Fo(r, a);
             o.payload = t,
               null != n && (o.callback = n),
-              null !== (t = Bo(e, o, a)) && (tu(t, e, a, r), Uo(t, e, a));
+              null !== (t = Uo(e, o, a)) && (tu(t, e, a, r), Bo(t, e, a));
           },
           enqueueReplaceState: function (e, t, n) {
             e = e._reactInternals;
@@ -4135,14 +4135,14 @@
             o.tag = 1,
               o.payload = t,
               null != n && (o.callback = n),
-              null !== (t = Bo(e, o, a)) && (tu(t, e, a, r), Uo(t, e, a));
+              null !== (t = Uo(e, o, a)) && (tu(t, e, a, r), Bo(t, e, a));
           },
           enqueueForceUpdate: function (e, t) {
             e = e._reactInternals;
             var n = Zs(), r = eu(e), a = Fo(n, r);
             a.tag = 2,
               null != t && (a.callback = t),
-              null !== (t = Bo(e, a, r)) && (tu(t, e, r, n), Uo(t, e, r));
+              null !== (t = Uo(e, a, r)) && (tu(t, e, r, n), Bo(t, e, r));
           },
         };
         function ol(e, t, n, r, a, o, i) {
@@ -4205,7 +4205,7 @@
           try {
             var n = "", r = t;
             do {
-              n += U(r), r = r.return;
+              n += B(r), r = r.return;
             } while (r);
             var a = n;
           } catch (e) {
@@ -4294,7 +4294,7 @@
                 n.flags &= -52805,
                 1 === n.tag && (null === n.alternate
                   ? n.tag = 17
-                  : ((t = Fo(-1, 1)).tag = 2, Bo(n, t, 1))),
+                  : ((t = Fo(-1, 1)).tag = 2, Uo(n, t, 1))),
                 n.lanes |= 1),
               e);
         }
@@ -4740,7 +4740,7 @@
           var r = e.alternate;
           null !== r && (r.lanes |= t), Po(e.return, t, n);
         }
-        function Bl(e, t, n, r, a) {
+        function Ul(e, t, n, r, a) {
           var o = e.memoizedState;
           null === o
             ? e.memoizedState = {
@@ -4758,7 +4758,7 @@
               o.tail = n,
               o.tailMode = a);
         }
-        function Ul(e, t, n) {
+        function Bl(e, t, n) {
           var r = t.pendingProps, a = r.revealOrder, o = r.tail;
           if (wl(e, t, r.children, n), 2 & (r = ei.current)) {
             r = 1 & r | 2, t.flags |= 128;
@@ -4791,7 +4791,7 @@
                 }
                 null === (n = a)
                   ? (a = t.child, t.child = null)
-                  : (a = n.sibling, n.sibling = null), Bl(t, !1, a, n, o);
+                  : (a = n.sibling, n.sibling = null), Ul(t, !1, a, n, o);
                 break;
               case "backwards":
                 for (n = null, a = t.child, t.child = null; null !== a;) {
@@ -4801,10 +4801,10 @@
                   }
                   e = a.sibling, a.sibling = n, n = a, a = e;
                 }
-                Bl(t, !0, n, null, o);
+                Ul(t, !0, n, null, o);
                 break;
               case "together":
-                Bl(t, !1, null, null, void 0);
+                Ul(t, !1, null, null, void 0);
                 break;
               default:
                 t.memoizedState = null;
@@ -5227,7 +5227,7 @@
                       e = e.sibling;
                     }
                   }
-                  null !== i.tail && Xe() > Us &&
+                  null !== i.tail && Xe() > Bs &&
                     (t.flags |= 128, r = !0, Hl(i, !1), t.lanes = 4194304);
                 }
               } else {
@@ -5242,7 +5242,7 @@
                         null === i.tail && "hidden" === i.tailMode &&
                         !s.alternate && !ao
                     ) return Vl(t), null;
-                  } else {2 * Xe() - i.renderingStartTime > Us &&
+                  } else {2 * Xe() - i.renderingStartTime > Bs &&
                       1073741824 !== n &&
                       (t.flags |= 128, r = !0, Hl(i, !1), t.lanes = 4194304);}
                 }
@@ -5791,7 +5791,7 @@
                   a.stateNode.isHidden = i,
                   !i ||
                   null !== a.alternate && null !== a.alternate.memoizedState ||
-                  (Bs = Xe())),
+                  (Us = Xe())),
                 4 & r && ps(e);
               break;
             case 22:
@@ -6153,8 +6153,8 @@
           Is = 0,
           Ds = null,
           Fs = null,
-          Bs = 0,
-          Us = 1 / 0,
+          Us = 0,
+          Bs = 1 / 0,
           $s = null,
           qs = !1,
           Hs = null,
@@ -6187,7 +6187,7 @@
             (e === Ts && (!(2 & Ns) && (Ms |= n), 4 === js && iu(e, Rs)),
               nu(e, r),
               1 === n && 0 === Ns && !(1 & t.mode) &&
-              (Us = Xe() + 500, Fa && $a()));
+              (Bs = Xe() + 500, Fa && $a()));
         }
         function nu(e, t) {
           var n = e.callbackNode;
@@ -6212,9 +6212,9 @@
             if (null != n && Ke(n), 1 === t) {
               0 === e.tag
                 ? function (e) {
-                  Fa = !0, Ua(e);
+                  Fa = !0, Ba(e);
                 }(lu.bind(null, e))
-                : Ua(lu.bind(null, e)),
+                : Ba(lu.bind(null, e)),
                 ia(function () {
                   !(6 & Ns) && $a();
                 }),
@@ -6252,7 +6252,7 @@
             Ns |= 2;
             var i = pu();
             for (
-              Ts === e && Rs === t || ($s = null, Us = Xe() + 500, du(e, t));;
+              Ts === e && Rs === t || ($s = null, Bs = Xe() + 500, du(e, t));;
             ) {
               try {
                 vu();
@@ -6320,7 +6320,7 @@
                 case 3:
                   if (
                     iu(e, r),
-                      (130023424 & r) === r && 10 < (t = Bs + 500 - Xe())
+                      (130023424 & r) === r && 10 < (t = Us + 500 - Xe())
                   ) {
                     if (0 !== ft(e, 0)) break;
                     if (((a = e.suspendedLanes) & r) !== r) {
@@ -6414,7 +6414,7 @@
           try {
             return e(t);
           } finally {
-            0 === (Ns = n) && (Us = Xe() + 500, Fa && $a());
+            0 === (Ns = n) && (Bs = Xe() + 500, Fa && $a());
           }
         }
         function uu(e) {
@@ -6981,7 +6981,7 @@
           return !1;
         }
         function xu(e, t, n) {
-          e = Bo(e, t = pl(0, t = ul(n, t), 1), 1),
+          e = Uo(e, t = pl(0, t = ul(n, t), 1), 1),
             t = Zs(),
             null !== e && (vt(e, 1, t), nu(e, t));
         }
@@ -6999,7 +6999,7 @@
                   "function" == typeof r.componentDidCatch &&
                     (null === Vs || !Vs.has(r))
                 ) {
-                  t = Bo(t, e = hl(t, e = ul(n, e), 1), 1),
+                  t = Uo(t, e = hl(t, e = ul(n, e), 1), 1),
                     e = Zs(),
                     null !== t && (vt(t, 1, e), nu(t, e));
                   break;
@@ -7014,7 +7014,7 @@
             t = Zs(),
             e.pingedLanes |= e.suspendedLanes & n,
             Ts === e && (Rs & n) === n &&
-            (4 === js || 3 === js && (130023424 & Rs) === Rs && 500 > Xe() - Bs
+            (4 === js || 3 === js && (130023424 & Rs) === Rs && 500 > Xe() - Us
               ? du(e, 0)
               : Is |= n),
             nu(e, t);
@@ -7219,7 +7219,7 @@
             Io(o),
             e;
         }
-        function Bu(e) {
+        function Uu(e) {
           if (!e) return Na;
           e: {
             if ($e(e = e._reactInternals) !== e || 1 !== e.tag) {
@@ -7247,11 +7247,11 @@
           }
           return t;
         }
-        function Uu(e, t, n, r, a, o, i, l, s) {
-          return (e = Fu(n, r, !0, e, 0, o, 0, l, s)).context = Bu(null),
+        function Bu(e, t, n, r, a, o, i, l, s) {
+          return (e = Fu(n, r, !0, e, 0, o, 0, l, s)).context = Uu(null),
             n = e.current,
             (o = Fo(r = Zs(), a = eu(n))).callback = null != t ? t : null,
-            Bo(n, o, a),
+            Uo(n, o, a),
             e.current.lanes = a,
             vt(e, a, r),
             nu(e, r),
@@ -7259,11 +7259,11 @@
         }
         function $u(e, t, n, r) {
           var a = t.current, o = Zs(), i = eu(a);
-          return n = Bu(n),
+          return n = Uu(n),
             null === t.context ? t.context = n : t.pendingContext = n,
             (t = Fo(o, i)).payload = { element: e },
             null !== (r = void 0 === r ? null : r) && (t.callback = r),
-            null !== (e = Bo(a, t, i)) && (tu(e, a, i, o), Uo(e, a, i)),
+            null !== (e = Uo(a, t, i)) && (tu(e, a, i, o), Bo(e, a, i)),
             i;
         }
         function qu(e) {
@@ -7318,7 +7318,7 @@
                         break;
                       case 19:
                         if (r = 0 !== (n & t.childLanes), 128 & e.flags) {
-                          if (r) return Ul(e, t, n);
+                          if (r) return Bl(e, t, n);
                           t.flags |= 128;
                         }
                         if (
@@ -7583,7 +7583,7 @@
                 sl(t, r, a, n),
                 Tl(null, t, r, !0, e, n);
             case 19:
-              return Ul(e, t, n);
+              return Bl(e, t, n);
             case 22:
               return Sl(e, t, n);
           }
@@ -7630,7 +7630,7 @@
                     o.call(e);
                   };
                 }
-                var i = Uu(t, r, e, 0, null, !1, 0, "", Xu);
+                var i = Bu(t, r, e, 0, null, !1, 0, "", Xu);
                 return e._reactRootContainer = i,
                   e[ha] = i.current,
                   $r(8 === e.nodeType ? e.parentNode : e),
@@ -7692,7 +7692,7 @@
                   0 !== n &&
                     (yt(t, 1 | n),
                       nu(t, Xe()),
-                      !(6 & Ns) && (Us = Xe() + 500, $a()));
+                      !(6 & Ns) && (Bs = Xe() + 500, $a()));
                 }
                 break;
               case 13:
@@ -7864,7 +7864,7 @@
               (!0 === n.unstable_strictMode && (a = !0),
                 void 0 !== n.identifierPrefix && (i = n.identifierPrefix),
                 void 0 !== n.onRecoverableError && (l = n.onRecoverableError)),
-                t = Uu(t, null, e, 1, null != n ? n : null, a, 0, i, l),
+                t = Bu(t, null, e, 1, null != n ? n : null, a, 0, i, l),
                 e[ha] = t.current,
                 $r(e),
                 r
@@ -8837,11 +8837,11 @@
   var o = {};
   a.r(o),
     a.d(o, {
-      Decoder: () => Zn,
-      Encoder: () => Gn,
-      PacketType: () => Xn,
-      isPacketValid: () => rr,
-      protocol: () => Jn,
+      Decoder: () => er,
+      Encoder: () => Zn,
+      PacketType: () => Gn,
+      isPacketValid: () => ar,
+      protocol: () => Xn,
     });
   var i = a(540), l = a.t(i, 2), s = a(338), u = a(418);
   var c = { notify() {}, get: () => [] };
@@ -9024,9 +9024,9 @@
     I = "GAME_STARTED",
     D = "GAME_OVER",
     F = "GAME_RESET",
-    B = "GAME_ERROR",
-    U = "CONNECTION",
-    $ = (e) => ({ type: U, payload: { connected: e } }),
+    U = "GAME_ERROR",
+    B = "CONNECTION",
+    $ = (e) => ({ type: B, payload: { connected: e } }),
     q = {
       room: null,
       started: !1,
@@ -9098,19 +9098,32 @@
       }
       return !0;
     },
-    ne = (e, t, n) => {
+    ne = (e) => {
+      const t = [], n = [];
+      for (let r = 0; r < e.length; r++) {
+        const a = e[r], o = a.every((e) => 0 !== e), i = a.includes(8);
+        o && !i ? t.push(r) : n.push(a);
+      }
+      const r = t.length;
+      return {
+        newBoard: [...Array.from({ length: r }, () => Array(H).fill(0)), ...n],
+        linesCleared: r,
+        clearedIndexes: t,
+      };
+    },
+    re = (e, t, n) => {
       if (!t || !t.shape || n <= 0) return t;
       for (let r = t.y - n; r <= t.y; r++) {
         if (te(e, t.shape, t.x, r)) return { ...t, y: r };
       }
       return t;
     },
-    re = (e) => e[0].map((t, n) => e.map((e) => e[n]).reverse()),
-    ae = (e, t, n = 1) => {
+    ae = (e) => e[0].map((t, n) => e.map((e) => e[n]).reverse()),
+    oe = (e, t, n = 1) => {
       if (!t || !t.shape) return null;
       const r = t.rot || 0, a = (r + (n > 0 ? 1 : 3)) % 4;
-      let o = re(t.shape);
-      n < 0 && (o = re(re(o)));
+      let o = ae(t.shape);
+      n < 0 && (o = ae(ae(o)));
       for (
         const [n, i]
           of ((e, t, n) =>
@@ -9121,22 +9134,22 @@
       }
       return null;
     },
-    oe = (e, t, n, r) => {
+    ie = (e, t, n, r) => {
       let a = r;
       for (; te(e, t, n, a + 1);) a++;
       return a;
     },
-    ie = "SET_PLAYER",
-    le = "SET_BOARD",
-    se = "NEW_PIECE",
-    ue = "ADD_PENALTY",
-    ce = "PLAYER_DIED",
-    de = "RESET_PLAYER",
-    fe = (e) => ({ type: ie, payload: e }),
+    le = "SET_PLAYER",
+    se = "SET_BOARD",
+    ue = "NEW_PIECE",
+    ce = "ADD_PENALTY",
+    de = "PLAYER_DIED",
+    fe = "RESET_PLAYER",
     pe = (e) => ({ type: le, payload: e }),
     he = (e) => ({ type: se, payload: e }),
-    me = () => ({ type: ce }),
-    ge = {
+    me = (e) => ({ type: ue, payload: e }),
+    ge = () => ({ type: de }),
+    ve = {
       name: null,
       isHost: !1,
       isAlive: !0,
@@ -9149,17 +9162,17 @@
       penaltyLines: 0,
       penaltySeq: 0,
     },
-    ve = "SET_OPPONENTS",
-    ye = "UPDATE_SPECTRUM",
-    be = "OPPONENT_DIED",
-    we = "ADD_OPPONENT",
-    ke = (e) => ({ type: ve, payload: e }),
-    xe = [],
-    _e = "SCORE_UPDATE",
-    Se = {},
-    Ee = "LEADERBOARD_UPDATE",
-    Ce = [],
-    Ne = function e(t, n, r) {
+    ye = "SET_OPPONENTS",
+    be = "UPDATE_SPECTRUM",
+    we = "OPPONENT_DIED",
+    ke = "ADD_OPPONENT",
+    xe = (e) => ({ type: ye, payload: e }),
+    _e = [],
+    Se = "SCORE_UPDATE",
+    Ee = {},
+    Ce = "LEADERBOARD_UPDATE",
+    Ne = [],
+    Te = function e(t, n, r) {
       if ("function" != typeof t) throw new Error(T(2));
       if (
         "function" == typeof n && "function" == typeof r ||
@@ -9293,9 +9306,9 @@
                 started: t.payload.started || !1,
                 error: null,
               };
-            case B:
-              return { ...e, error: t.payload.message };
             case U:
+              return { ...e, error: t.payload.message };
+            case B:
               return { ...e, connected: t.payload.connected };
             case A:
               return {
@@ -9326,15 +9339,15 @@
               return e;
           }
         },
-        player: (e = ge, t) => {
+        player: (e = ve, t) => {
           switch (t.type) {
-            case ie:
-              return { ...e, ...t.payload };
             case le:
+              return { ...e, ...t.payload };
+            case se:
               return { ...e, board: t.payload };
             case "SET_PIECE":
               return { ...e, currentPiece: t.payload };
-            case se: {
+            case ue: {
               const { piece: n, nextPiece: r } = t.payload,
                 a = r ? r.type : null;
               if (e.currentPiece) return { ...e, nextPieceType: a };
@@ -9351,7 +9364,7 @@
                 nextPieceType: a,
               };
             }
-            case ue: {
+            case ce: {
               const n = t.payload,
                 r = ((e, t) => {
                   if (t <= 0) return e.map((e) => [...e]);
@@ -9361,36 +9374,36 @@
               return {
                 ...e,
                 board: r,
-                currentPiece: ne(r, e.currentPiece, n),
+                currentPiece: re(r, e.currentPiece, n),
                 penaltyLines: n,
                 penaltySeq: e.penaltySeq + 1,
               };
             }
-            case ce:
+            case de:
               return { ...e, isAlive: !1 };
             case I:
-            case de:
+            case fe:
             case F:
-              return { ...ge, name: e.name, isHost: e.isHost, board: ee() };
+              return { ...ve, name: e.name, isHost: e.isHost, board: ee() };
             default:
               return e;
           }
         },
-        opponents: (e = xe, t) => {
+        opponents: (e = _e, t) => {
           switch (t.type) {
-            case ve:
-              return t.payload ? t.payload : [];
             case ye:
+              return t.payload ? t.payload : [];
+            case be:
               return e.map((e) =>
                 e.name === t.payload.playerName
                   ? { ...e, spectrum: t.payload.spectrum }
                   : e
               );
-            case be:
+            case we:
               return e.map((e) =>
                 e.name === t.payload ? { ...e, isAlive: !1 } : e
               );
-            case we: {
+            case ke: {
               const n = "string" == typeof t.payload
                   ? t.payload
                   : t.payload.name,
@@ -9413,22 +9426,22 @@
               return e;
           }
         },
-        scores: (e = Se, t) => {
+        scores: (e = Ee, t) => {
           switch (t.type) {
-            case _e: {
+            case Se: {
               const { playerName: n, score: r } = t.payload;
               return { ...e, [n]: r };
             }
             case "SCORES_RESET":
             case I:
             case F:
-              return Se;
+              return Ee;
             default:
               return e;
           }
         },
-        leaderboard: (e = Ce, t) =>
-          t.type === Ee && Array.isArray(t.payload) ? t.payload : e,
+        leaderboard: (e = Ne, t) =>
+          t.type === Ce && Array.isArray(t.payload) ? t.payload : e,
       }),
       function (...e) {
         return (t) => (n, r) => {
@@ -9449,8 +9462,8 @@
         };
       }(j),
     );
-  function Te() {
-    return Te = Object.assign ? Object.assign.bind() : function (e) {
+  function Pe() {
+    return Pe = Object.assign ? Object.assign.bind() : function (e) {
       for (var t = 1; t < arguments.length; t++) {
         var n = arguments[t];
         for (var r in n) {
@@ -9459,17 +9472,17 @@
       }
       return e;
     },
-      Te.apply(this, arguments);
+      Pe.apply(this, arguments);
   }
-  var Pe;
+  var Re;
   !function (e) {
     e.Pop = "POP", e.Push = "PUSH", e.Replace = "REPLACE";
-  }(Pe || (Pe = {}));
-  const Re = "popstate";
-  function Oe(e, t) {
+  }(Re || (Re = {}));
+  const Oe = "popstate";
+  function Le(e, t) {
     if (!1 === e || null == e) throw new Error(t);
   }
-  function Le(e, t) {
+  function je(e, t) {
     if (!e) {
       "undefined" != typeof console && console.warn(t);
       try {
@@ -9477,31 +9490,31 @@
       } catch (e) {}
     }
   }
-  function je(e, t) {
+  function ze(e, t) {
     return { usr: e.state, key: e.key, idx: t };
   }
-  function ze(e, t, n, r) {
+  function Ae(e, t, n, r) {
     return void 0 === n && (n = null),
-      Te(
+      Pe(
         {
           pathname: "string" == typeof e ? e : e.pathname,
           search: "",
           hash: "",
         },
-        "string" == typeof t ? Me(t) : t,
+        "string" == typeof t ? Ie(t) : t,
         {
           state: n,
           key: t && t.key || r || Math.random().toString(36).substr(2, 8),
         },
       );
   }
-  function Ae(e) {
+  function Me(e) {
     let { pathname: t = "/", search: n = "", hash: r = "" } = e;
     return n && "?" !== n && (t += "?" === n.charAt(0) ? n : "?" + n),
       r && "#" !== r && (t += "#" === r.charAt(0) ? r : "#" + r),
       t;
   }
-  function Me(e) {
+  function Ie(e) {
     let t = {};
     if (e) {
       let n = e.indexOf("#");
@@ -9512,13 +9525,13 @@
     }
     return t;
   }
-  var Ie;
-  function De(e, t, n) {
+  var De;
+  function Fe(e, t, n) {
     return void 0 === n && (n = "/"),
       function (e, t, n, r) {
-        let a = Ge(("string" == typeof t ? Me(t) : t).pathname || "/", n);
+        let a = Ze(("string" == typeof t ? Ie(t) : t).pathname || "/", n);
         if (null == a) return null;
-        let o = Fe(e);
+        let o = Ue(e);
         !function (e) {
           e.sort((e, t) =>
             e.score !== t.score ? t.score - e.score : function (e, t) {
@@ -9534,13 +9547,13 @@
         }(o);
         let i = null;
         for (let e = 0; null == i && e < o.length; ++e) {
-          let t = Xe(a);
-          i = Ye(o[e], t, r);
+          let t = Ge(a);
+          i = Je(o[e], t, r);
         }
         return i;
       }(e, t, n, !1);
   }
-  function Fe(e, t, n, r) {
+  function Ue(e, t, n, r) {
     void 0 === t && (t = []),
       void 0 === n && (n = []),
       void 0 === r && (r = "");
@@ -9552,23 +9565,23 @@
         route: e,
       };
       i.relativePath.startsWith("/") &&
-        (Oe(
+        (Le(
           i.relativePath.startsWith(r),
           'Absolute route path "' + i.relativePath + '" nested under path "' +
             r +
             '" is not valid. An absolute child route path must start with the combined path of all its parent routes.',
         ),
           i.relativePath = i.relativePath.slice(r.length));
-      let l = at([r, i.relativePath]), s = n.concat(i);
+      let l = ot([r, i.relativePath]), s = n.concat(i);
       e.children && e.children.length > 0 &&
-      (Oe(
+      (Le(
         !0 !== e.index,
         'Index routes must not have child routes. Please remove all child routes from route path "' +
           l + '".',
       ),
-        Fe(e.children, t, s, l)),
+        Ue(e.children, t, s, l)),
         (null != e.path || e.index) &&
-        t.push({ path: l, score: Ke(l, e.index), routesMeta: s });
+        t.push({ path: l, score: Ye(l, e.index), routesMeta: s });
     };
     return e.forEach((e, t) => {
       var n;
@@ -9595,39 +9608,39 @@
       e.deferred = "deferred",
       e.redirect = "redirect",
       e.error = "error";
-  }(Ie || (Ie = {})),
+  }(De || (De = {})),
     new Set(["lazy", "caseSensitive", "path", "id", "index", "children"]);
-  const Ue = /^:[\w-]+$/,
-    $e = 3,
-    qe = 2,
-    He = 1,
-    Ve = 10,
-    We = -2,
-    Qe = (e) => "*" === e;
-  function Ke(e, t) {
+  const $e = /^:[\w-]+$/,
+    qe = 3,
+    He = 2,
+    Ve = 1,
+    We = 10,
+    Qe = -2,
+    Ke = (e) => "*" === e;
+  function Ye(e, t) {
     let n = e.split("/"), r = n.length;
-    return n.some(Qe) && (r += We),
-      t && (r += qe),
-      n.filter((e) => !Qe(e)).reduce(
-        (e, t) => e + (Ue.test(t) ? $e : "" === t ? He : Ve),
+    return n.some(Ke) && (r += Qe),
+      t && (r += He),
+      n.filter((e) => !Ke(e)).reduce(
+        (e, t) => e + ($e.test(t) ? qe : "" === t ? Ve : We),
         r,
       );
   }
-  function Ye(e, t, n) {
+  function Je(e, t, n) {
     void 0 === n && (n = !1);
     let { routesMeta: r } = e, a = {}, o = "/", i = [];
     for (let e = 0; e < r.length; ++e) {
       let l = r[e],
         s = e === r.length - 1,
         u = "/" === o ? t : t.slice(o.length) || "/",
-        c = Je(
+        c = Xe(
           { path: l.relativePath, caseSensitive: l.caseSensitive, end: s },
           u,
         ),
         d = l.route;
       if (
         !c && s && n && !r[r.length - 1].route.index &&
-        (c = Je({
+        (c = Xe({
           path: l.relativePath,
           caseSensitive: l.caseSensitive,
           end: !1,
@@ -9636,20 +9649,20 @@
       Object.assign(a, c.params),
         i.push({
           params: a,
-          pathname: at([o, c.pathname]),
-          pathnameBase: ot(at([o, c.pathnameBase])),
+          pathname: ot([o, c.pathname]),
+          pathnameBase: it(ot([o, c.pathnameBase])),
           route: d,
         }),
-        "/" !== c.pathnameBase && (o = at([o, c.pathnameBase]));
+        "/" !== c.pathnameBase && (o = ot([o, c.pathnameBase]));
     }
     return i;
   }
-  function Je(e, t) {
+  function Xe(e, t) {
     "string" == typeof e && (e = { path: e, caseSensitive: !1, end: !0 });
     let [n, r] = function (e, t, n) {
         void 0 === t && (t = !1),
           void 0 === n && (n = !0),
-          Le(
+          je(
             "*" === e || !e.endsWith("*") || e.endsWith("/*"),
             'Route path "' + e + '" will be treated as if it were "' +
               e.replace(/\*$/, "/*") +
@@ -9694,13 +9707,13 @@
       }, {});
     return { params: s, pathname: o, pathnameBase: i, pattern: e };
   }
-  function Xe(e) {
+  function Ge(e) {
     try {
       return e.split("/").map((e) =>
         decodeURIComponent(e).replace(/\//g, "%2F")
       ).join("/");
     } catch (t) {
-      return Le(
+      return je(
         !1,
         'The URL path "' + e +
           '" could not be decoded because it is is a malformed URL segment. This is probably due to a bad percent encoding (' +
@@ -9709,27 +9722,27 @@
         e;
     }
   }
-  function Ge(e, t) {
+  function Ze(e, t) {
     if ("/" === t) return e;
     if (!e.toLowerCase().startsWith(t.toLowerCase())) return null;
     let n = t.endsWith("/") ? t.length - 1 : t.length, r = e.charAt(n);
     return r && "/" !== r ? null : e.slice(n) || "/";
   }
-  const Ze = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
-  function et(e, t) {
+  const et = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
+  function tt(e, t) {
     let n = t.replace(/\/+$/, "").split("/");
     return e.split("/").forEach((e) => {
       ".." === e ? n.length > 1 && n.pop() : "." !== e && n.push(e);
     }),
       n.length > 1 ? n.join("/") : "/";
   }
-  function tt(e, t, n, r) {
+  function nt(e, t, n, r) {
     return "Cannot include a '" + e +
       "' character in a manually specified `to." + t + "` field [" +
       JSON.stringify(r) + "].  Please separate it out to the `to." + n +
       '` field. Alternatively you may provide the full path as a string in <Link to="..."> and the router will parse it for you.';
   }
-  function nt(e, t) {
+  function rt(e, t) {
     let n = function (e) {
       return e.filter((e, t) =>
         0 === t || e.route.path && e.route.path.length > 0
@@ -9739,19 +9752,19 @@
       ? n.map((e, t) => t === n.length - 1 ? e.pathname : e.pathnameBase)
       : n.map((e) => e.pathnameBase);
   }
-  function rt(e, t, n, r) {
+  function at(e, t, n, r) {
     let a;
     void 0 === r && (r = !1),
-      "string" == typeof e ? a = Me(e) : (a = Te({}, e),
-        Oe(
+      "string" == typeof e ? a = Ie(e) : (a = Pe({}, e),
+        Le(
           !a.pathname || !a.pathname.includes("?"),
-          tt("?", "pathname", "search", a),
+          nt("?", "pathname", "search", a),
         ),
-        Oe(
+        Le(
           !a.pathname || !a.pathname.includes("#"),
-          tt("#", "pathname", "hash", a),
+          nt("#", "pathname", "hash", a),
         ),
-        Oe(!a.search || !a.search.includes("#"), tt("#", "search", "hash", a)));
+        Le(!a.search || !a.search.includes("#"), nt("#", "search", "hash", a)));
     let o, i = "" === e || "" === a.pathname, l = i ? "/" : a.pathname;
     if (null == l) o = n;
     else {
@@ -9767,39 +9780,39 @@
         void 0 === t && (t = "/");
         let n,
           { pathname: r, search: a = "", hash: o = "" } = "string" == typeof e
-            ? Me(e)
+            ? Ie(e)
             : e;
         if (r) {
-          if (i = r, Ze.test(i)) n = r;
+          if (i = r, et.test(i)) n = r;
           else {
             if (r.includes("//")) {
               let e = r;
               r = r.replace(/\/\/+/g, "/"),
-                Le(
+                je(
                   !1,
                   "Pathnames cannot have embedded double slashes - normalizing " +
                     e + " -> " + r,
                 );
             }
-            n = r.startsWith("/") ? et(r.substring(1), "/") : et(r, t);
+            n = r.startsWith("/") ? tt(r.substring(1), "/") : tt(r, t);
           }
         } else n = t;
         var i;
-        return { pathname: n, search: it(a), hash: lt(o) };
+        return { pathname: n, search: lt(a), hash: st(o) };
       }(a, o),
       u = l && "/" !== l && l.endsWith("/"),
       c = (i || "." === l) && n.endsWith("/");
     return s.pathname.endsWith("/") || !u && !c || (s.pathname += "/"), s;
   }
-  const at = (e) => e.join("/").replace(/\/\/+/g, "/"),
-    ot = (e) => e.replace(/\/+$/, "").replace(/^\/*/, "/"),
-    it = (e) => e && "?" !== e ? e.startsWith("?") ? e : "?" + e : "",
-    lt = (e) => e && "#" !== e ? e.startsWith("#") ? e : "#" + e : "";
+  const ot = (e) => e.join("/").replace(/\/\/+/g, "/"),
+    it = (e) => e.replace(/\/+$/, "").replace(/^\/*/, "/"),
+    lt = (e) => e && "?" !== e ? e.startsWith("?") ? e : "?" + e : "",
+    st = (e) => e && "#" !== e ? e.startsWith("#") ? e : "#" + e : "";
   Error;
-  const st = ["post", "put", "patch", "delete"],
-    ut = (new Set(st), ["get", ...st]);
-  function ct() {
-    return ct = Object.assign ? Object.assign.bind() : function (e) {
+  const ut = ["post", "put", "patch", "delete"],
+    ct = (new Set(ut), ["get", ...ut]);
+  function dt() {
+    return dt = Object.assign ? Object.assign.bind() : function (e) {
       for (var t = 1; t < arguments.length; t++) {
         var n = arguments[t];
         for (var r in n) {
@@ -9808,91 +9821,91 @@
       }
       return e;
     },
-      ct.apply(this, arguments);
+      dt.apply(this, arguments);
   }
-  new Set(ut),
+  new Set(ct),
     new Set([301, 302, 303, 307, 308]),
     new Set([307, 308]),
     Symbol("deferred");
-  const dt = i.createContext(null),
-    ft = i.createContext(null),
+  const ft = i.createContext(null),
     pt = i.createContext(null),
     ht = i.createContext(null),
-    mt = i.createContext({ outlet: null, matches: [], isDataRoute: !1 }),
-    gt = i.createContext(null);
-  function vt() {
-    return null != i.useContext(ht);
-  }
+    mt = i.createContext(null),
+    gt = i.createContext({ outlet: null, matches: [], isDataRoute: !1 }),
+    vt = i.createContext(null);
   function yt() {
-    return vt() || Oe(!1), i.useContext(ht).location;
+    return null != i.useContext(mt);
   }
-  function bt(e) {
-    i.useContext(pt).static || i.useLayoutEffect(e);
+  function bt() {
+    return yt() || Le(!1), i.useContext(mt).location;
   }
-  function wt() {
-    let { isDataRoute: e } = i.useContext(mt);
+  function wt(e) {
+    i.useContext(ht).static || i.useLayoutEffect(e);
+  }
+  function kt() {
+    let { isDataRoute: e } = i.useContext(gt);
     return e
       ? function () {
         let { router: e } = function () {
-            let e = i.useContext(dt);
-            return e || Oe(!1), e;
-          }(Ct.UseNavigateStable),
-          t = Tt(Nt.UseNavigateStable),
+            let e = i.useContext(ft);
+            return e || Le(!1), e;
+          }(Nt.UseNavigateStable),
+          t = Pt(Tt.UseNavigateStable),
           n = i.useRef(!1);
-        bt(() => {
+        wt(() => {
           n.current = !0;
         });
         let r = i.useCallback(function (r, a) {
           void 0 === a && (a = {}),
             n.current && ("number" == typeof r
               ? e.navigate(r)
-              : e.navigate(r, ct({ fromRouteId: t }, a)));
+              : e.navigate(r, dt({ fromRouteId: t }, a)));
         }, [e, t]);
         return r;
       }()
       : function () {
-        vt() || Oe(!1);
-        let e = i.useContext(dt),
-          { basename: t, future: n, navigator: r } = i.useContext(pt),
-          { matches: a } = i.useContext(mt),
-          { pathname: o } = yt(),
-          l = JSON.stringify(nt(a, n.v7_relativeSplatPath)),
+        yt() || Le(!1);
+        let e = i.useContext(ft),
+          { basename: t, future: n, navigator: r } = i.useContext(ht),
+          { matches: a } = i.useContext(gt),
+          { pathname: o } = bt(),
+          l = JSON.stringify(rt(a, n.v7_relativeSplatPath)),
           s = i.useRef(!1);
-        bt(() => {
+        wt(() => {
           s.current = !0;
         });
         let u = i.useCallback(function (n, a) {
           if (void 0 === a && (a = {}), !s.current) return;
           if ("number" == typeof n) return void r.go(n);
-          let i = rt(n, JSON.parse(l), o, "path" === a.relative);
+          let i = at(n, JSON.parse(l), o, "path" === a.relative);
           null == e && "/" !== t &&
-          (i.pathname = "/" === i.pathname ? t : at([t, i.pathname])),
+          (i.pathname = "/" === i.pathname ? t : ot([t, i.pathname])),
             (a.replace ? r.replace : r.push)(i, a.state, a);
         }, [t, r, l, o, e]);
         return u;
       }();
   }
-  function kt(e, t, n, r) {
-    vt() || Oe(!1);
-    let { navigator: a } = i.useContext(pt),
-      { matches: o } = i.useContext(mt),
+  function xt(e, t, n, r) {
+    yt() || Le(!1);
+    let { navigator: a } = i.useContext(ht),
+      { matches: o } = i.useContext(gt),
       l = o[o.length - 1],
       s = l ? l.params : {},
       u = (l && l.pathname, l ? l.pathnameBase : "/");
     l && l.route;
-    let c, d = yt();
+    let c, d = bt();
     if (t) {
       var f;
-      let e = "string" == typeof t ? Me(t) : t;
+      let e = "string" == typeof t ? Ie(t) : t;
       "/" === u || (null == (f = e.pathname) ? void 0 : f.startsWith(u)) ||
-      Oe(!1), c = e;
+      Le(!1), c = e;
     } else c = d;
     let p = c.pathname || "/", h = p;
     if ("/" !== u) {
       let e = u.replace(/^\//, "").split("/");
       h = "/" + p.replace(/^\//, "").split("/").slice(e.length).join("/");
     }
-    let m = De(e, { pathname: h }),
+    let m = Fe(e, { pathname: h }),
       g = function (e, t, n, r) {
         var a;
         if (
@@ -9917,7 +9930,7 @@
           let e = l.findIndex((e) =>
             e.route.id && void 0 !== (null == s ? void 0 : s[e.route.id])
           );
-          e >= 0 || Oe(!1), l = l.slice(0, Math.min(l.length, e + 1));
+          e >= 0 || Le(!1), l = l.slice(0, Math.min(l.length, e + 1));
         }
         let u = !1, c = -1;
         if (n && r && r.v7_partialHydration) {
@@ -9942,10 +9955,10 @@
           var h;
           n &&
             (o = s && r.route.id ? s[r.route.id] : void 0,
-              f = r.route.errorElement || _t,
+              f = r.route.errorElement || St,
               u &&
               (c < 0 && 0 === a
-                ? (Pt[h = "route-fallback"] || (Pt[h] = !0), d = !0, p = null)
+                ? (Rt[h = "route-fallback"] || (Rt[h] = !0), d = !0, p = null)
                 : c === a &&
                   (d = !0, p = r.route.hydrateFallbackElement || null)));
           let m = t.concat(l.slice(0, a + 1)),
@@ -9960,7 +9973,7 @@
                 : r.route.element
                 ? r.route.element
                 : e,
-                i.createElement(Et, {
+                i.createElement(Ct, {
                   match: r,
                   routeContext: {
                     outlet: e,
@@ -9971,7 +9984,7 @@
                 });
             };
           return n && (r.route.ErrorBoundary || r.route.errorElement || 0 === a)
-            ? i.createElement(St, {
+            ? i.createElement(Et, {
               location: n.location,
               revalidation: n.revalidation,
               component: f,
@@ -9985,13 +9998,13 @@
         m && m.map((e) =>
           Object.assign({}, e, {
             params: Object.assign({}, s, e.params),
-            pathname: at([
+            pathname: ot([
               u,
               a.encodeLocation
                 ? a.encodeLocation(e.pathname).pathname
                 : e.pathname,
             ]),
-            pathnameBase: "/" === e.pathnameBase ? u : at([
+            pathnameBase: "/" === e.pathnameBase ? u : ot([
               u,
               a.encodeLocation
                 ? a.encodeLocation(e.pathnameBase).pathname
@@ -10004,29 +10017,29 @@
         r,
       );
     return t && g
-      ? i.createElement(ht.Provider, {
+      ? i.createElement(mt.Provider, {
         value: {
-          location: ct({
+          location: dt({
             pathname: "/",
             search: "",
             hash: "",
             state: null,
             key: "default",
           }, c),
-          navigationType: Pe.Pop,
+          navigationType: Re.Pop,
         },
       }, g)
       : g;
   }
-  function xt() {
+  function _t() {
     let e = function () {
         var e;
-        let t = i.useContext(gt),
+        let t = i.useContext(vt),
           n = function () {
-            let e = i.useContext(ft);
-            return e || Oe(!1), e;
-          }(Nt.UseRouteError),
-          r = Tt(Nt.UseRouteError);
+            let e = i.useContext(pt);
+            return e || Le(!1), e;
+          }(Tt.UseRouteError),
+          r = Pt(Tt.UseRouteError);
         return void 0 !== t ? t : null == (e = n.errors) ? void 0 : e[r];
       }(),
       t = (function (e) {
@@ -10049,8 +10062,8 @@
       null,
     );
   }
-  const _t = i.createElement(xt, null);
-  class St extends i.Component {
+  const St = i.createElement(_t, null);
+  class Et extends i.Component {
     constructor(e) {
       super(e),
         this.state = {
@@ -10082,9 +10095,9 @@
     render() {
       return void 0 !== this.state.error
         ? i.createElement(
-          mt.Provider,
+          gt.Provider,
           { value: this.props.routeContext },
-          i.createElement(gt.Provider, {
+          i.createElement(vt.Provider, {
             value: this.state.error,
             children: this.props.component,
           }),
@@ -10092,20 +10105,20 @@
         : this.props.children;
     }
   }
-  function Et(e) {
-    let { routeContext: t, match: n, children: r } = e, a = i.useContext(dt);
+  function Ct(e) {
+    let { routeContext: t, match: n, children: r } = e, a = i.useContext(ft);
     return a && a.static && a.staticContext &&
       (n.route.errorElement || n.route.ErrorBoundary) &&
       (a.staticContext._deepestRenderedBoundaryId = n.route.id),
-      i.createElement(mt.Provider, { value: t }, r);
+      i.createElement(gt.Provider, { value: t }, r);
   }
-  var Ct = function (e) {
+  var Nt = function (e) {
       return e.UseBlocker = "useBlocker",
         e.UseRevalidator = "useRevalidator",
         e.UseNavigateStable = "useNavigate",
         e;
-    }(Ct || {}),
-    Nt = function (e) {
+    }(Nt || {}),
+    Tt = function (e) {
       return e.UseBlocker = "useBlocker",
         e.UseLoaderData = "useLoaderData",
         e.UseActionData = "useActionData",
@@ -10117,24 +10130,24 @@
         e.UseNavigateStable = "useNavigate",
         e.UseRouteId = "useRouteId",
         e;
-    }(Nt || {});
-  function Tt(e) {
+    }(Tt || {});
+  function Pt(e) {
     let t = function () {
-        let e = i.useContext(mt);
-        return e || Oe(!1), e;
+        let e = i.useContext(gt);
+        return e || Le(!1), e;
       }(),
       n = t.matches[t.matches.length - 1];
-    return n.route.id || Oe(!1), n.route.id;
+    return n.route.id || Le(!1), n.route.id;
   }
-  const Pt = {};
-  function Rt(e) {
+  const Rt = {};
+  function Ot(e) {
     let { to: t, replace: n, state: r, relative: a } = e;
-    vt() || Oe(!1);
-    let { future: o, static: l } = i.useContext(pt),
-      { matches: s } = i.useContext(mt),
-      { pathname: u } = yt(),
-      c = wt(),
-      d = rt(t, nt(s, o.v7_relativeSplatPath), u, "path" === a),
+    yt() || Le(!1);
+    let { future: o, static: l } = i.useContext(ht),
+      { matches: s } = i.useContext(gt),
+      { pathname: u } = bt(),
+      c = kt(),
+      d = at(t, rt(s, o.v7_relativeSplatPath), u, "path" === a),
       f = JSON.stringify(d);
     return i.useEffect(
       () => c(JSON.parse(f), { replace: n, state: r, relative: a }),
@@ -10142,31 +10155,31 @@
     ),
       null;
   }
-  function Ot(e) {
-    Oe(!1);
-  }
   function Lt(e) {
+    Le(!1);
+  }
+  function jt(e) {
     let {
       basename: t = "/",
       children: n = null,
       location: r,
-      navigationType: a = Pe.Pop,
+      navigationType: a = Re.Pop,
       navigator: o,
       static: l = !1,
       future: s,
     } = e;
-    vt() && Oe(!1);
+    yt() && Le(!1);
     let u = t.replace(/^\/*/, "/"),
       c = i.useMemo(
         () => ({
           basename: u,
           navigator: o,
           static: l,
-          future: ct({ v7_relativeSplatPath: !1 }, s),
+          future: dt({ v7_relativeSplatPath: !1 }, s),
         }),
         [u, s, o, l],
       );
-    "string" == typeof r && (r = Me(r));
+    "string" == typeof r && (r = Ie(r));
     let {
         pathname: d = "/",
         search: f = "",
@@ -10175,32 +10188,32 @@
         key: m = "default",
       } = r,
       g = i.useMemo(() => {
-        let e = Ge(d, u);
+        let e = Ze(d, u);
         return null == e ? null : {
           location: { pathname: e, search: f, hash: p, state: h, key: m },
           navigationType: a,
         };
       }, [u, d, f, p, h, m, a]);
     return null == g ? null : i.createElement(
-      pt.Provider,
+      ht.Provider,
       { value: c },
-      i.createElement(ht.Provider, { children: n, value: g }),
+      i.createElement(mt.Provider, { children: n, value: g }),
     );
   }
-  function jt(e) {
+  function zt(e) {
     let { children: t, location: n } = e;
-    return kt(zt(t), n);
+    return xt(At(t), n);
   }
-  function zt(e, t) {
+  function At(e, t) {
     void 0 === t && (t = []);
     let n = [];
     return i.Children.forEach(e, (e, r) => {
       if (!i.isValidElement(e)) return;
       let a = [...t, r];
       if (e.type === i.Fragment) {
-        return void n.push.apply(n, zt(e.props.children, a));
+        return void n.push.apply(n, At(e.props.children, a));
       }
-      e.type !== Ot && Oe(!1), e.props.index && e.props.children && Oe(!1);
+      e.type !== Lt && Le(!1), e.props.index && e.props.children && Le(!1);
       let o = {
         id: e.props.id || a.join("-"),
         caseSensitive: e.props.caseSensitive,
@@ -10218,12 +10231,12 @@
         handle: e.props.handle,
         lazy: e.props.lazy,
       };
-      e.props.children && (o.children = zt(e.props.children, a)), n.push(o);
+      e.props.children && (o.children = At(e.props.children, a)), n.push(o);
     }),
       n;
   }
   l.startTransition, new Promise(() => {}), i.Component;
-  var At = a(961), Mt = a.t(At, 2);
+  var Mt = a(961), It = a.t(Mt, 2);
   new Set([
     "application/x-www-form-urlencoded",
     "multipart/form-data",
@@ -10233,8 +10246,8 @@
     window.__reactRouterVersion = "6";
   } catch (e) {}
   new Map();
-  const It = l.startTransition;
-  function Dt(e) {
+  const Dt = l.startTransition;
+  function Ft(e) {
     let { basename: t, children: n, future: r, window: a } = e, o = i.useRef();
     null == o.current && (o.current = function (e) {
       return void 0 === e && (e = {}),
@@ -10242,14 +10255,14 @@
           void 0 === r && (r = {});
           let { window: a = document.defaultView, v5Compat: o = !1 } = r,
             i = a.history,
-            l = Pe.Pop,
+            l = Re.Pop,
             s = null,
             u = c();
           function c() {
             return (i.state || { idx: null }).idx;
           }
           function d() {
-            l = Pe.Pop;
+            l = Re.Pop;
             let e = c(), t = null == e ? null : e - u;
             u = e, s && s({ action: l, location: p.location, delta: t });
           }
@@ -10257,16 +10270,16 @@
             let t = "null" !== a.location.origin
                 ? a.location.origin
                 : a.location.href,
-              n = "string" == typeof e ? e : Ae(e);
+              n = "string" == typeof e ? e : Me(e);
             return n = n.replace(/ $/, "%20"),
-              Oe(
+              Le(
                 t,
                 "No window.location.(origin|href) available to create URL for href: " +
                   n,
               ),
               new URL(n, t);
           }
-          null == u && (u = 0, i.replaceState(Te({}, i.state, { idx: u }), ""));
+          null == u && (u = 0, i.replaceState(Pe({}, i.state, { idx: u }), ""));
           let p = {
             get action() {
               return l;
@@ -10278,8 +10291,8 @@
               if (s) {
                 throw new Error("A history only accepts one active listener");
               }
-              return a.addEventListener(Re, d), s = e, () => {
-                a.removeEventListener(Re, d), s = null;
+              return a.addEventListener(Oe, d), s = e, () => {
+                a.removeEventListener(Oe, d), s = null;
               };
             },
             createHref: (e) => t(a, e),
@@ -10289,10 +10302,10 @@
               return { pathname: t.pathname, search: t.search, hash: t.hash };
             },
             push: function (e, t) {
-              l = Pe.Push;
-              let r = ze(p.location, e, t);
+              l = Re.Push;
+              let r = Ae(p.location, e, t);
               n && n(r, e), u = c() + 1;
-              let d = je(r, u), f = p.createHref(r);
+              let d = ze(r, u), f = p.createHref(r);
               try {
                 i.pushState(d, "", f);
               } catch (e) {
@@ -10304,10 +10317,10 @@
               o && s && s({ action: l, location: p.location, delta: 1 });
             },
             replace: function (e, t) {
-              l = Pe.Replace;
-              let r = ze(p.location, e, t);
+              l = Re.Replace;
+              let r = Ae(p.location, e, t);
               n && n(r, e), u = c();
-              let a = je(r, u), d = p.createHref(r);
+              let a = ze(r, u), d = p.createHref(r);
               i.replaceState(a, "", d),
                 o && s && s({ action: l, location: p.location, delta: 0 });
             },
@@ -10317,7 +10330,7 @@
         }(
           function (e, t) {
             let { pathname: n, search: r, hash: a } = e.location;
-            return ze(
+            return Ae(
               "",
               { pathname: n, search: r, hash: a },
               t.state && t.state.usr || null,
@@ -10325,7 +10338,7 @@
             );
           },
           function (e, t) {
-            return "string" == typeof t ? t : Ae(t);
+            return "string" == typeof t ? t : Me(t);
           },
           null,
           e,
@@ -10335,7 +10348,7 @@
       [s, u] = i.useState({ action: l.action, location: l.location }),
       { v7_startTransition: c } = r || {},
       d = i.useCallback((e) => {
-        c && It ? It(() => u(e)) : u(e);
+        c && Dt ? Dt(() => u(e)) : u(e);
       }, [u, c]);
     return i.useLayoutEffect(() => l.listen(d), [l, d]),
       i.useEffect(() => {
@@ -10349,7 +10362,7 @@
               t.v7_skipActionErrorRevalidation));
         var e, t;
       }, [r]),
-      i.createElement(Lt, {
+      i.createElement(jt, {
         basename: t,
         children: n,
         location: s.location,
@@ -10358,8 +10371,8 @@
         future: r,
       });
   }
-  var Ft, Bt;
-  Mt.flushSync,
+  var Ut, Bt;
+  It.flushSync,
     l.useId,
     "undefined" != typeof window && void 0 !== window.document &&
     window.document.createElement,
@@ -10369,40 +10382,40 @@
         e.UseSubmitFetcher = "useSubmitFetcher",
         e.UseFetcher = "useFetcher",
         e.useViewTransitionState = "useViewTransitionState";
-    }(Ft || (Ft = {})),
+    }(Ut || (Ut = {})),
     function (e) {
       e.UseFetcher = "useFetcher",
         e.UseFetchers = "useFetchers",
         e.UseScrollRestoration = "useScrollRestoration";
     }(Bt || (Bt = {}));
-  const Ut = Object.create(null);
-  Ut.open = "0",
-    Ut.close = "1",
-    Ut.ping = "2",
-    Ut.pong = "3",
-    Ut.message = "4",
-    Ut.upgrade = "5",
-    Ut.noop = "6";
   const $t = Object.create(null);
-  Object.keys(Ut).forEach((e) => {
-    $t[Ut[e]] = e;
+  $t.open = "0",
+    $t.close = "1",
+    $t.ping = "2",
+    $t.pong = "3",
+    $t.message = "4",
+    $t.upgrade = "5",
+    $t.noop = "6";
+  const qt = Object.create(null);
+  Object.keys($t).forEach((e) => {
+    qt[$t[e]] = e;
   });
-  const qt = { type: "error", data: "parser error" },
-    Ht = "function" == typeof Blob ||
+  const Ht = { type: "error", data: "parser error" },
+    Vt = "function" == typeof Blob ||
       "undefined" != typeof Blob &&
         "[object BlobConstructor]" === Object.prototype.toString.call(Blob),
-    Vt = "function" == typeof ArrayBuffer,
-    Wt = (e) =>
+    Wt = "function" == typeof ArrayBuffer,
+    Qt = (e) =>
       "function" == typeof ArrayBuffer.isView
         ? ArrayBuffer.isView(e)
         : e && e.buffer instanceof ArrayBuffer,
-    Qt = ({ type: e, data: t }, n, r) =>
-      Ht && t instanceof Blob
-        ? n ? r(t) : Kt(t, r)
-        : Vt && (t instanceof ArrayBuffer || Wt(t))
-        ? n ? r(t) : Kt(new Blob([t]), r)
-        : r(Ut[e] + (t || "")),
-    Kt = (e, t) => {
+    Kt = ({ type: e, data: t }, n, r) =>
+      Vt && t instanceof Blob
+        ? n ? r(t) : Yt(t, r)
+        : Wt && (t instanceof ArrayBuffer || Qt(t))
+        ? n ? r(t) : Yt(new Blob([t]), r)
+        : r($t[e] + (t || "")),
+    Yt = (e, t) => {
       const n = new FileReader();
       return n.onload = function () {
         const e = n.result.split(",")[1];
@@ -10410,64 +10423,64 @@
       },
         n.readAsDataURL(e);
     };
-  function Yt(e) {
+  function Jt(e) {
     return e instanceof Uint8Array
       ? e
       : e instanceof ArrayBuffer
       ? new Uint8Array(e)
       : new Uint8Array(e.buffer, e.byteOffset, e.byteLength);
   }
-  let Jt;
-  const Xt = "undefined" == typeof Uint8Array ? [] : new Uint8Array(256);
+  let Xt;
+  const Gt = "undefined" == typeof Uint8Array ? [] : new Uint8Array(256);
   for (let e = 0; e < 64; e++) {
-    Xt[
+    Gt[
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
         .charCodeAt(e)
     ] = e;
   }
-  const Gt = "function" == typeof ArrayBuffer,
-    Zt = (e, t) => {
-      if ("string" != typeof e) return { type: "message", data: tn(e, t) };
+  const Zt = "function" == typeof ArrayBuffer,
+    en = (e, t) => {
+      if ("string" != typeof e) return { type: "message", data: nn(e, t) };
       const n = e.charAt(0);
       return "b" === n
-        ? { type: "message", data: en(e.substring(1), t) }
-        : $t[n]
-        ? e.length > 1 ? { type: $t[n], data: e.substring(1) } : { type: $t[n] }
-        : qt;
+        ? { type: "message", data: tn(e.substring(1), t) }
+        : qt[n]
+        ? e.length > 1 ? { type: qt[n], data: e.substring(1) } : { type: qt[n] }
+        : Ht;
     },
-    en = (e, t) => {
-      if (Gt) {
+    tn = (e, t) => {
+      if (Zt) {
         const n = ((e) => {
           let t, n, r, a, o, i = .75 * e.length, l = e.length, s = 0;
           "=" === e[e.length - 1] && (i--, "=" === e[e.length - 2] && i--);
           const u = new ArrayBuffer(i), c = new Uint8Array(u);
           for (t = 0; t < l; t += 4) {
-            n = Xt[e.charCodeAt(t)],
-              r = Xt[e.charCodeAt(t + 1)],
-              a = Xt[e.charCodeAt(t + 2)],
-              o = Xt[e.charCodeAt(t + 3)],
+            n = Gt[e.charCodeAt(t)],
+              r = Gt[e.charCodeAt(t + 1)],
+              a = Gt[e.charCodeAt(t + 2)],
+              o = Gt[e.charCodeAt(t + 3)],
               c[s++] = n << 2 | r >> 4,
               c[s++] = (15 & r) << 4 | a >> 2,
               c[s++] = (3 & a) << 6 | 63 & o;
           }
           return u;
         })(e);
-        return tn(n, t);
+        return nn(n, t);
       }
       return { base64: !0, data: e };
     },
-    tn = (e, t) =>
+    nn = (e, t) =>
       "blob" === t
         ? e instanceof Blob ? e : new Blob([e])
         : e instanceof ArrayBuffer
         ? e
         : e.buffer,
-    nn = String.fromCharCode(30);
-  let rn;
-  function an(e) {
+    rn = String.fromCharCode(30);
+  let an;
+  function on(e) {
     return e.reduce((e, t) => e + t.length, 0);
   }
-  function on(e, t) {
+  function ln(e, t) {
     if (e[0].length === t) return e.shift();
     const n = new Uint8Array(t);
     let r = 0;
@@ -10476,29 +10489,29 @@
     }
     return e.length && r < e[0].length && (e[0] = e[0].slice(r)), n;
   }
-  function ln(e) {
+  function sn(e) {
     if (e) {
       return function (e) {
-        for (var t in ln.prototype) e[t] = ln.prototype[t];
+        for (var t in sn.prototype) e[t] = sn.prototype[t];
         return e;
       }(e);
     }
   }
-  ln.prototype.on = ln.prototype.addEventListener = function (e, t) {
+  sn.prototype.on = sn.prototype.addEventListener = function (e, t) {
     return this._callbacks = this._callbacks || {},
       (this._callbacks["$" + e] = this._callbacks["$" + e] || []).push(t),
       this;
   },
-    ln.prototype.once = function (e, t) {
+    sn.prototype.once = function (e, t) {
       function n() {
         this.off(e, n), t.apply(this, arguments);
       }
       return n.fn = t, this.on(e, n), this;
     },
-    ln.prototype.off =
-      ln.prototype.removeListener =
-      ln.prototype.removeAllListeners =
-      ln.prototype.removeEventListener =
+    sn.prototype.off =
+      sn.prototype.removeListener =
+      sn.prototype.removeAllListeners =
+      sn.prototype.removeEventListener =
         function (e, t) {
           if (this._callbacks = this._callbacks || {}, 0 == arguments.length) {
             return this._callbacks = {}, this;
@@ -10516,7 +10529,7 @@
           }
           return 0 === r.length && delete this._callbacks["$" + e], this;
         },
-    ln.prototype.emit = function (e) {
+    sn.prototype.emit = function (e) {
       this._callbacks = this._callbacks || {};
       for (
         var t = new Array(arguments.length - 1),
@@ -10531,34 +10544,34 @@
       }
       return this;
     },
-    ln.prototype.emitReserved = ln.prototype.emit,
-    ln.prototype.listeners = function (e) {
+    sn.prototype.emitReserved = sn.prototype.emit,
+    sn.prototype.listeners = function (e) {
       return this._callbacks = this._callbacks || {},
         this._callbacks["$" + e] || [];
     },
-    ln.prototype.hasListeners = function (e) {
+    sn.prototype.hasListeners = function (e) {
       return !!this.listeners(e).length;
     };
-  const sn =
+  const un =
       "function" == typeof Promise && "function" == typeof Promise.resolve
         ? (e) => Promise.resolve().then(e)
         : (e, t) => t(e, 0),
-    un = "undefined" != typeof self
+    cn = "undefined" != typeof self
       ? self
       : "undefined" != typeof window
       ? window
       : Function("return this")();
-  function cn(e, ...t) {
+  function dn(e, ...t) {
     return t.reduce((t, n) => (e.hasOwnProperty(n) && (t[n] = e[n]), t), {});
   }
-  const dn = un.setTimeout, fn = un.clearTimeout;
-  function pn(e, t) {
+  const fn = cn.setTimeout, pn = cn.clearTimeout;
+  function hn(e, t) {
     t.useNativeTimers
-      ? (e.setTimeoutFn = dn.bind(un), e.clearTimeoutFn = fn.bind(un))
-      : (e.setTimeoutFn = un.setTimeout.bind(un),
-        e.clearTimeoutFn = un.clearTimeout.bind(un));
+      ? (e.setTimeoutFn = fn.bind(cn), e.clearTimeoutFn = pn.bind(cn))
+      : (e.setTimeoutFn = cn.setTimeout.bind(cn),
+        e.clearTimeoutFn = cn.clearTimeout.bind(cn));
   }
-  function hn(e) {
+  function mn(e) {
     return "string" == typeof e
       ? function (e) {
         let t = 0, n = 0;
@@ -10576,11 +10589,11 @@
       }(e)
       : Math.ceil(1.33 * (e.byteLength || e.size));
   }
-  function mn() {
+  function gn() {
     return Date.now().toString(36).substring(3) +
       Math.random().toString(36).substring(2, 5);
   }
-  class gn extends Error {
+  class vn extends Error {
     constructor(e, t, n) {
       super(e),
         this.description = t,
@@ -10588,18 +10601,18 @@
         this.type = "TransportError";
     }
   }
-  class vn extends ln {
+  class yn extends sn {
     constructor(e) {
       super(),
         this.writable = !1,
-        pn(this, e),
+        hn(this, e),
         this.opts = e,
         this.query = e.query,
         this.socket = e.socket,
         this.supportsBinary = !e.forceBase64;
     }
     onError(e, t, n) {
-      return super.emitReserved("error", new gn(e, t, n)), this;
+      return super.emitReserved("error", new vn(e, t, n)), this;
     }
     open() {
       return this.readyState = "opening", this.doOpen(), this;
@@ -10616,7 +10629,7 @@
       this.readyState = "open", this.writable = !0, super.emitReserved("open");
     }
     onData(e) {
-      const t = Zt(e, this.socket.binaryType);
+      const t = en(e, this.socket.binaryType);
       this.onPacket(t);
     }
     onPacket(e) {
@@ -10654,7 +10667,7 @@
       return t.length ? "?" + t : "";
     }
   }
-  class yn extends vn {
+  class bn extends yn {
     constructor() {
       super(...arguments), this._polling = !1;
     }
@@ -10686,9 +10699,9 @@
     }
     onData(e) {
       ((e, t) => {
-        const n = e.split(nn), r = [];
+        const n = e.split(rn), r = [];
         for (let e = 0; e < n.length; e++) {
-          const a = Zt(n[e], t);
+          const a = en(n[e], t);
           if (r.push(a), "error" === a.type) break;
         }
         return r;
@@ -10721,8 +10734,8 @@
           const n = e.length, r = new Array(n);
           let a = 0;
           e.forEach((e, o) => {
-            Qt(e, !1, (e) => {
-              r[o] = e, ++a === n && t(r.join(nn));
+            Kt(e, !1, (e) => {
+              r[o] = e, ++a === n && t(r.join(rn));
             });
           });
         })(e, (e) => {
@@ -10734,19 +10747,19 @@
     uri() {
       const e = this.opts.secure ? "https" : "http", t = this.query || {};
       return !1 !== this.opts.timestampRequests &&
-        (t[this.opts.timestampParam] = mn()),
+        (t[this.opts.timestampParam] = gn()),
         this.supportsBinary || t.sid || (t.b64 = 1),
         this.createUri(e, t);
     }
   }
-  let bn = !1;
+  let wn = !1;
   try {
-    bn = "undefined" != typeof XMLHttpRequest &&
+    wn = "undefined" != typeof XMLHttpRequest &&
       "withCredentials" in new XMLHttpRequest();
   } catch (e) {}
-  const wn = bn;
-  function kn() {}
-  class xn extends yn {
+  const kn = wn;
+  function xn() {}
+  class _n extends bn {
     constructor(e) {
       if (super(e), "undefined" != typeof location) {
         const t = "https:" === location.protocol;
@@ -10772,11 +10785,11 @@
         this.pollXhr = e;
     }
   }
-  class _n extends ln {
+  class Sn extends sn {
     constructor(e, t, n) {
       super(),
         this.createRequest = e,
-        pn(this, n),
+        hn(this, n),
         this._opts = n,
         this._method = n.method || "GET",
         this._uri = t,
@@ -10785,7 +10798,7 @@
     }
     _create() {
       var e;
-      const t = cn(
+      const t = dn(
         this._opts,
         "agent",
         "pfx",
@@ -10841,19 +10854,19 @@
         }, 0);
       }
       "undefined" != typeof document &&
-        (this._index = _n.requestsCount++, _n.requests[this._index] = this);
+        (this._index = Sn.requestsCount++, Sn.requests[this._index] = this);
     }
     _onError(e) {
       this.emitReserved("error", e, this._xhr), this._cleanup(!0);
     }
     _cleanup(e) {
       if (void 0 !== this._xhr && null !== this._xhr) {
-        if (this._xhr.onreadystatechange = kn, e) {
+        if (this._xhr.onreadystatechange = xn, e) {
           try {
             this._xhr.abort();
           } catch (e) {}
         }
-        "undefined" != typeof document && delete _n.requests[this._index],
+        "undefined" != typeof document && delete Sn.requests[this._index],
           this._xhr = null;
       }
     }
@@ -10868,48 +10881,48 @@
       this._cleanup();
     }
   }
-  function Sn() {
-    for (let e in _n.requests) {
-      _n.requests.hasOwnProperty(e) && _n.requests[e].abort();
+  function En() {
+    for (let e in Sn.requests) {
+      Sn.requests.hasOwnProperty(e) && Sn.requests[e].abort();
     }
   }
-  _n.requestsCount = 0,
-    _n.requests = {},
+  Sn.requestsCount = 0,
+    Sn.requests = {},
     "undefined" != typeof document &&
     ("function" == typeof attachEvent
-      ? attachEvent("onunload", Sn)
+      ? attachEvent("onunload", En)
       : "function" == typeof addEventListener &&
-        addEventListener("onpagehide" in un ? "pagehide" : "unload", Sn, !1));
-  const En = function () {
-    const e = Cn({ xdomain: !1 });
+        addEventListener("onpagehide" in cn ? "pagehide" : "unload", En, !1));
+  const Cn = function () {
+    const e = Nn({ xdomain: !1 });
     return e && null !== e.responseType;
   }();
-  function Cn(e) {
+  function Nn(e) {
     const t = e.xdomain;
     try {
-      if ("undefined" != typeof XMLHttpRequest && (!t || wn)) {
+      if ("undefined" != typeof XMLHttpRequest && (!t || kn)) {
         return new XMLHttpRequest();
       }
     } catch (e) {}
     if (!t) {
       try {
-        return new (un[["Active"].concat("Object").join("X")])(
+        return new (cn[["Active"].concat("Object").join("X")])(
           "Microsoft.XMLHTTP",
         );
       } catch (e) {}
     }
   }
-  const Nn = "undefined" != typeof navigator &&
+  const Tn = "undefined" != typeof navigator &&
     "string" == typeof navigator.product &&
     "reactnative" === navigator.product.toLowerCase();
-  class Tn extends vn {
+  class Pn extends yn {
     get name() {
       return "websocket";
     }
     doOpen() {
       const e = this.uri(),
         t = this.opts.protocols,
-        n = Nn ? {} : cn(
+        n = Tn ? {} : dn(
           this.opts,
           "agent",
           "perMessageDeflate",
@@ -10951,11 +10964,11 @@
       this.writable = !1;
       for (let t = 0; t < e.length; t++) {
         const n = e[t], r = t === e.length - 1;
-        Qt(n, this.supportsBinary, (e) => {
+        Kt(n, this.supportsBinary, (e) => {
           try {
             this.doWrite(n, e);
           } catch (e) {}
-          r && sn(() => {
+          r && un(() => {
             this.writable = !0, this.emitReserved("drain");
           }, this.setTimeoutFn);
         });
@@ -10968,22 +10981,22 @@
     uri() {
       const e = this.opts.secure ? "wss" : "ws", t = this.query || {};
       return this.opts.timestampRequests &&
-        (t[this.opts.timestampParam] = mn()),
+        (t[this.opts.timestampParam] = gn()),
         this.supportsBinary || (t.b64 = 1),
         this.createUri(e, t);
     }
   }
-  const Pn = un.WebSocket || un.MozWebSocket,
-    Rn = {
-      websocket: class extends Tn {
+  const Rn = cn.WebSocket || cn.MozWebSocket,
+    On = {
+      websocket: class extends Pn {
         createSocket(e, t, n) {
-          return Nn ? new Pn(e, t, n) : t ? new Pn(e, t) : new Pn(e);
+          return Tn ? new Rn(e, t, n) : t ? new Rn(e, t) : new Rn(e);
         }
         doWrite(e, t) {
           this.ws.send(t);
         }
       },
-      webtransport: class extends vn {
+      webtransport: class extends yn {
         get name() {
           return "webtransport";
         }
@@ -11004,26 +11017,26 @@
             this._transport.ready.then(() => {
               this._transport.createBidirectionalStream().then((e) => {
                 const t = function (e, t) {
-                    rn || (rn = new TextDecoder());
+                    an || (an = new TextDecoder());
                     const n = [];
                     let r = 0, a = -1, o = !1;
                     return new TransformStream({
                       transform(i, l) {
                         for (n.push(i);;) {
                           if (0 === r) {
-                            if (an(n) < 1) break;
-                            const e = on(n, 1);
+                            if (on(n) < 1) break;
+                            const e = ln(n, 1);
                             o = !(128 & ~e[0]),
                               a = 127 & e[0],
                               r = a < 126 ? 3 : 126 === a ? 1 : 2;
                           } else if (1 === r) {
-                            if (an(n) < 2) break;
-                            const e = on(n, 2);
+                            if (on(n) < 2) break;
+                            const e = ln(n, 2);
                             a = new DataView(e.buffer, e.byteOffset, e.length)
                               .getUint16(0), r = 3;
                           } else if (2 === r) {
-                            if (an(n) < 8) break;
-                            const e = on(n, 8),
+                            if (on(n) < 8) break;
+                            const e = ln(n, 8),
                               t = new DataView(
                                 e.buffer,
                                 e.byteOffset,
@@ -11031,17 +11044,17 @@
                               ),
                               o = t.getUint32(0);
                             if (o > Math.pow(2, 21) - 1) {
-                              l.enqueue(qt);
+                              l.enqueue(Ht);
                               break;
                             }
                             a = o * Math.pow(2, 32) + t.getUint32(4), r = 3;
                           } else {
-                            if (an(n) < a) break;
-                            const e = on(n, a);
-                            l.enqueue(Zt(o ? e : rn.decode(e), t)), r = 0;
+                            if (on(n) < a) break;
+                            const e = ln(n, a);
+                            l.enqueue(en(o ? e : an.decode(e), t)), r = 0;
                           }
                           if (0 === a || a > e) {
-                            l.enqueue(qt);
+                            l.enqueue(Ht);
                             break;
                           }
                         }
@@ -11052,12 +11065,12 @@
                   r = new TransformStream({
                     transform(e, t) {
                       !function (e, t) {
-                        Ht && e.data instanceof Blob
-                          ? e.data.arrayBuffer().then(Yt).then(t)
-                          : Vt && (e.data instanceof ArrayBuffer || Wt(e.data))
-                          ? t(Yt(e.data))
-                          : Qt(e, !1, (e) => {
-                            Jt || (Jt = new TextEncoder()), t(Jt.encode(e));
+                        Vt && e.data instanceof Blob
+                          ? e.data.arrayBuffer().then(Jt).then(t)
+                          : Wt && (e.data instanceof ArrayBuffer || Qt(e.data))
+                          ? t(Jt(e.data))
+                          : Kt(e, !1, (e) => {
+                            Xt || (Xt = new TextEncoder()), t(Xt.encode(e));
                           });
                       }(e, (n) => {
                         const r = n.length;
@@ -11099,7 +11112,7 @@
           for (let t = 0; t < e.length; t++) {
             const n = e[t], r = t === e.length - 1;
             this._writer.write(n).then(() => {
-              r && sn(() => {
+              r && un(() => {
                 this.writable = !0, this.emitReserved("drain");
               }, this.setTimeoutFn);
             });
@@ -11110,21 +11123,21 @@
           null === (e = this._transport) || void 0 === e || e.close();
         }
       },
-      polling: class extends xn {
+      polling: class extends _n {
         constructor(e) {
           super(e);
           const t = e && e.forceBase64;
-          this.supportsBinary = En && !t;
+          this.supportsBinary = Cn && !t;
         }
         request(e = {}) {
           return Object.assign(e, { xd: this.xd }, this.opts),
-            new _n(Cn, this.uri(), e);
+            new Sn(Nn, this.uri(), e);
         }
       },
     },
-    On =
+    Ln =
       /^(?:(?![^:@\/?#]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@\/?#]*)(?::([^:@\/?#]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/,
-    Ln = [
+    jn = [
       "source",
       "protocol",
       "authority",
@@ -11140,14 +11153,14 @@
       "query",
       "anchor",
     ];
-  function jn(e) {
+  function zn(e) {
     if (e.length > 8e3) throw "URI too long";
     const t = e, n = e.indexOf("["), r = e.indexOf("]");
     -1 != n && -1 != r &&
       (e = e.substring(0, n) + e.substring(n, r).replace(/:/g, ";") +
         e.substring(r, e.length));
-    let a = On.exec(e || ""), o = {}, i = 14;
-    for (; i--;) o[Ln[i]] = a[i] || "";
+    let a = Ln.exec(e || ""), o = {}, i = 14;
+    for (; i--;) o[jn[i]] = a[i] || "";
     return -1 != n && -1 != r &&
       (o.source = t,
         o.host = o.host.substring(1, o.host.length - 1).replace(/;/g, ":"),
@@ -11171,13 +11184,13 @@
       }(0, o.query),
       o;
   }
-  const zn = "function" == typeof addEventListener &&
+  const An = "function" == typeof addEventListener &&
       "function" == typeof removeEventListener,
-    An = [];
-  zn && addEventListener("offline", () => {
-    An.forEach((e) => e());
+    Mn = [];
+  An && addEventListener("offline", () => {
+    Mn.forEach((e) => e());
   }, !1);
-  class Mn extends ln {
+  class In extends sn {
     constructor(e, t) {
       if (
         super(),
@@ -11191,13 +11204,13 @@
           e && "object" == typeof e && (t = e, e = null),
           e
       ) {
-        const n = jn(e);
+        const n = zn(e);
         t.hostname = n.host,
           t.secure = "https" === n.protocol || "wss" === n.protocol,
           t.port = n.port,
           n.query && (t.query = n.query);
-      } else t.host && (t.hostname = jn(t.host).host);
-      pn(this, t),
+      } else t.host && (t.hostname = zn(t.host).host);
+      hn(this, t),
         this.secure = null != t.secure
           ? t.secure
           : "undefined" != typeof location && "https:" === location.protocol,
@@ -11239,7 +11252,7 @@
           }
           return t;
         }(this.opts.query)),
-        zn &&
+        An &&
         (this.opts.closeOnBeforeunload &&
           (this._beforeunloadEventListener = () => {
             this.transport &&
@@ -11255,7 +11268,7 @@
               description: "network connection lost",
             });
           },
-            An.push(this._offlineEventListener))),
+            Mn.push(this._offlineEventListener))),
         this.opts.withCredentials && (this._cookieJar = void 0),
         this._open();
     }
@@ -11277,7 +11290,7 @@
           this.emitReserved("error", "No transports available");
         }, 0);
       }
-      const e = this.opts.rememberUpgrade && Mn.priorWebsocketSuccess &&
+      const e = this.opts.rememberUpgrade && In.priorWebsocketSuccess &&
           -1 !== this.transports.indexOf("websocket")
         ? "websocket"
         : this.transports[0];
@@ -11298,7 +11311,7 @@
     }
     onOpen() {
       this.readyState = "open",
-        Mn.priorWebsocketSuccess = "websocket" === this.transport.name,
+        In.priorWebsocketSuccess = "websocket" === this.transport.name,
         this.emitReserved("open"),
         this.flush();
     }
@@ -11374,7 +11387,7 @@
       let e = 1;
       for (let t = 0; t < this.writeBuffer.length; t++) {
         const n = this.writeBuffer[t].data;
-        if (n && (e += hn(n)), t > 0 && e > this._maxPayload) {
+        if (n && (e += mn(n)), t > 0 && e > this._maxPayload) {
           return this.writeBuffer.slice(0, t);
         }
         e += 2;
@@ -11385,7 +11398,7 @@
       if (!this._pingTimeoutTime) return !0;
       const e = Date.now() > this._pingTimeoutTime;
       return e && (this._pingTimeoutTime = 0,
-        sn(() => {
+        un(() => {
           this._onClose("ping timeout");
         }, this.setTimeoutFn)),
         e;
@@ -11432,7 +11445,7 @@
     }
     _onError(e) {
       if (
-        Mn.priorWebsocketSuccess = !1,
+        In.priorWebsocketSuccess = !1,
           this.opts.tryAllTransports && this.transports.length > 1 &&
           "opening" === this.readyState
       ) return this.transports.shift(), this._open();
@@ -11448,7 +11461,7 @@
             this.transport.removeAllListeners("close"),
             this.transport.close(),
             this.transport.removeAllListeners(),
-            zn &&
+            An &&
             (this._beforeunloadEventListener &&
               removeEventListener(
                 "beforeunload",
@@ -11457,8 +11470,8 @@
               ),
               this._offlineEventListener)
         ) {
-          const e = An.indexOf(this._offlineEventListener);
-          -1 !== e && An.splice(e, 1);
+          const e = Mn.indexOf(this._offlineEventListener);
+          -1 !== e && Mn.splice(e, 1);
         }
         this.readyState = "closed",
           this.id = null,
@@ -11468,8 +11481,8 @@
       }
     }
   }
-  Mn.protocol = 4;
-  class In extends Mn {
+  In.protocol = 4;
+  class Dn extends In {
     constructor() {
       super(...arguments), this._upgrades = [];
     }
@@ -11484,7 +11497,7 @@
     }
     _probe(e) {
       let t = this.createTransport(e), n = !1;
-      Mn.priorWebsocketSuccess = !1;
+      In.priorWebsocketSuccess = !1;
       const r = () => {
         n ||
           (t.send([{ type: "ping", data: "probe" }]),
@@ -11494,7 +11507,7 @@
                   if (
                     this.upgrading = !0, this.emitReserved("upgrading", t), !t
                   ) return;
-                  Mn.priorWebsocketSuccess = "websocket" === t.name,
+                  In.priorWebsocketSuccess = "websocket" === t.name,
                     this.transport.pause(() => {
                       n ||
                         "closed" !== this.readyState &&
@@ -11558,76 +11571,76 @@
       return t;
     }
   }
-  class Dn extends In {
+  class Fn extends Dn {
     constructor(e, t = {}) {
       const n = "object" == typeof e ? e : t;
       (!n.transports || n.transports && "string" == typeof n.transports[0]) &&
       (n.transports = (n.transports || ["polling", "websocket", "webtransport"])
-        .map((e) => Rn[e]).filter((e) => !!e)), super(e, n);
+        .map((e) => On[e]).filter((e) => !!e)), super(e, n);
     }
   }
-  const Fn = "function" == typeof ArrayBuffer,
+  const Un = "function" == typeof ArrayBuffer,
     Bn = Object.prototype.toString,
-    Un = "function" == typeof Blob ||
+    $n = "function" == typeof Blob ||
       "undefined" != typeof Blob &&
         "[object BlobConstructor]" === Bn.call(Blob),
-    $n = "function" == typeof File ||
+    qn = "function" == typeof File ||
       "undefined" != typeof File &&
         "[object FileConstructor]" === Bn.call(File);
-  function qn(e) {
-    return Fn &&
+  function Hn(e) {
+    return Un &&
         (e instanceof ArrayBuffer ||
           ((e) =>
             "function" == typeof ArrayBuffer.isView
               ? ArrayBuffer.isView(e)
               : e.buffer instanceof ArrayBuffer)(e)) ||
-      Un && e instanceof Blob || $n && e instanceof File;
+      $n && e instanceof Blob || qn && e instanceof File;
   }
-  function Hn(e, t) {
+  function Vn(e, t) {
     if (!e || "object" != typeof e) return !1;
     if (Array.isArray(e)) {
-      for (let t = 0, n = e.length; t < n; t++) if (Hn(e[t])) return !0;
+      for (let t = 0, n = e.length; t < n; t++) if (Vn(e[t])) return !0;
       return !1;
     }
-    if (qn(e)) return !0;
+    if (Hn(e)) return !0;
     if (e.toJSON && "function" == typeof e.toJSON && 1 === arguments.length) {
-      return Hn(e.toJSON(), !0);
+      return Vn(e.toJSON(), !0);
     }
     for (const t in e) {
-      if (Object.prototype.hasOwnProperty.call(e, t) && Hn(e[t])) return !0;
+      if (Object.prototype.hasOwnProperty.call(e, t) && Vn(e[t])) return !0;
     }
     return !1;
   }
-  function Vn(e) {
+  function Wn(e) {
     const t = [], n = e.data, r = e;
-    return r.data = Wn(n, t),
+    return r.data = Qn(n, t),
       r.attachments = t.length,
       { packet: r, buffers: t };
   }
-  function Wn(e, t) {
+  function Qn(e, t) {
     if (!e) return e;
-    if (qn(e)) {
+    if (Hn(e)) {
       const n = { _placeholder: !0, num: t.length };
       return t.push(e), n;
     }
     if (Array.isArray(e)) {
       const n = new Array(e.length);
-      for (let r = 0; r < e.length; r++) n[r] = Wn(e[r], t);
+      for (let r = 0; r < e.length; r++) n[r] = Qn(e[r], t);
       return n;
     }
     if ("object" == typeof e && !(e instanceof Date)) {
       const n = {};
       for (const r in e) {
-        Object.prototype.hasOwnProperty.call(e, r) && (n[r] = Wn(e[r], t));
+        Object.prototype.hasOwnProperty.call(e, r) && (n[r] = Qn(e[r], t));
       }
       return n;
     }
     return e;
   }
-  function Qn(e, t) {
-    return e.data = Kn(e.data, t), delete e.attachments, e;
-  }
   function Kn(e, t) {
+    return e.data = Yn(e.data, t), delete e.attachments, e;
+  }
+  function Yn(e, t) {
     if (!e) return e;
     if (e && !0 === e._placeholder) {
       if ("number" == typeof e.num && e.num >= 0 && e.num < t.length) {
@@ -11636,15 +11649,15 @@
       throw new Error("illegal attachments");
     }
     if (Array.isArray(e)) {
-      for (let n = 0; n < e.length; n++) e[n] = Kn(e[n], t);
+      for (let n = 0; n < e.length; n++) e[n] = Yn(e[n], t);
     } else if ("object" == typeof e) {
       for (const n in e) {
-        Object.prototype.hasOwnProperty.call(e, n) && (e[n] = Kn(e[n], t));
+        Object.prototype.hasOwnProperty.call(e, n) && (e[n] = Yn(e[n], t));
       }
     }
     return e;
   }
-  const Yn = [
+  const Jn = [
       "connect",
       "connect_error",
       "disconnect",
@@ -11652,8 +11665,8 @@
       "newListener",
       "removeListener",
     ],
-    Jn = 5;
-  var Xn;
+    Xn = 5;
+  var Gn;
   !function (e) {
     e[e.CONNECT = 0] = "CONNECT",
       e[e.DISCONNECT = 1] = "DISCONNECT",
@@ -11662,16 +11675,16 @@
       e[e.CONNECT_ERROR = 4] = "CONNECT_ERROR",
       e[e.BINARY_EVENT = 5] = "BINARY_EVENT",
       e[e.BINARY_ACK = 6] = "BINARY_ACK";
-  }(Xn || (Xn = {}));
-  class Gn {
+  }(Gn || (Gn = {}));
+  class Zn {
     constructor(e) {
       this.replacer = e;
     }
     encode(e) {
-      return e.type !== Xn.EVENT && e.type !== Xn.ACK || !Hn(e)
+      return e.type !== Gn.EVENT && e.type !== Gn.ACK || !Vn(e)
         ? [this.encodeAsString(e)]
         : this.encodeAsBinary({
-          type: e.type === Xn.EVENT ? Xn.BINARY_EVENT : Xn.BINARY_ACK,
+          type: e.type === Gn.EVENT ? Gn.BINARY_EVENT : Gn.BINARY_ACK,
           nsp: e.nsp,
           data: e.data,
           id: e.id,
@@ -11679,7 +11692,7 @@
     }
     encodeAsString(e) {
       let t = "" + e.type;
-      return e.type !== Xn.BINARY_EVENT && e.type !== Xn.BINARY_ACK ||
+      return e.type !== Gn.BINARY_EVENT && e.type !== Gn.BINARY_ACK ||
         (t += e.attachments + "-"),
         e.nsp && "/" !== e.nsp && (t += e.nsp + ","),
         null != e.id && (t += e.id),
@@ -11687,11 +11700,11 @@
         t;
     }
     encodeAsBinary(e) {
-      const t = Vn(e), n = this.encodeAsString(t.packet), r = t.buffers;
+      const t = Wn(e), n = this.encodeAsString(t.packet), r = t.buffers;
       return r.unshift(n), r;
     }
   }
-  class Zn extends ln {
+  class er extends sn {
     constructor(e) {
       super(),
         this.opts = Object.assign(
@@ -11706,14 +11719,14 @@
           throw new Error("got plaintext data when reconstructing a packet");
         }
         t = this.decodeString(e);
-        const n = t.type === Xn.BINARY_EVENT;
-        n || t.type === Xn.BINARY_ACK
-          ? (t.type = n ? Xn.EVENT : Xn.ACK,
-            this.reconstructor = new er(t),
+        const n = t.type === Gn.BINARY_EVENT;
+        n || t.type === Gn.BINARY_ACK
+          ? (t.type = n ? Gn.EVENT : Gn.ACK,
+            this.reconstructor = new tr(t),
             0 === t.attachments && super.emitReserved("decoded", t))
           : super.emitReserved("decoded", t);
       } else {
-        if (!qn(e) && !e.base64) throw new Error("Unknown type: " + e);
+        if (!Hn(e) && !e.base64) throw new Error("Unknown type: " + e);
         if (!this.reconstructor) {
           throw new Error("got binary data when not reconstructing a packet");
         }
@@ -11724,10 +11737,10 @@
     decodeString(e) {
       let t = 0;
       const n = { type: Number(e.charAt(0)) };
-      if (void 0 === Xn[n.type]) {
+      if (void 0 === Gn[n.type]) {
         throw new Error("unknown packet type " + n.type);
       }
-      if (n.type === Xn.BINARY_EVENT || n.type === Xn.BINARY_ACK) {
+      if (n.type === Gn.BINARY_EVENT || n.type === Gn.BINARY_ACK) {
         const r = t + 1;
         for (; "-" !== e.charAt(++t) && t != e.length;);
         const a = e.substring(r, t);
@@ -11735,7 +11748,7 @@
           throw new Error("Illegal attachments");
         }
         const o = Number(a);
-        if (!tr(o) || o < 0) throw new Error("Illegal attachments");
+        if (!nr(o) || o < 0) throw new Error("Illegal attachments");
         if (o > this.opts.maxAttachments) {
           throw new Error("too many attachments");
         }
@@ -11761,7 +11774,7 @@
       }
       if (e.charAt(++t)) {
         const r = this.tryParse(e.substr(t));
-        if (!Zn.isPayloadValid(n.type, r)) throw new Error("invalid payload");
+        if (!er.isPayloadValid(n.type, r)) throw new Error("invalid payload");
         n.data = r;
       }
       return n;
@@ -11775,19 +11788,19 @@
     }
     static isPayloadValid(e, t) {
       switch (e) {
-        case Xn.CONNECT:
-          return nr(t);
-        case Xn.DISCONNECT:
+        case Gn.CONNECT:
+          return rr(t);
+        case Gn.DISCONNECT:
           return void 0 === t;
-        case Xn.CONNECT_ERROR:
-          return "string" == typeof t || nr(t);
-        case Xn.EVENT:
-        case Xn.BINARY_EVENT:
+        case Gn.CONNECT_ERROR:
+          return "string" == typeof t || rr(t);
+        case Gn.EVENT:
+        case Gn.BINARY_EVENT:
           return Array.isArray(t) &&
             ("number" == typeof t[0] ||
-              "string" == typeof t[0] && -1 === Yn.indexOf(t[0]));
-        case Xn.ACK:
-        case Xn.BINARY_ACK:
+              "string" == typeof t[0] && -1 === Jn.indexOf(t[0]));
+        case Gn.ACK:
+        case Gn.BINARY_ACK:
           return Array.isArray(t);
       }
     }
@@ -11797,7 +11810,7 @@
           this.reconstructor = null);
     }
   }
-  class er {
+  class tr {
     constructor(e) {
       this.packet = e, this.buffers = [], this.reconPack = e;
     }
@@ -11805,7 +11818,7 @@
       if (
         this.buffers.push(e), this.buffers.length === this.reconPack.attachments
       ) {
-        const e = Qn(this.reconPack, this.buffers);
+        const e = Kn(this.reconPack, this.buffers);
         return this.finishedReconstruction(), e;
       }
       return null;
@@ -11814,40 +11827,40 @@
       this.reconPack = null, this.buffers = [];
     }
   }
-  const tr = Number.isInteger || function (e) {
+  const nr = Number.isInteger || function (e) {
     return "number" == typeof e && isFinite(e) && Math.floor(e) === e;
   };
-  function nr(e) {
+  function rr(e) {
     return "[object Object]" === Object.prototype.toString.call(e);
   }
-  function rr(e) {
-    return "string" == typeof e.nsp && (void 0 === (t = e.id) || tr(t)) &&
+  function ar(e) {
+    return "string" == typeof e.nsp && (void 0 === (t = e.id) || nr(t)) &&
       function (e, t) {
         switch (e) {
-          case Xn.CONNECT:
-            return void 0 === t || nr(t);
-          case Xn.DISCONNECT:
+          case Gn.CONNECT:
+            return void 0 === t || rr(t);
+          case Gn.DISCONNECT:
             return void 0 === t;
-          case Xn.EVENT:
+          case Gn.EVENT:
             return Array.isArray(t) &&
               ("number" == typeof t[0] ||
-                "string" == typeof t[0] && -1 === Yn.indexOf(t[0]));
-          case Xn.ACK:
+                "string" == typeof t[0] && -1 === Jn.indexOf(t[0]));
+          case Gn.ACK:
             return Array.isArray(t);
-          case Xn.CONNECT_ERROR:
-            return "string" == typeof t || nr(t);
+          case Gn.CONNECT_ERROR:
+            return "string" == typeof t || rr(t);
           default:
             return !1;
         }
       }(e.type, e.data);
     var t;
   }
-  function ar(e, t, n) {
+  function or(e, t, n) {
     return e.on(t, n), function () {
       e.off(t, n);
     };
   }
-  const or = Object.freeze({
+  const ir = Object.freeze({
     connect: 1,
     connect_error: 1,
     disconnect: 1,
@@ -11855,7 +11868,7 @@
     newListener: 1,
     removeListener: 1,
   });
-  class ir extends ln {
+  class lr extends sn {
     constructor(e, t, n) {
       super(),
         this.connected = !1,
@@ -11880,10 +11893,10 @@
       if (this.subs) return;
       const e = this.io;
       this.subs = [
-        ar(e, "open", this.onopen.bind(this)),
-        ar(e, "packet", this.onpacket.bind(this)),
-        ar(e, "error", this.onerror.bind(this)),
-        ar(e, "close", this.onclose.bind(this)),
+        or(e, "open", this.onopen.bind(this)),
+        or(e, "packet", this.onpacket.bind(this)),
+        or(e, "error", this.onerror.bind(this)),
+        or(e, "close", this.onclose.bind(this)),
       ];
     }
     get active() {
@@ -11904,14 +11917,14 @@
     }
     emit(e, ...t) {
       var n, r, a;
-      if (or.hasOwnProperty(e)) {
+      if (ir.hasOwnProperty(e)) {
         throw new Error('"' + e.toString() + '" is a reserved event name');
       }
       if (
         t.unshift(e),
           this._opts.retries && !this.flags.fromQueue && !this.flags.volatile
       ) return this._addToQueue(t), this;
-      const o = { type: Xn.EVENT, data: t, options: {} };
+      const o = { type: Gn.EVENT, data: t, options: {} };
       if (
         o.options.compress = !1 !== this.flags.compress,
           "function" == typeof t[t.length - 1]
@@ -12004,7 +12017,7 @@
     }
     _sendConnectPacket(e) {
       this.packet({
-        type: Xn.CONNECT,
+        type: Gn.CONNECT,
         data: this._pid
           ? Object.assign({ pid: this._pid, offset: this._lastOffset }, e)
           : e,
@@ -12032,7 +12045,7 @@
     onpacket(e) {
       if (e.nsp === this.nsp) {
         switch (e.type) {
-          case Xn.CONNECT:
+          case Gn.CONNECT:
             e.data && e.data.sid
               ? this.onconnect(e.data.sid, e.data.pid)
               : this.emitReserved(
@@ -12042,18 +12055,18 @@
                 ),
               );
             break;
-          case Xn.EVENT:
-          case Xn.BINARY_EVENT:
+          case Gn.EVENT:
+          case Gn.BINARY_EVENT:
             this.onevent(e);
             break;
-          case Xn.ACK:
-          case Xn.BINARY_ACK:
+          case Gn.ACK:
+          case Gn.BINARY_ACK:
             this.onack(e);
             break;
-          case Xn.DISCONNECT:
+          case Gn.DISCONNECT:
             this.ondisconnect();
             break;
-          case Xn.CONNECT_ERROR:
+          case Gn.CONNECT_ERROR:
             this.destroy();
             const t = new Error(e.data.message);
             t.data = e.data.data, this.emitReserved("connect_error", t);
@@ -12080,7 +12093,7 @@
       const t = this;
       let n = !1;
       return function (...r) {
-        n || (n = !0, t.packet({ type: Xn.ACK, id: e, data: r }));
+        n || (n = !0, t.packet({ type: Gn.ACK, id: e, data: r }));
       };
     }
     onack(e) {
@@ -12115,7 +12128,7 @@
         this.io._destroy(this);
     }
     disconnect() {
-      return this.connected && this.packet({ type: Xn.DISCONNECT }),
+      return this.connected && this.packet({ type: Gn.DISCONNECT }),
         this.destroy(),
         this.connected && this.onclose("io client disconnect"),
         this;
@@ -12185,7 +12198,7 @@
       }
     }
   }
-  function lr(e) {
+  function sr(e) {
     e = e || {},
       this.ms = e.min || 100,
       this.max = e.max || 1e4,
@@ -12193,7 +12206,7 @@
       this.jitter = e.jitter > 0 && e.jitter <= 1 ? e.jitter : 0,
       this.attempts = 0;
   }
-  lr.prototype.duration = function () {
+  sr.prototype.duration = function () {
     var e = this.ms * Math.pow(this.factor, this.attempts++);
     if (this.jitter) {
       var t = Math.random(), n = Math.floor(t * this.jitter * e);
@@ -12201,19 +12214,19 @@
     }
     return 0 | Math.min(e, this.max);
   },
-    lr.prototype.reset = function () {
+    sr.prototype.reset = function () {
       this.attempts = 0;
     },
-    lr.prototype.setMin = function (e) {
+    sr.prototype.setMin = function (e) {
       this.ms = e;
     },
-    lr.prototype.setMax = function (e) {
+    sr.prototype.setMax = function (e) {
       this.max = e;
     },
-    lr.prototype.setJitter = function (e) {
+    sr.prototype.setJitter = function (e) {
       this.jitter = e;
     };
-  class sr extends ln {
+  class ur extends sn {
     constructor(e, t) {
       var n;
       super(),
@@ -12222,7 +12235,7 @@
         e && "object" == typeof e && (t = e, e = void 0),
         (t = t || {}).path = t.path || "/socket.io",
         this.opts = t,
-        pn(this, t),
+        hn(this, t),
         this.reconnection(!1 !== t.reconnection),
         this.reconnectionAttempts(t.reconnectionAttempts || 1 / 0),
         this.reconnectionDelay(t.reconnectionDelay || 1e3),
@@ -12230,7 +12243,7 @@
         this.randomizationFactor(
           null !== (n = t.randomizationFactor) && void 0 !== n ? n : .5,
         ),
-        this.backoff = new lr({
+        this.backoff = new sr({
           min: this.reconnectionDelay(),
           max: this.reconnectionDelayMax(),
           jitter: this.randomizationFactor(),
@@ -12287,10 +12300,10 @@
     }
     open(e) {
       if (~this._readyState.indexOf("open")) return this;
-      this.engine = new Dn(this.uri, this.opts);
+      this.engine = new Fn(this.uri, this.opts);
       const t = this.engine, n = this;
       this._readyState = "opening", this.skipReconnect = !1;
-      const r = ar(t, "open", function () {
+      const r = or(t, "open", function () {
           n.onopen(), e && e();
         }),
         a = (t) => {
@@ -12299,7 +12312,7 @@
             this.emitReserved("error", t),
             e ? e(t) : this.maybeReconnectOnOpen();
         },
-        o = ar(t, "error", a);
+        o = or(t, "error", a);
       if (!1 !== this._timeout) {
         const e = this._timeout,
           n = this.setTimeoutFn(() => {
@@ -12319,11 +12332,11 @@
       this.cleanup(), this._readyState = "open", this.emitReserved("open");
       const e = this.engine;
       this.subs.push(
-        ar(e, "ping", this.onping.bind(this)),
-        ar(e, "data", this.ondata.bind(this)),
-        ar(e, "error", this.onerror.bind(this)),
-        ar(e, "close", this.onclose.bind(this)),
-        ar(this.decoder, "decoded", this.ondecoded.bind(this)),
+        or(e, "ping", this.onping.bind(this)),
+        or(e, "data", this.ondata.bind(this)),
+        or(e, "error", this.onerror.bind(this)),
+        or(e, "close", this.onclose.bind(this)),
+        or(this.decoder, "decoded", this.ondecoded.bind(this)),
       );
     }
     onping() {
@@ -12337,7 +12350,7 @@
       }
     }
     ondecoded(e) {
-      sn(() => {
+      un(() => {
         this.emitReserved("packet", e);
       }, this.setTimeoutFn);
     }
@@ -12348,7 +12361,7 @@
       let n = this.nsps[e];
       return n
         ? this._autoConnect && !n.active && n.connect()
-        : (n = new ir(this, e, t), this.nsps[e] = n),
+        : (n = new lr(this, e, t), this.nsps[e] = n),
         n;
     }
     _destroy(e) {
@@ -12416,8 +12429,8 @@
         this.emitReserved("reconnect", e);
     }
   }
-  const ur = {};
-  function cr(e, t) {
+  const cr = {};
+  function dr(e, t) {
     "object" == typeof e && (t = e, e = void 0);
     const n = function (e, t = "", n) {
         let r = e;
@@ -12428,7 +12441,7 @@
             (e = "/" === e.charAt(1) ? n.protocol + e : n.host + e),
             /^(https?|wss?):\/\//.test(e) ||
             (e = void 0 !== n ? n.protocol + "//" + e : "https://" + e),
-            r = jn(e)),
+            r = zn(e)),
           r.port ||
           (/^(http|ws)$/.test(r.protocol)
             ? r.port = "80"
@@ -12443,24 +12456,24 @@
       r = n.source,
       a = n.id,
       o = n.path,
-      i = ur[a] && o in ur[a].nsps;
+      i = cr[a] && o in cr[a].nsps;
     let l;
     return t.forceNew || t["force new connection"] || !1 === t.multiplex || i
-      ? l = new sr(r, t)
-      : (ur[a] || (ur[a] = new sr(r, t)), l = ur[a]),
+      ? l = new ur(r, t)
+      : (cr[a] || (cr[a] = new ur(r, t)), l = cr[a]),
       n.query && !t.query && (t.query = n.queryKey),
       l.socket(n.path, t);
   }
-  Object.assign(cr, { Manager: sr, Socket: ir, io: cr, connect: cr });
-  let dr = null, fr = null, pr = !1;
-  const hr = (e) => {
-      dr && dr.emit("startGame", { room: e });
+  Object.assign(dr, { Manager: ur, Socket: lr, io: dr, connect: dr });
+  let fr = null, pr = null, hr = !1;
+  const mr = (e) => {
+      fr && fr.emit("startGame", { room: e });
     },
-    mr = (e) => {
-      dr && dr.emit("playerDead", { room: e });
+    gr = (e) => {
+      fr && fr.emit("playerDead", { room: e });
     };
-  var gr = a(848);
-  const vr = ({ onClose: e }) => {
+  var vr = a(848);
+  const yr = ({ onClose: e }) => {
       const t = N((e) => e.leaderboard),
         n = (0, i.useRef)(null),
         r = (0, i.useRef)(null);
@@ -12487,10 +12500,10 @@
             t && "function" == typeof t.focus && t.focus();
         };
       }, [e]),
-        (0, gr.jsx)("div", {
+        (0, vr.jsx)("div", {
           className: "lb-overlay",
           onClick: e,
-          children: (0, gr.jsxs)("div", {
+          children: (0, vr.jsxs)("div", {
             className: "lb-modal",
             ref: n,
             role: "dialog",
@@ -12498,41 +12511,41 @@
             "aria-labelledby": "lb-title",
             onClick: (e) => e.stopPropagation(),
             children: [
-              (0, gr.jsx)("button", {
+              (0, vr.jsx)("button", {
                 className: "lb-modal__close",
                 ref: r,
                 onClick: e,
                 "aria-label": "Close leaderboard",
-                children: (0, gr.jsx)("span", {
+                children: (0, vr.jsx)("span", {
                   "aria-hidden": "true",
                   children: "×",
                 }),
               }),
-              (0, gr.jsx)("h2", {
+              (0, vr.jsx)("h2", {
                 className: "lb-modal__title",
                 id: "lb-title",
                 children: "Leaderboard",
               }),
               0 === t.length
-                ? (0, gr.jsx)("p", {
+                ? (0, vr.jsx)("p", {
                   className: "lb-modal__empty",
                   children: "No scores yet. Be the first!",
                 })
-                : (0, gr.jsx)("div", {
+                : (0, vr.jsx)("div", {
                   children: t.map((e, t) =>
-                    (0, gr.jsxs)("div", {
+                    (0, vr.jsxs)("div", {
                       className: "lb-row " + (0 === t ? "lb-row--gold" : ""),
                       children: [
-                        (0, gr.jsxs)("div", {
+                        (0, vr.jsxs)("div", {
                           className: "lb-row__rank",
                           children: ["#", t + 1],
                         }),
-                        (0, gr.jsx)("div", {
+                        (0, vr.jsx)("div", {
                           className: "lb-row__name",
                           title: e.playerName,
                           children: e.playerName,
                         }),
-                        (0, gr.jsxs)("div", {
+                        (0, vr.jsxs)("div", {
                           className: "lb-row__score",
                           children: [e.score.toLocaleString(), " pts"],
                         }),
@@ -12544,7 +12557,7 @@
           }),
         });
     },
-    yr = () => {
+    br = () => {
       const e = N((e) => e.game.room),
         t = N((e) => e.game.players),
         n = N((e) => e.player.isHost),
@@ -12555,48 +12568,48 @@
       return (0, i.useEffect)(() => {
         a && u(!1);
       }, [a]),
-        (0, gr.jsxs)("div", {
+        (0, vr.jsxs)("div", {
           className: "screen",
           children: [
-            (0, gr.jsxs)("div", {
+            (0, vr.jsxs)("div", {
               className: "lobby",
               children: [
-                (0, gr.jsxs)("h1", {
+                (0, vr.jsxs)("h1", {
                   className: "brand",
                   children: [
-                    (0, gr.jsx)("span", {
+                    (0, vr.jsx)("span", {
                       className: "brand__accent",
                       children: "RED",
                     }),
                     " TETRIS",
                   ],
                 }),
-                (0, gr.jsxs)("div", {
+                (0, vr.jsxs)("div", {
                   className: "lobby__room",
                   children: [
-                    (0, gr.jsx)("p", {
+                    (0, vr.jsx)("p", {
                       className: "eyebrow",
                       children: "ROOM",
                     }),
-                    (0, gr.jsx)("p", {
+                    (0, vr.jsx)("p", {
                       className: "lobby__room-name",
                       children: e,
                     }),
                   ],
                 }),
-                (0, gr.jsxs)("div", {
+                (0, vr.jsxs)("div", {
                   className: "lobby__player-list",
                   children: [
-                    (0, gr.jsxs)("p", {
+                    (0, vr.jsxs)("p", {
                       className: "eyebrow",
                       children: ["Players (", t.length, ")"],
                     }),
                     t.map((e) =>
-                      (0, gr.jsxs)("div", {
+                      (0, vr.jsxs)("div", {
                         className: "lobby__player" +
                           (e.name === r ? " lobby__player--self" : ""),
                         children: [
-                          (0, gr.jsxs)("span", {
+                          (0, vr.jsxs)("span", {
                             className: "lobby__player-name" +
                               (e.name === r ? " lobby__player-name--self" : ""),
                             children: [
@@ -12606,7 +12619,7 @@
                             ],
                           }),
                           e.isHost &&
-                          (0, gr.jsx)("span", {
+                          (0, vr.jsx)("span", {
                             className: "lobby__badge",
                             children: "HOST",
                           }),
@@ -12615,25 +12628,25 @@
                     ),
                   ],
                 }),
-                (0, gr.jsx)("p", {
+                (0, vr.jsx)("p", {
                   className: "lobby__subtitle",
                   children: n
                     ? "You are the host. Start when everyone is ready."
                     : "Waiting for the host to start the game…",
                 }),
-                (0, gr.jsxs)("div", {
+                (0, vr.jsxs)("div", {
                   className: "lobby__actions",
                   children: [
-                    (0, gr.jsx)("button", {
+                    (0, vr.jsx)("button", {
                       id: "btn-start",
                       className: "btn btn--primary",
                       onClick: () => {
-                        s || (u(!0), hr(e));
+                        s || (u(!0), mr(e));
                       },
                       disabled: !n || 0 === t.length || s,
                       children: s ? "Starting…" : "Start Game",
                     }),
-                    (0, gr.jsx)("button", {
+                    (0, vr.jsx)("button", {
                       className: "btn btn--secondary",
                       onClick: () => l(!0),
                       children: "Leaderboard",
@@ -12642,11 +12655,11 @@
                 }),
               ],
             }),
-            o && (0, gr.jsx)(vr, { onClose: () => l(!1) }),
+            o && (0, vr.jsx)(yr, { onClose: () => l(!1) }),
           ],
         });
     },
-    br = (e, t, n) => {
+    wr = (e, t, n) => {
       if ("ghost" === t) {
         const t = K[e];
         return t && "empty" !== t && "penalty" !== t
@@ -12661,11 +12674,11 @@
         ? t ? `cell cell--${a} cell--${t}${r}` : `cell cell--${a}`
         : "cell cell--empty";
     },
-    wr = i.forwardRef(({ value: e, state: t, rising: n, id: r, style: a }, o) =>
-      (0, gr.jsx)("div", { id: r, ref: o, className: br(e, t, n), style: a })
+    kr = i.forwardRef(({ value: e, state: t, rising: n, id: r, style: a }, o) =>
+      (0, vr.jsx)("div", { id: r, ref: o, className: wr(e, t, n), style: a })
     ),
-    kr = i.memo(wr),
-    xr = ({ clearingRows: e }) => {
+    xr = i.memo(kr),
+    _r = ({ clearingRows: e }) => {
       const [t, n] = (0, i.useState)([]), r = (0, i.useRef)(0);
       return (0, i.useEffect)(() => {
         if (!e || 0 === e.length) return;
@@ -12688,11 +12701,11 @@
         const a = setTimeout(() => n([]), 700);
         return () => clearTimeout(a);
       }, [e]),
-        0 === t.length ? null : (0, gr.jsx)("div", {
+        0 === t.length ? null : (0, vr.jsx)("div", {
           className: "particles",
           "aria-hidden": "true",
           children: t.map((e) =>
-            (0, gr.jsx)("div", {
+            (0, vr.jsx)("div", {
               className: "particle",
               style: {
                 left: `${e.left}%`,
@@ -12708,13 +12721,13 @@
           ),
         });
     },
-    _r = i.memo(xr),
-    Sr = "cubic-bezier(0.16, 1, 0.3, 1)",
-    Er = () =>
+    Sr = i.memo(_r),
+    Er = "cubic-bezier(0.16, 1, 0.3, 1)",
+    Cr = () =>
       "undefined" != typeof window && "function" == typeof window.matchMedia &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    Cr = (e) => e && "function" == typeof e.animate,
-    Nr = (e, t, n) => {
+    Nr = (e) => e && "function" == typeof e.animate,
+    Tr = (e, t, n) => {
       const r = [];
       for (let a = 0; a < e.length; a++) {
         for (let o = 0; o < e[a].length; o++) {
@@ -12725,12 +12738,12 @@
       }
       return r;
     },
-    Tr = i.memo(({ board: e, cellRef: t, rising: n, riseSeq: r }) =>
+    Pr = i.memo(({ board: e, cellRef: t, rising: n, riseSeq: r }) =>
       e.map((e, a) =>
-        (0, gr.jsx)(i.Fragment, {
+        (0, vr.jsx)(i.Fragment, {
           children: e.map((e, o) => {
             const i = `cell-${a}-${o}`, l = n && 0 !== e;
-            return (0, gr.jsx)(kr, {
+            return (0, vr.jsx)(xr, {
               id: i,
               ref: t(i),
               value: e,
@@ -12741,7 +12754,7 @@
         }, a)
       )
     ),
-    Pr = (
+    Rr = (
       { clearingRows: e = [], lockingCells: t = [], dropTrail: n = null },
     ) => {
       const r = N((e) => e.player.board),
@@ -12754,13 +12767,13 @@
             if (!t || !t.shape) return [];
             const { shape: n, x: r, y: a, type: o } = t,
               i = Y[o],
-              l = Nr(n, r, a),
+              l = Tr(n, r, a),
               s = new Set(l.map((e) => `${e.y}-${e.x}`)),
-              u = oe(e, n, r, a);
+              u = ie(e, n, r, a);
             return [
               ...(u === a
                 ? []
-                : Nr(n, r, u).filter((t) =>
+                : Tr(n, r, u).filter((t) =>
                   0 === e[t.y][t.x] && !s.has(`${t.y}-${t.x}`)
                 )).map((e, t) => ({
                   ...e,
@@ -12798,10 +12811,10 @@
           if (t && t.length > 0) {
             t.map((e) => c.current.get(`cell-${e.y}-${e.x}`)).forEach(
               (e, t) => {
-                Cr(e) && !Er() &&
+                Nr(e) && !Cr() &&
                   e.animate([{ filter: "brightness(2.6)" }, {
                     filter: "brightness(1)",
-                  }], { duration: 160, delay: 8 * t, easing: Sr });
+                  }], { duration: 160, delay: 8 * t, easing: Er });
               },
             );
           }
@@ -12814,7 +12827,7 @@
                 (t, n) => c.current.get(`cell-${e}-${n}`),
               )
             ).forEach((e) => {
-              Cr(e) && !Er() &&
+              Nr(e) && !Cr() &&
                 e.animate([{
                   transform: "scaleX(1)",
                   opacity: 1,
@@ -12830,15 +12843,15 @@
                 }], { duration: 250, easing: "ease-in", fill: "none" });
             }),
               ((e, t, n) => {
-                if (n <= 0 || Er()) return;
+                if (n <= 0 || Cr()) return;
                 const r = n >= 4, a = r ? 440 : 260;
                 if (
-                  Cr(t) &&
+                  Nr(t) &&
                   t.animate([{ opacity: 0 }, {
                     opacity: r ? .5 : .07 * n,
                     offset: .12,
                   }, { opacity: 0 }], { duration: a, easing: "ease-out" }),
-                    Cr(e) && n > 1
+                    Nr(e) && n > 1
                 ) {
                   const t = r ? 9 : 2 * n;
                   e.animate([{ transform: "translate3d(0, 0, 0)" }, {
@@ -12852,13 +12865,13 @@
                     offset: .72,
                   }, { transform: "translate3d(0, 0, 0)" }], {
                     duration: a,
-                    easing: Sr,
+                    easing: Er,
                   });
                 }
               })(f.current, p.current, e.length);
           }
         }, [e]),
-        (0, gr.jsxs)("div", {
+        (0, vr.jsxs)("div", {
           className: `board${m.rows ? " board--penalty" : ""}${
             s ? " board--dead" : ""
           }`,
@@ -12867,16 +12880,16 @@
           role: "img",
           "aria-label": "Your board — 10 columns by 20 rows",
           children: [
-            (0, gr.jsx)("div", {
+            (0, vr.jsx)("div", {
               className: "board__flash",
               ref: p,
               "aria-hidden": "true",
             }),
-            (0, gr.jsx)("div", {
+            (0, vr.jsx)("div", {
               className: "board__surge",
               "aria-hidden": "true",
             }),
-            (0, gr.jsx)(Tr, {
+            (0, vr.jsx)(Pr, {
               board: r,
               cellRef: h,
               rising: m.rows > 0,
@@ -12884,7 +12897,7 @@
             }),
             n &&
             n.cols.map((e) =>
-              (0, gr.jsx)("div", {
+              (0, vr.jsx)("div", {
                 className: "drop-trail",
                 "aria-hidden": "true",
                 style: {
@@ -12895,32 +12908,32 @@
               }, `trail-${n.seq}-${e.x}`)
             ),
             u.map((e) =>
-              (0, gr.jsx)(kr, {
+              (0, vr.jsx)(xr, {
                 value: e.value,
                 state: e.state,
                 style: { gridColumn: e.x + 1, gridRow: e.y + 1 },
               }, e.key)
             ),
-            (0, gr.jsx)(_r, { clearingRows: e }),
+            (0, vr.jsx)(Sr, { clearingRows: e }),
           ],
         });
     },
-    Rr = i.memo(Pr),
-    Or = ({ name: e, spectrum: t, isAlive: n }) =>
-      (0, gr.jsxs)("div", {
+    Or = i.memo(Rr),
+    Lr = ({ name: e, spectrum: t, isAlive: n }) =>
+      (0, vr.jsxs)("div", {
         className: "opponent" + (n ? "" : " opponent--dead"),
         children: [
-          (0, gr.jsx)("div", {
+          (0, vr.jsx)("div", {
             className: "opponent__name",
             title: e,
             children: e,
           }),
-          (0, gr.jsx)("div", {
+          (0, vr.jsx)("div", {
             className: "opponent__spectrum",
             role: "img",
             "aria-label": `spectrum of ${e}`,
             children: t.map((e, t) =>
-              (0, gr.jsx)("div", {
+              (0, vr.jsx)("div", {
                 className: "opponent__bar",
                 style: { height: e / V * 100 + "%" },
               }, t)
@@ -12928,8 +12941,8 @@
           }),
         ],
       }),
-    Lr = i.memo(Or),
-    jr = () => {
+    jr = i.memo(Lr),
+    zr = () => {
       const e = S(),
         t = N((e) => e.game.winner),
         n = N((e) => e.game.room),
@@ -12943,37 +12956,37 @@
         s && c(!1);
       }, [s]);
       const d = o[l] || 0, f = t === l;
-      return (0, gr.jsx)("div", {
+      return (0, vr.jsx)("div", {
         className: "screen",
-        children: (0, gr.jsxs)("div", {
+        children: (0, vr.jsxs)("div", {
           className: "gameover",
           role: "status",
           children: [
-            (0, gr.jsx)("h1", {
+            (0, vr.jsx)("h1", {
               className: "gameover__title",
               children: "GAME OVER",
             }),
-            (0, gr.jsxs)("div", {
+            (0, vr.jsxs)("div", {
               children: [
-                (0, gr.jsx)("p", {
+                (0, vr.jsx)("p", {
                   className: "gameover__winner",
                   children: t
-                    ? (0, gr.jsxs)(gr.Fragment, {
+                    ? (0, vr.jsxs)(vr.Fragment, {
                       children: [
-                        (0, gr.jsx)("strong", { children: t }),
+                        (0, vr.jsx)("strong", { children: t }),
                         " wins!",
                       ],
                     })
                     : "No winner this round.",
                 }),
-                (0, gr.jsxs)("div", {
+                (0, vr.jsxs)("div", {
                   className: "gameover__scoreblock",
                   children: [
-                    (0, gr.jsx)("p", {
+                    (0, vr.jsx)("p", {
                       className: "eyebrow",
                       children: "YOUR FINAL SCORE",
                     }),
-                    (0, gr.jsx)("p", {
+                    (0, vr.jsx)("p", {
                       className: "gameover__score " +
                         (f
                           ? "gameover__score--winner"
@@ -12984,28 +12997,28 @@
                 }),
               ],
             }),
-            r && (0, gr.jsx)("button", {
+            r && (0, vr.jsx)("button", {
               id: "btn-restart",
               className: "btn btn--primary",
               onClick: () => {
                 u ||
                   (c(!0),
                     e({ type: F }),
-                    e({ type: de }),
-                    e(ke(
+                    e({ type: fe }),
+                    e(xe(
                       a.map((e) => ({
                         ...e,
                         isAlive: !0,
                         spectrum: Array(H).fill(0),
                       })),
                     )),
-                    hr(n));
+                    mr(n));
               },
               disabled: u,
               children: u ? "Starting…" : "Play Again",
             }),
             !r &&
-            (0, gr.jsx)("p", {
+            (0, vr.jsx)("p", {
               className: "gameover__wait",
               children: "Waiting for host to restart…",
             }),
@@ -13013,7 +13026,7 @@
         }),
       });
     },
-    zr = ({ label: e, type: t, spent: n = !1 }) => {
+    Ar = ({ label: e, type: t, spent: n = !1 }) => {
       const r = ((e) => {
         const t = Array.from({ length: 4 }, () => Array(4).fill(0));
         if (!e || !W[e]) return t;
@@ -13027,19 +13040,19 @@
         }),
           t;
       })(t);
-      return (0, gr.jsxs)("div", {
+      return (0, vr.jsxs)("div", {
         className: "preview" + (n ? " preview--spent" : ""),
         children: [
-          (0, gr.jsx)("p", { className: "preview__label", children: e }),
-          (0, gr.jsx)("div", {
+          (0, vr.jsx)("p", { className: "preview__label", children: e }),
+          (0, vr.jsx)("div", {
             className: "preview__grid",
             role: "img",
             "aria-label": t ? `${e}: ${t} piece` : `${e}: empty`,
             children: r.map((e, t) =>
-              (0, gr.jsx)("div", {
+              (0, vr.jsx)("div", {
                 className: "preview__row",
                 children: e.map((e, n) =>
-                  (0, gr.jsx)(kr, { value: e }, `${t}-${n}`)
+                  (0, vr.jsx)(xr, { value: e }, `${t}-${n}`)
                 ),
               }, t)
             ),
@@ -13047,34 +13060,34 @@
         ],
       });
     },
-    Ar = i.memo(zr),
-    Mr = () => {
+    Mr = i.memo(Ar),
+    Ir = () => {
       const e = N((e) => e.player.nextPieceType);
-      return (0, gr.jsx)(Ar, { label: "Next", type: e });
+      return (0, vr.jsx)(Mr, { label: "Next", type: e });
     },
-    Ir = i.memo(Mr),
-    Dr = () => {
+    Dr = i.memo(Ir),
+    Fr = () => {
       const e = N((e) => e.player.holdPieceType),
         t = N((e) => e.player.canHold);
-      return (0, gr.jsx)(Ar, { label: "Hold", type: e, spent: !t });
+      return (0, vr.jsx)(Mr, { label: "Hold", type: e, spent: !t });
     },
-    Fr = i.memo(Dr),
+    Ur = i.memo(Fr),
     Br = ({ label: e, value: t, flash: n = !1, strong: r = !1, title: a }) =>
-      (0, gr.jsxs)("div", {
+      (0, vr.jsxs)("div", {
         className: "stat" + (r ? " stat--strong" : ""),
         children: [
-          (0, gr.jsx)("span", {
+          (0, vr.jsx)("span", {
             className: "stat__label",
             title: a,
             children: e,
           }),
-          (0, gr.jsx)("span", {
+          (0, vr.jsx)("span", {
             className: "stat__value" + (n ? " stat__value--flash" : ""),
             children: t,
           }),
         ],
       }),
-    Ur = ({ level: e = 1, lines: t = 0 }) => {
+    $r = ({ level: e = 1, lines: t = 0 }) => {
       const n = N((e) => e.scores),
         r = N((e) => e.player.name),
         a = N((e) => e.opponents),
@@ -13098,26 +13111,26 @@
           const e = setTimeout(() => f(!1), 200);
           return () => clearTimeout(e);
         }, [s]),
-        (0, gr.jsxs)("div", {
+        (0, vr.jsxs)("div", {
           className: "score-panel",
           children: [
-            (0, gr.jsxs)("div", {
+            (0, vr.jsxs)("div", {
               className: "score-panel__group",
               children: [
-                (0, gr.jsx)(Br, {
+                (0, vr.jsx)(Br, {
                   label: "Score",
                   value: o.toLocaleString(),
                   flash: u,
                   strong: !0,
                 }),
-                (0, gr.jsx)(Br, { label: "Lines", value: t }),
-                (0, gr.jsx)(Br, { label: "Level", value: e }),
+                (0, vr.jsx)(Br, { label: "Lines", value: t }),
+                (0, vr.jsx)(Br, { label: "Level", value: e }),
               ],
             }),
             l &&
-            (0, gr.jsx)("div", {
+            (0, vr.jsx)("div", {
               className: "score-panel__group score-panel__group--rival",
-              children: (0, gr.jsx)(Br, {
+              children: (0, vr.jsx)(Br, {
                 label: l.name,
                 title: l.name,
                 value: s.toLocaleString(),
@@ -13127,8 +13140,8 @@
           ],
         });
     },
-    $r = i.memo(Ur),
-    qr = [
+    qr = i.memo($r),
+    Hr = [
       [["←", "→"], "Move"],
       [["↓"], "Soft drop"],
       [["Space"], "Hard drop"],
@@ -13136,7 +13149,7 @@
       [["Z"], "Rotate CCW"],
       [["C"], "Hold"],
     ],
-    Hr = () => {
+    Vr = () => {
       const e = S(),
         t = N((e) => e.game.room),
         n = N((e) => e.game.started),
@@ -13185,8 +13198,8 @@
         I = (0, i.useRef)(null),
         D = (0, i.useRef)(null),
         F = (0, i.useRef)(null),
-        B = (0, i.useRef)(!0),
-        U = (0, i.useRef)(t),
+        U = (0, i.useRef)(!0),
+        B = (0, i.useRef)(t),
         $ = (0, i.useRef)(c),
         q = (0, i.useRef)(0),
         Q = (0, i.useRef)(!1),
@@ -13205,10 +13218,10 @@
           F.current = s;
         }, [s]),
         (0, i.useEffect)(() => {
-          B.current = u;
+          U.current = u;
         }, [u]),
         (0, i.useEffect)(() => {
-          U.current = t;
+          B.current = t;
         }, [t]),
         (0, i.useEffect)(() => {
           $.current = c;
@@ -13221,9 +13234,9 @@
       (0, i.useEffect)(() => ee, [ee]),
         (0, i.useEffect)(() => {
           d && K && !E.current && ((e, t) => {
-            dr && dr.emit("updateSpectrum", { room: e, spectrum: t });
+            fr && fr.emit("updateSpectrum", { room: e, spectrum: t });
           })(
-            U.current,
+            B.current,
             ((e) => {
               const t = Array(H).fill(0);
               for (let n = 0; n < H; n++) {
@@ -13240,25 +13253,26 @@
         }, [K, d]),
         (0, i.useEffect)(() => {
           d && K && X && X.shape &&
-            (te(K, X.shape, X.x, X.y) || (e(me()), mr(U.current)));
+            (te(K, X.shape, X.x, X.y) || (e(ge()), gr(B.current)));
         }, [K, X, d, e]);
-      const ne = (0, i.useCallback)((t) => {
+      const re = (0, i.useCallback)((t) => {
           const n = D.current, r = t || M.current;
           if (!n || !r) return !1;
+          ee(), Z.current = 0;
           const a = { type: n, shape: W[n].shape, x: J[n], y: 0, rot: 0 };
           return te(r, a.shape, a.x, a.y)
             ? (q.current = 0,
               Q.current = !1,
               w((e) => e + 1),
               e({ type: "SET_PIECE", payload: a }),
-              e(fe({ canHold: !0 })),
+              e(pe({ canHold: !0 })),
               ((e) => {
-                dr && dr.emit("requestNextPiece", { room: e });
-              })(U.current),
+                fr && fr.emit("requestNextPiece", { room: e });
+              })(B.current),
               !0)
-            : (e(me()), mr(U.current), !1);
-        }, [e]),
-        re = (0, i.useCallback)((t, n) => {
+            : (e(ge()), gr(B.current), !1);
+        }, [e, ee]),
+        ae = (0, i.useCallback)((t, n) => {
           const r = t || I.current, a = M.current;
           if (!r || !r.shape || !a) return;
           ee(), Z.current = 0;
@@ -13291,55 +13305,42 @@
               }
               return o;
             })(a, o, i, l, Y[s]),
-            { newBoard: f, linesCleared: p, clearedIndexes: m } = ((e) => {
-              const t = [], n = [];
-              for (let r = 0; r < e.length; r++) {
-                const a = e[r], o = a.every((e) => 0 !== e), i = a.includes(8);
-                o && !i ? t.push(r) : n.push(a);
-              }
-              const r = t.length;
-              return {
-                newBoard: [
-                  ...Array.from({ length: r }, () => Array(H).fill(0)),
-                  ...n,
-                ],
-                linesCleared: r,
-                clearedIndexes: t,
-              };
-            })(d),
-            v = void 0 !== n;
+            { linesCleared: f, clearedIndexes: p } = ne(d),
+            m = void 0 !== n;
           ((e, t) => {
-            dr && dr.emit("pieceLocked", { room: e, ...t });
-          })(U.current, {
-            lines: p,
+            fr && fr.emit("pieceLocked", { room: e, ...t });
+          })(B.current, {
+            lines: f,
             tSpin: c,
-            dropCells: v ? n : q.current,
-            hardDrop: v,
+            dropCells: m ? n : q.current,
+            hardDrop: m,
           }),
-            p > 0
-              ? (e(fe({ lines: $.current + p })),
+            f > 0
+              ? (e(pe({ lines: $.current + f })),
                 E.current = !0,
-                h(m),
-                e(pe(d)),
+                h(p),
+                e(he(d)),
                 e({ type: "SET_PIECE", payload: null }),
                 _.current = setTimeout(() => {
-                  E.current = !1, h([]), e(pe(f)), ne(f);
+                  E.current = !1, h([]);
+                  const { newBoard: t } = ne(M.current || d);
+                  e(he(t)), re(t);
                 }, 300))
-              : (e(pe(d)), ne(d));
-        }, [e, ee, ne]),
-        ie = (0, i.useCallback)(() => {
+              : (e(he(d)), re(d));
+        }, [e, ee, re]),
+        le = (0, i.useCallback)(() => {
           G.current || (G.current = setTimeout(() => {
-            G.current = null, re();
+            G.current = null, ae();
           }, 500));
-        }, [re]),
-        le = (0, i.useCallback)((e) => {
+        }, [ae]),
+        se = (0, i.useCallback)((e) => {
           const t = M.current;
           t &&
             (te(t, e.shape, e.x, e.y + 1)
               ? (ee(), Z.current = 0)
-              : Z.current < 15 && (Z.current++, ee(), ie()));
-        }, [ee, ie]),
-        se = (0, i.useCallback)(() => {
+              : Z.current < 15 && (Z.current++, ee(), le()));
+        }, [ee, le]),
+        ue = (0, i.useCallback)(() => {
           const t = I.current, n = M.current;
           if (!t || !t.shape || !n) return;
           const r = t.y + 1;
@@ -13348,8 +13349,8 @@
               Q.current = !1,
               ee(),
               Z.current = 0)
-            : ie();
-        }, [e, ie, ee]);
+            : le();
+        }, [e, le, ee]);
       ((e, t, n, r) => {
         const a = (0, i.useRef)(n);
         (0, i.useEffect)(() => {
@@ -13371,27 +13372,27 @@
             Math.round((.8 - .007 * (t - 1)) ** (t - 1) * 1e3),
           );
         })(f),
-        se,
+        ue,
         b,
       );
-      const ue = (0, i.useCallback)((t) => {
+      const ce = (0, i.useCallback)((t) => {
           const n = I.current, r = M.current;
           if (n && r && te(r, n.shape, n.x + t, n.y)) {
             const r = { ...n, x: n.x + t };
-            Q.current = !1, e({ type: "SET_PIECE", payload: r }), le(r);
+            Q.current = !1, e({ type: "SET_PIECE", payload: r }), se(r);
           }
-        }, [e, le]),
-        ce = (0, i.useCallback)(() => ue(-1), [ue]),
-        de = (0, i.useCallback)(() => ue(1), [ue]),
-        he = (0, i.useCallback)((t) => {
+        }, [e, se]),
+        de = (0, i.useCallback)(() => ce(-1), [ce]),
+        fe = (0, i.useCallback)(() => ce(1), [ce]),
+        me = (0, i.useCallback)((t) => {
           const n = I.current, r = M.current;
           if (!n || !r) return;
-          const a = ae(r, n, t);
-          a && (Q.current = !0, e({ type: "SET_PIECE", payload: a }), le(a));
-        }, [e, le]),
-        ge = (0, i.useCallback)(() => he(1), [he]),
-        ve = (0, i.useCallback)(() => he(-1), [he]),
-        ye = (0, i.useCallback)(() => {
+          const a = oe(r, n, t);
+          a && (Q.current = !0, e({ type: "SET_PIECE", payload: a }), se(a));
+        }, [e, se]),
+        ve = (0, i.useCallback)(() => me(1), [me]),
+        ye = (0, i.useCallback)(() => me(-1), [me]),
+        be = (0, i.useCallback)(() => {
           const t = I.current, n = M.current;
           if (!t || !n) return;
           const r = t.y + 1;
@@ -13400,12 +13401,12 @@
               Q.current = !1,
               e({ type: "SET_PIECE", payload: { ...t, y: r } }),
               ee())
-            : ie();
-        }, [e, ee, ie]),
-        be = (0, i.useCallback)(() => {
+            : le();
+        }, [e, ee, le]),
+        we = (0, i.useCallback)(() => {
           const t = I.current, n = M.current;
           if (!t || !n) return;
-          const r = oe(n, t.shape, t.x, t.y);
+          const r = ie(n, t.shape, t.x, t.y);
           r > t.y && (k.current += 1,
             y(((e, t, n) => {
               const { shape: r, x: a, y: o, type: i } = e, l = [];
@@ -13422,24 +13423,26 @@
             clearTimeout(x.current),
             x.current = setTimeout(() => y(null), 220));
           const a = { ...t, y: r };
-          e({ type: "SET_PIECE", payload: a }), re(a, r - t.y);
-        }, [e, re]),
-        we = (0, i.useCallback)(() => {
+          e({ type: "SET_PIECE", payload: a }), ae(a, r - t.y);
+        }, [e, ae]),
+        ke = (0, i.useCallback)(() => {
           const t = I.current, n = M.current;
-          if (!t || !n || !B.current) return;
+          if (!t || !n || !U.current) return;
           if (!F.current) {
-            return void (ne(n) &&
-              e(fe({ holdPieceType: t.type, canHold: !1 })));
+            return void (re(n) &&
+              e(pe({ holdPieceType: t.type, canHold: !1 })));
           }
           const r = F.current,
             a = { type: r, shape: W[r].shape, x: J[r], y: 0, rot: 0 };
-          if (!te(n, a.shape, a.x, a.y)) return e(me()), void mr(U.current);
-          q.current = 0,
+          if (!te(n, a.shape, a.x, a.y)) return e(ge()), void gr(B.current);
+          ee(),
+            Z.current = 0,
+            q.current = 0,
             Q.current = !1,
             w((e) => e + 1),
-            e(fe({ holdPieceType: t.type, canHold: !1 })),
+            e(pe({ holdPieceType: t.type, canHold: !1 })),
             e({ type: "SET_PIECE", payload: a });
-        }, [e, ne]);
+        }, [e, re, ee]);
       return (0, i.useEffect)(() => {
         if (!d) return;
         const e = {},
@@ -13459,29 +13462,29 @@
             if (!e.repeat) {
               switch (e.key) {
                 case "ArrowLeft":
-                  e.preventDefault(), t("left", ce);
+                  e.preventDefault(), t("left", de);
                   break;
                 case "ArrowRight":
-                  e.preventDefault(), t("right", de);
+                  e.preventDefault(), t("right", fe);
                   break;
                 case "ArrowDown":
-                  e.preventDefault(), t("down", ye);
+                  e.preventDefault(), t("down", be);
                   break;
                 case "ArrowUp":
                 case "x":
                 case "X":
-                  e.preventDefault(), ge();
+                  e.preventDefault(), ve();
                   break;
                 case "z":
                 case "Z":
-                  e.preventDefault(), ve();
+                  e.preventDefault(), ye();
                   break;
                 case " ":
-                  e.preventDefault(), be();
+                  e.preventDefault(), we();
                   break;
                 case "c":
                 case "C":
-                  e.preventDefault(), we();
+                  e.preventDefault(), ke();
               }
             }
           },
@@ -13504,49 +13507,49 @@
                 clearTimeout(e), clearInterval(e);
               });
           };
-      }, [d, ce, de, ge, ve, ye, be, we]),
-        r ? (0, gr.jsx)(jr, {}) : (0, gr.jsxs)("div", {
+      }, [d, de, fe, ve, ye, be, we, ke]),
+        r ? (0, vr.jsx)(zr, {}) : (0, vr.jsxs)("div", {
           className: "game-layout",
           children: [
-            (0, gr.jsx)("p", {
+            (0, vr.jsx)("p", {
               className: "sr-only",
               "aria-live": "polite",
               "aria-atomic": "true",
               children: R,
             }),
-            (0, gr.jsxs)("section", {
+            (0, vr.jsxs)("section", {
               className: "game-stage",
               children: [
-                (0, gr.jsx)($r, { level: f, lines: c }),
-                (0, gr.jsx)(Rr, {
+                (0, vr.jsx)(qr, { level: f, lines: c }),
+                (0, vr.jsx)(Or, {
                   clearingRows: p,
                   lockingCells: m,
                   dropTrail: v,
                 }),
               ],
             }),
-            (0, gr.jsx)("div", {
+            (0, vr.jsx)("div", {
               className: "game-hold",
-              children: (0, gr.jsx)(Fr, {}),
+              children: (0, vr.jsx)(Ur, {}),
             }),
-            (0, gr.jsx)("div", {
+            (0, vr.jsx)("div", {
               className: "game-next",
-              children: (0, gr.jsx)(Ir, {}),
+              children: (0, vr.jsx)(Dr, {}),
             }),
-            (0, gr.jsxs)("aside", {
+            (0, vr.jsxs)("aside", {
               className: "game-foes",
               children: [
-                o.length > 0 && (0, gr.jsxs)("div", {
+                o.length > 0 && (0, vr.jsxs)("div", {
                   className: "game-foes__group",
                   children: [
-                    (0, gr.jsx)("p", {
+                    (0, vr.jsx)("p", {
                       className: "eyebrow",
                       children: "Opponents",
                     }),
-                    (0, gr.jsx)("div", {
+                    (0, vr.jsx)("div", {
                       className: "opponents-stack",
                       children: o.map((e) =>
-                        (0, gr.jsx)(Lr, {
+                        (0, vr.jsx)(jr, {
                           name: e.name,
                           spectrum: e.spectrum,
                           isAlive: e.isAlive,
@@ -13555,15 +13558,15 @@
                     }),
                   ],
                 }),
-                !a && (0, gr.jsxs)("div", {
+                !a && (0, vr.jsxs)("div", {
                   className: "panel eliminated",
                   role: "status",
                   children: [
-                    (0, gr.jsx)("p", {
+                    (0, vr.jsx)("p", {
                       className: "eliminated__title",
                       children: "ELIMINATED",
                     }),
-                    (0, gr.jsx)("p", {
+                    (0, vr.jsx)("p", {
                       className: "eliminated__hint",
                       children: "Watching game…",
                     }),
@@ -13571,31 +13574,31 @@
                 }),
               ],
             }),
-            (0, gr.jsxs)("div", {
+            (0, vr.jsxs)("div", {
               className: "game-meta",
               children: [
-                (0, gr.jsx)("p", {
+                (0, vr.jsx)("p", {
                   className: "sr-only",
                   id: "controls-title",
                   children: "Keyboard controls",
                 }),
-                (0, gr.jsx)("dl", {
+                (0, vr.jsx)("dl", {
                   className: "controls",
                   "aria-labelledby": "controls-title",
-                  children: qr.map(([e, t]) =>
-                    (0, gr.jsxs)("div", {
+                  children: Hr.map(([e, t]) =>
+                    (0, vr.jsxs)("div", {
                       className: "controls__row",
                       children: [
-                        (0, gr.jsx)("dt", {
+                        (0, vr.jsx)("dt", {
                           className: "controls__keys",
                           children: e.map((e) =>
-                            (0, gr.jsx)("kbd", {
+                            (0, vr.jsx)("kbd", {
                               className: "controls__key",
                               children: e,
                             }, e)
                           ),
                         }),
-                        (0, gr.jsx)("dd", {
+                        (0, vr.jsx)("dd", {
                           className: "controls__action",
                           children: t,
                         }),
@@ -13603,30 +13606,30 @@
                     }, t)
                   ),
                 }),
-                (0, gr.jsxs)("dl", {
+                (0, vr.jsxs)("dl", {
                   className: "game-meta__facts",
                   children: [
-                    (0, gr.jsxs)("div", {
+                    (0, vr.jsxs)("div", {
                       className: "game-meta__fact",
                       children: [
-                        (0, gr.jsx)("dt", {
+                        (0, vr.jsx)("dt", {
                           className: "game-meta__key",
                           children: "Room",
                         }),
-                        (0, gr.jsx)("dd", {
+                        (0, vr.jsx)("dd", {
                           className: "game-meta__value",
                           children: t,
                         }),
                       ],
                     }),
-                    0 === o.length && (0, gr.jsxs)("div", {
+                    0 === o.length && (0, vr.jsxs)("div", {
                       className: "game-meta__fact",
                       children: [
-                        (0, gr.jsx)("dt", {
+                        (0, vr.jsx)("dt", {
                           className: "game-meta__key",
                           children: "Mode",
                         }),
-                        (0, gr.jsx)("dd", {
+                        (0, vr.jsx)("dd", {
                           className: "game-meta__value",
                           children: "Solo",
                         }),
@@ -13639,9 +13642,9 @@
           ],
         });
     },
-    Vr = () => {
+    Wr = () => {
       const { room: e, playerName: t } = function () {
-          let { matches: e } = i.useContext(mt), t = e[e.length - 1];
+          let { matches: e } = i.useContext(gt), t = e[e.length - 1];
           return t ? t.params : {};
         }(),
         n = S(),
@@ -13652,23 +13655,23 @@
       if (
         (0, i.useEffect)(() => {
           ((e) => {
-            dr ||
-              (dr = cr(window.location.origin, { transports: ["websocket"] }),
-                dr.on("connect", () => {
-                  e($(!0)), pr && fr && (pr = !1, dr.emit("joinGame", fr));
+            fr ||
+              (fr = dr(window.location.origin, { transports: ["websocket"] }),
+                fr.on("connect", () => {
+                  e($(!0)), hr && pr && (hr = !1, fr.emit("joinGame", pr));
                 }),
-                dr.on("disconnect", () => {
+                fr.on("disconnect", () => {
                   e($(!1));
                 }),
-                dr.on("gameJoined", (t) => {
-                  pr = !0, e(((e) => ({ type: z, payload: e }))(t));
+                fr.on("gameJoined", (t) => {
+                  hr = !0, e(((e) => ({ type: z, payload: e }))(t));
                   const n = t.players.find((e) => e.name === t.playerName);
-                  e(fe({
+                  e(pe({
                     name: t.playerName,
                     isHost: t.isHost,
                     isAlive: !n || n.isAlive,
                   })),
-                    e(ke(
+                    e(xe(
                       t.players.filter((e) => e.name !== t.playerName).map(
                         (e) => ({
                           name: e.name,
@@ -13678,65 +13681,65 @@
                       ),
                     ));
                 }),
-                dr.on("playerJoined", (t) => {
+                fr.on("playerJoined", (t) => {
                   e(((e) => ({ type: A, payload: e }))(t)),
-                    e(((e) => ({ type: we, payload: e }))({
+                    e(((e) => ({ type: ke, payload: e }))({
                       name: t.playerName,
                       isAlive: t.isAlive,
                     }));
                 }),
-                dr.on("playerLeft", (t) => {
+                fr.on("playerLeft", (t) => {
                   e(((e) => ({ type: M, payload: e }))(t));
                 }),
-                dr.on("gameStarted", (t) => {
-                  e(((e) => ({ type: I, payload: e }))(t)), e(he(t));
+                fr.on("gameStarted", (t) => {
+                  e(((e) => ({ type: I, payload: e }))(t)), e(me(t));
                 }),
-                dr.on("newPiece", (t) => {
-                  e(he(t));
+                fr.on("newPiece", (t) => {
+                  e(me(t));
                 }),
-                dr.on("updateSpectrum", (t) => {
-                  e(((e) => ({ type: ye, payload: e }))(t));
+                fr.on("updateSpectrum", (t) => {
+                  e(((e) => ({ type: be, payload: e }))(t));
                 }),
-                dr.on("opponentDead", ({ playerName: t }) => {
-                  e({ type: be, payload: t });
+                fr.on("opponentDead", ({ playerName: t }) => {
+                  e({ type: we, payload: t });
                 }),
-                dr.on("addPenalty", ({ lines: t }) => {
-                  e(((e) => ({ type: ue, payload: e }))(t));
+                fr.on("addPenalty", ({ lines: t }) => {
+                  e(((e) => ({ type: ce, payload: e }))(t));
                 }),
-                dr.on("gameOver", (t) => {
+                fr.on("gameOver", (t) => {
                   e(((e) => ({ type: D, payload: e }))(t));
                 }),
-                dr.on("score:update", (t) => {
-                  e(((e) => ({ type: _e, payload: e }))(t));
+                fr.on("score:update", (t) => {
+                  e(((e) => ({ type: Se, payload: e }))(t));
                 }),
-                dr.on("leaderboard:update", (t) => {
-                  e(((e) => ({ type: Ee, payload: e }))(t));
+                fr.on("leaderboard:update", (t) => {
+                  e(((e) => ({ type: Ce, payload: e }))(t));
                 }),
-                dr.on("error", ({ message: t }) => {
-                  e(((e) => ({ type: B, payload: { message: e } }))(t));
+                fr.on("error", ({ message: t }) => {
+                  e(((e) => ({ type: U, payload: { message: e } }))(t));
                 }));
           })(n),
             ((e, t) => {
-              fr = { room: e, playerName: t }, dr && dr.emit("joinGame", fr);
+              pr = { room: e, playerName: t }, fr && fr.emit("joinGame", pr);
             })(e, t);
         }, [e, t, n]), o && !a
       ) {
-        return (0, gr.jsx)("div", {
+        return (0, vr.jsx)("div", {
           className: "screen",
-          children: (0, gr.jsxs)("div", {
+          children: (0, vr.jsxs)("div", {
             className: "lobby home",
             children: [
-              (0, gr.jsxs)("h1", {
+              (0, vr.jsxs)("h1", {
                 className: "brand",
                 children: [
-                  (0, gr.jsx)("span", {
+                  (0, vr.jsx)("span", {
                     className: "brand__accent",
                     children: "RED",
                   }),
                   " TETRIS",
                 ],
               }),
-              (0, gr.jsx)("p", {
+              (0, vr.jsx)("p", {
                 className: "screen__hint",
                 role: "alert",
                 children: o,
@@ -13746,9 +13749,9 @@
         });
       }
       if (!a) {
-        return (0, gr.jsx)("div", {
+        return (0, vr.jsx)("div", {
           className: "screen",
-          children: (0, gr.jsx)("p", {
+          children: (0, vr.jsx)("p", {
             className: "screen__hint",
             role: "status",
             children: "Connecting…",
@@ -13756,39 +13759,39 @@
         });
       }
       const s = l ? o : "Connection lost. Reconnecting…";
-      return (0, gr.jsxs)(gr.Fragment, {
+      return (0, vr.jsxs)(vr.Fragment, {
         children: [
           s &&
-          (0, gr.jsx)("p", {
+          (0, vr.jsx)("p", {
             className: "notice",
             role: "status",
             children: s,
           }),
-          r ? (0, gr.jsx)(Hr, {}) : (0, gr.jsx)(yr, {}),
+          r ? (0, vr.jsx)(Vr, {}) : (0, vr.jsx)(br, {}),
         ],
       });
     },
-    Wr = () =>
-      (0, gr.jsx)("div", {
+    Qr = () =>
+      (0, vr.jsx)("div", {
         className: "screen",
-        children: (0, gr.jsxs)("div", {
+        children: (0, vr.jsxs)("div", {
           className: "lobby home",
           children: [
-            (0, gr.jsxs)("h1", {
+            (0, vr.jsxs)("h1", {
               className: "brand",
               children: [
-                (0, gr.jsx)("span", {
+                (0, vr.jsx)("span", {
                   className: "brand__accent",
                   children: "RED",
                 }),
                 " TETRIS",
               ],
             }),
-            (0, gr.jsxs)("p", {
+            (0, vr.jsxs)("p", {
               className: "lobby__subtitle",
               children: [
                 "Navigate to ",
-                (0, gr.jsx)("strong", {
+                (0, vr.jsx)("strong", {
                   className: "home__link",
                   children: "/:room/:playerName",
                 }),
@@ -13796,11 +13799,11 @@
                 "to start.",
               ],
             }),
-            (0, gr.jsxs)("p", {
+            (0, vr.jsxs)("p", {
               className: "home__example",
               children: [
                 "Example → ",
-                (0, gr.jsx)("a", {
+                (0, vr.jsx)("a", {
                   className: "home__link",
                   href: "/arena/alice",
                   children: "/arena/alice",
@@ -13810,51 +13813,51 @@
           ],
         }),
       }),
-    Qr = () =>
-      (0, gr.jsx)("main", {
+    Kr = () =>
+      (0, vr.jsx)("main", {
         className: "app-main",
-        children: (0, gr.jsxs)(jt, {
+        children: (0, vr.jsxs)(zt, {
           children: [
-            (0, gr.jsx)(Ot, {
+            (0, vr.jsx)(Lt, {
               path: "/:room/:playerName",
-              element: (0, gr.jsx)(Vr, {}),
+              element: (0, vr.jsx)(Wr, {}),
             }),
-            (0, gr.jsx)(Ot, { path: "/", element: (0, gr.jsx)(Wr, {}) }),
-            (0, gr.jsx)(Ot, {
+            (0, vr.jsx)(Lt, { path: "/", element: (0, vr.jsx)(Qr, {}) }),
+            (0, vr.jsx)(Lt, {
               path: "*",
-              element: (0, gr.jsx)(Rt, { to: "/", replace: !0 }),
+              element: (0, vr.jsx)(Ot, { to: "/", replace: !0 }),
             }),
           ],
         }),
       }),
-    Kr = () =>
-      (0, gr.jsx)(Dt, {
+    Yr = () =>
+      (0, vr.jsx)(Ft, {
         future: { v7_startTransition: !0, v7_relativeSplatPath: !0 },
-        children: (0, gr.jsx)(Qr, {}),
+        children: (0, vr.jsx)(Kr, {}),
       });
-  var Yr = a(72),
-    Jr = a.n(Yr),
-    Xr = a(825),
-    Gr = a.n(Xr),
-    Zr = a(659),
-    ea = a.n(Zr),
-    ta = a(56),
-    na = a.n(ta),
-    ra = a(159),
-    aa = a.n(ra),
-    oa = a(113),
-    ia = a.n(oa),
-    la = a(507),
-    sa = {};
-  sa.styleTagTransform = ia(),
-    sa.setAttributes = na(),
-    sa.insert = ea().bind(null, "head"),
-    sa.domAPI = Gr(),
-    sa.insertStyleElement = aa(),
-    Jr()(la.A, sa),
-    la.A && la.A.locals && la.A.locals;
-  const ua = document.getElementById("root");
-  (0, s.H)(ua).render(
-    (0, gr.jsx)(y, { store: Ne, children: (0, gr.jsx)(Kr, {}) }),
+  var Jr = a(72),
+    Xr = a.n(Jr),
+    Gr = a(825),
+    Zr = a.n(Gr),
+    ea = a(659),
+    ta = a.n(ea),
+    na = a(56),
+    ra = a.n(na),
+    aa = a(159),
+    oa = a.n(aa),
+    ia = a(113),
+    la = a.n(ia),
+    sa = a(507),
+    ua = {};
+  ua.styleTagTransform = la(),
+    ua.setAttributes = ra(),
+    ua.insert = ta().bind(null, "head"),
+    ua.domAPI = Zr(),
+    ua.insertStyleElement = oa(),
+    Xr()(sa.A, ua),
+    sa.A && sa.A.locals && sa.A.locals;
+  const ca = document.getElementById("root");
+  (0, s.H)(ca).render(
+    (0, vr.jsx)(y, { store: Te, children: (0, vr.jsx)(Yr, {}) }),
   );
 })();

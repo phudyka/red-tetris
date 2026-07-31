@@ -17,6 +17,10 @@ class Game {
     this.pieces = []; // number[] — séquence commune (500 pièces)
     this.started = false;
     this.over = false;
+    // Effectif au coup d'envoi. `players.length` ne suffit pas à distinguer un
+    // solo d'un duel dont l'adversaire a fermé son onglet : dans les deux cas il
+    // ne reste qu'un joueur, mais seul le second a un vainqueur.
+    this.startedWith = 0;
   }
 
   // ── Joueurs ────────────────────────────────────────────────────────────────
@@ -55,6 +59,7 @@ class Game {
   start() {
     this.started = true;
     this.over = false;
+    this.startedWith = this.players.length;
     this.pieces = generatePieceSequence(SEQUENCE_CHUNK);
     this.players.forEach((p) => p.reset());
   }
@@ -92,17 +97,12 @@ class Game {
    * @returns {Player|null}  Le gagnant s'il n'en reste qu'un, null sinon
    */
   checkWinCondition() {
+    // Un seul survivant d'une partie lancée à plusieurs gagne — que les autres
+    // soient morts ou partis. En solo (startedWith === 1) il n'y a jamais de
+    // vainqueur : l'appelant termine la partie quand plus personne n'est en vie.
     const alive = this.getAlivePlayers();
-    if (this.players.length === 1 && alive.length === 0) {
-      // Solo : le seul joueur est mort
-      return null;
-    }
-    if (alive.length === 1 && this.players.length > 1) {
+    if (alive.length === 1 && this.startedWith > 1) {
       return alive[0];
-    }
-    if (alive.length === 0) {
-      // Tous morts simultanément (cas rare) — pas de gagnant
-      return null;
     }
     return null;
   }
@@ -110,6 +110,7 @@ class Game {
   reset() {
     this.started = false;
     this.over = false;
+    this.startedWith = 0;
     this.pieces = generatePieceSequence(SEQUENCE_CHUNK);
     this.players.forEach((p) => p.reset());
   }
