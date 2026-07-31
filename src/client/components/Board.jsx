@@ -197,6 +197,11 @@ const Board = ({ clearingRows = [], lockingCells = [], dropTrail = null }) => {
   const penaltySeq = useSelector((s) => s.player.penaltySeq) || 0;
   const penaltyLines = useSelector((s) => s.player.penaltyLines) || 0;
   const isDead = useSelector((s) => s.player.isAlive) === false;
+  // INVISIBLE : le tas s'éteint après le lock. Le rendu ne change pas de nature
+  // pour autant — les cellules restent dans le DOM, c'est leur opacité qui
+  // tombe, sinon la grille perdrait ses repères et l'animation son point de
+  // départ.
+  const invisible = useSelector((s) => Boolean(s.game?.modes?.invisible));
 
   const pieceLayer = useMemo(
     () => buildPieceLayer(board, currentPiece),
@@ -271,11 +276,13 @@ const Board = ({ clearingRows = [], lockingCells = [], dropTrail = null }) => {
     <div
       className={`board${rise.rows ? " board--penalty" : ""}${
         isDead ? " board--dead" : ""
-      }`}
+      }${invisible ? " board--invisible" : ""}`}
       style={rise.rows ? { "--rise": rise.rows } : undefined}
       ref={boardRef}
       role="img"
-      aria-label="Your board — 10 columns by 20 rows"
+      aria-label={invisible
+        ? "Your board — 10 columns by 20 rows, invisible mode: locked pieces fade out"
+        : "Your board — 10 columns by 20 rows"}
     >
       <div className="board__flash" ref={flashRef} aria-hidden="true" />
       <div className="board__surge" aria-hidden="true" />

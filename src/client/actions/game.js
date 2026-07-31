@@ -11,6 +11,7 @@ export const GAME_OVER = "GAME_OVER";
 export const GAME_RESET = "GAME_RESET";
 export const GAME_ERROR = "GAME_ERROR";
 export const CONNECTION = "CONNECTION";
+export const MODES_CHANGED = "MODES_CHANGED";
 
 export const gameJoined = (payload) => ({ type: GAME_JOINED, payload });
 export const playerJoined = (payload) => ({ type: PLAYER_JOINED, payload });
@@ -25,4 +26,8 @@ export const gameError = (message) => ({
 export const connectionChanged = (connected) => ({
   type: CONNECTION,
   payload: { connected },
+});
+export const modesChanged = (modes) => ({
+  type: MODES_CHANGED,
+  payload: { modes },
 });

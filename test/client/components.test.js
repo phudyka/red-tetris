@@ -13,8 +13,9 @@ import GameOver from "../../src/client/components/GameOver";
 // Mock des fonctions socket qui émettent des events
 jest.mock("../../src/client/socket", () => ({
   emitStartGame: jest.fn(),
+  emitSetMode: jest.fn(),
 }));
-const { emitStartGame } = require("../../src/client/socket");
+const { emitSetMode, emitStartGame } = require("../../src/client/socket");
 
 const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
@@ -153,6 +154,118 @@ describe("React Components", () => {
       const btn = screen.getByRole("button", { name: /Start Game/i });
       expect(btn).toBeDisabled();
       expect(screen.getByText(/Waiting for the host/)).toBeInTheDocument();
+    });
+
+    // ── Modificateurs ─────────────────────────────────────────────────────
+    describe("modificateurs", () => {
+      const withModes = (modes, isHost = true) => ({
+        ...initialState,
+        game: { ...initialState.game, modes },
+        player: { name: isHost ? "Alice" : "Bob", isHost },
+      });
+
+      beforeEach(() => emitSetMode.mockClear());
+
+      it("expose les trois modificateurs avec leur état", () => {
+        const store = mockStore(
+          withModes({ invisible: true, gravity: false, sprint: false }),
+        );
+        render(
+          <Provider store={store}>
+            <Lobby />
+          </Provider>,
+        );
+
+        expect(screen.getByRole("button", { name: /Invisible/i }))
+          .toHaveAttribute("aria-pressed", "true");
+        expect(screen.getByRole("button", { name: /Gravity/i }))
+          .toHaveAttribute("aria-pressed", "false");
+        expect(screen.getByRole("button", { name: /Sprint 40/i }))
+          .toHaveAttribute("aria-pressed", "false");
+      });
+
+      // N'envoyer que l'interrupteur touché : deux clics rapprochés partis avec
+      // l'ensemble des modes se rembobineraient l'un l'autre, le second portant
+      // un état que l'écho du premier n'a pas encore mis à jour.
+      it("n'envoie que le modificateur basculé", () => {
+        const store = mockStore(
+          withModes({ invisible: true, gravity: false, sprint: false }),
+        );
+        render(
+          <Provider store={store}>
+            <Lobby />
+          </Provider>,
+        );
+
+        fireEvent.click(screen.getByRole("button", { name: /Sprint 40/i }));
+        expect(emitSetMode).toHaveBeenCalledWith("roomA", "sprint", true);
+      });
+
+      it("éteint un modificateur déjà armé", () => {
+        const store = mockStore(
+          withModes({ invisible: true, gravity: false, sprint: false }),
+        );
+        render(
+          <Provider store={store}>
+            <Lobby />
+          </Provider>,
+        );
+
+        fireEvent.click(screen.getByRole("button", { name: /Invisible/i }));
+        expect(emitSetMode).toHaveBeenCalledWith("roomA", "invisible", false);
+      });
+
+      it("deux bascules rapprochées ne s'annulent pas", () => {
+        const store = mockStore(
+          withModes({ invisible: false, gravity: false, sprint: false }),
+        );
+        render(
+          <Provider store={store}>
+            <Lobby />
+          </Provider>,
+        );
+
+        fireEvent.click(screen.getByRole("button", { name: /Invisible/i }));
+        fireEvent.click(screen.getByRole("button", { name: /Sprint 40/i }));
+
+        expect(emitSetMode).toHaveBeenNthCalledWith(
+          1,
+          "roomA",
+          "invisible",
+          true,
+        );
+        expect(emitSetMode).toHaveBeenNthCalledWith(2, "roomA", "sprint", true);
+      });
+
+      // Le non-host doit lire ce qui est armé — c'est la manche qu'il va jouer.
+      it("laisse la liste lisible au non-host mais la rend inerte", () => {
+        const store = mockStore(
+          withModes({ invisible: false, gravity: true, sprint: false }, false),
+        );
+        render(
+          <Provider store={store}>
+            <Lobby />
+          </Provider>,
+        );
+
+        const gravity = screen.getByRole("button", { name: /Gravity/i });
+        expect(gravity).toBeDisabled();
+        expect(gravity).toHaveAttribute("aria-pressed", "true");
+
+        fireEvent.click(gravity);
+        expect(emitSetMode).not.toHaveBeenCalled();
+      });
+
+      it("tient debout sans modes dans le store", () => {
+        const store = mockStore(initialState);
+        render(
+          <Provider store={store}>
+            <Lobby />
+          </Provider>,
+        );
+        expect(screen.getByRole("button", { name: /Invisible/i }))
+          .toHaveAttribute("aria-pressed", "false");
+      });
     });
   });
 

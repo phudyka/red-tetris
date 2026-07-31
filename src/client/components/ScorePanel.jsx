@@ -21,9 +21,10 @@ const Stat = ({ label, value, flash = false, strong = false, title }) => (
 );
 
 /**
- * @param {{ level?: number, lines?: number }} props
+ * @param {{ level?: number, lines?: number, goal?: number }} props
+ *   goal : objectif de lignes du mode sprint, 0 hors sprint
  */
-const ScorePanel = ({ level = 1, lines = 0 }) => {
+const ScorePanel = ({ level = 1, lines = 0, goal = 0 }) => {
   const scores = useSelector((s) => s.scores);
   const myName = useSelector((s) => s.player.name);
   const opponents = useSelector((s) => s.opponents);
@@ -63,7 +64,21 @@ const ScorePanel = ({ level = 1, lines = 0 }) => {
           flash={flashMine}
           strong
         />
-        <Stat label="Lines" value={lines} />
+        {
+          /* En sprint, une ligne posée n'a de sens que rapportée à l'objectif :
+            le compte garde son poids, la cible reste en retrait. */
+        }
+        <Stat
+          label="Lines"
+          value={goal > 0
+            ? (
+              <>
+                {lines}
+                <span className="stat__goal">/{goal}</span>
+              </>
+            )
+            : lines}
+        />
         <Stat label="Level" value={level} />
       </div>
 

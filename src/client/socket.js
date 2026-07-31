@@ -12,6 +12,7 @@ import {
   gameOver,
   gameReset,
   gameStarted,
+  modesChanged,
   playerJoined,
   playerLeft,
 } from "./actions/game";
@@ -114,6 +115,10 @@ export const initSocket = (dispatch) => {
     dispatch(addPenalty(lines));
   });
 
+  socket.on("modesChanged", ({ modes }) => {
+    dispatch(modesChanged(modes));
+  });
+
   socket.on("gameOver", (payload) => {
     dispatch(gameOver(payload));
   });
@@ -142,6 +147,18 @@ export const emitJoinGame = (room, playerName) => {
 
 export const emitStartGame = (room) => {
   if (socket) socket.emit("startGame", { room });
+};
+
+/**
+ * Bascule un modificateur de la room. Un seul à la fois : le serveur fusionne,
+ * donc deux clics rapprochés ne se rembobinent pas l'un l'autre. Réservé au
+ * host côté serveur — le refus revient par l'événement `error`.
+ * @param {string} room
+ * @param {string} mode  'invisible' | 'gravity' | 'sprint'
+ * @param {boolean} on
+ */
+export const emitSetMode = (room, mode, on) => {
+  if (socket) socket.emit("setMode", { room, mode, on });
 };
 
 export const emitPlayerDead = (room) => {

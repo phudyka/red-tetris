@@ -14,6 +14,29 @@ export const MAX_MOVE_RESETS = 15;
 export const LINES_PER_LEVEL = 10;
 export const MAX_LEVEL = 20;
 
+// ─── Modificateurs de manche ─────────────────────────────────────────────────
+// Trois axes orthogonaux, donc cumulables : le rendu du tas, la vitesse de
+// chute, la condition de victoire. Un sélecteur exclusif les opposerait sans
+// raison — ils ne se disputent rien.
+export const MODE_KEYS = ["invisible", "gravity", "sprint"];
+export const DEFAULT_MODES = {
+  invisible: false,
+  gravity: false,
+  sprint: false,
+};
+// Étiquettes courtes : elles tiennent dans une ligne de classement.
+export const MODE_TAGS = {
+  invisible: "INV",
+  gravity: "G+",
+  sprint: "SPR",
+};
+// Niveaux ajoutés à la gravité seule — jamais au niveau de score, sinon le mode
+// gonflerait les points au lieu de les mériter.
+export const GRAVITY_BOOST = 9;
+// Objectif du sprint. Le standard de la discipline, et une manche de 2 minutes
+// environ : assez courte pour une démonstration.
+export const SPRINT_TARGET = 40;
+
 // Tétrominos dans leurs boîtes SRS : 4×4 pour I, 2×2 pour O, 3×3 pour les cinq
 // autres. La boîte n'est pas un détail de stockage — c'est elle qui définit le
 // centre de rotation, et les tables de kicks ci-dessous la supposent. Une boîte

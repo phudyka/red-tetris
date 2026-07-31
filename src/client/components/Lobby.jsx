@@ -5,14 +5,44 @@
 
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { emitStartGame } from "../socket";
+import { emitSetMode, emitStartGame } from "../socket";
 import Leaderboard from "./Leaderboard";
+import {
+  DEFAULT_MODES,
+  MODE_TAGS,
+  SPRINT_TARGET,
+} from "../../shared/constants";
+
+// Trois axes indépendants — le rendu, la vitesse, la victoire — donc trois
+// interrupteurs cumulables plutôt qu'un choix exclusif. L'étiquette courte est
+// celle que le classement affichera : elle s'apprend ici.
+const MODIFIERS = [
+  {
+    key: "invisible",
+    name: "Invisible",
+    note: "Locked pieces fade out. The well is yours to remember.",
+    tag: MODE_TAGS.invisible,
+  },
+  {
+    key: "gravity",
+    name: "Gravity+",
+    note: "Pieces fall nine levels faster from the very first drop.",
+    tag: MODE_TAGS.gravity,
+  },
+  {
+    key: "sprint",
+    name: `Sprint ${SPRINT_TARGET}`,
+    note: `First player to clear ${SPRINT_TARGET} lines wins the round.`,
+    tag: MODE_TAGS.sprint,
+  },
+];
 
 const Lobby = () => {
   const room = useSelector((s) => s.game.room);
   const players = useSelector((s) => s.game.players);
   const isHost = useSelector((s) => s.player.isHost);
   const myName = useSelector((s) => s.player.name);
+  const modes = useSelector((s) => s.game.modes) || DEFAULT_MODES;
 
   const error = useSelector((s) => s.game.error);
 
@@ -28,6 +58,15 @@ const Lobby = () => {
     if (starting) return;
     setStarting(true);
     emitStartGame(room);
+  };
+
+  // Aucune bascule optimiste : c'est le serveur qui détient les modes de la
+  // room, et son écho arrive au host en même temps qu'aux autres. Un état local
+  // qui devance le refus montrerait un mode armé qui ne l'est pas.
+  // On n'envoie que l'interrupteur touché : envoyer les trois ferait qu'un
+  // second clic parti avant l'écho du premier le rembobinerait.
+  const handleToggle = (key) => {
+    emitSetMode(room, key, !modes[key]);
   };
 
   return (
@@ -63,9 +102,37 @@ const Lobby = () => {
           ))}
         </div>
 
+        <div className="lobby__modes">
+          <p className="eyebrow" id="modifiers-title">Modifiers</p>
+          <div className="modifiers" aria-labelledby="modifiers-title">
+            {MODIFIERS.map(({ key, name, note, tag }) => {
+              const on = modes[key] === true;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={`modifier${on ? " modifier--on" : ""}`}
+                  aria-pressed={on}
+                  disabled={!isHost}
+                  onClick={() => handleToggle(key)}
+                >
+                  <span className="modifier__mark" aria-hidden="true" />
+                  <span className="modifier__body">
+                    <span className="modifier__name">{name}</span>
+                    <span className="modifier__note">{note}</span>
+                  </span>
+                  <span className="modifier__tag" aria-hidden="true">
+                    {tag}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <p className="lobby__subtitle">
           {isHost
-            ? "You are the host. Start when everyone is ready."
+            ? "You are the host. Pick your modifiers, then start when everyone is ready."
             : "Waiting for the host to start the game…"}
         </p>
 

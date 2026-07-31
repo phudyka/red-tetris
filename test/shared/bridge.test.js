@@ -35,6 +35,25 @@ const CONSTANTS = [
   "TYPE_TO_COLOR_INDEX",
   "SPAWN_X",
   "SPAWN_Y",
+  "MODE_KEYS",
+  "DEFAULT_MODES",
+  "MODE_TAGS",
+  "GRAVITY_BOOST",
+  "SPRINT_TARGET",
+];
+
+// Toutes les combinaisons de modificateurs : l'étiquette et la gravité doivent
+// sortir identiques des deux copies, sinon le classement du serveur ne raconte
+// pas la manche que le client a jouée.
+const MODE_COMBOS = [
+  {},
+  { invisible: true },
+  { gravity: true },
+  { sprint: true },
+  { invisible: true, gravity: true },
+  { invisible: true, sprint: true },
+  { gravity: true, sprint: true },
+  { invisible: true, gravity: true, sprint: true },
 ];
 
 describe("Pont CJS ↔ ESM", () => {
@@ -57,6 +76,17 @@ describe("Pont CJS ↔ ESM", () => {
   it("expose exactement les mêmes fonctions", () => {
     const esmKeys = Object.keys(esmLogic).filter((k) => k !== "default").sort();
     expect(Object.keys(cjsLogic).sort()).toEqual(esmKeys);
+  });
+
+  it("rend la même étiquette et la même gravité sur les 8 combinaisons de modes", () => {
+    MODE_COMBOS.forEach((modes) => {
+      expect(cjsLogic.modeTag(modes)).toBe(esmLogic.modeTag(modes));
+      [1, 5, 12, 20].forEach((level) => {
+        expect(cjsLogic.gravityLevel(level, modes))
+          .toBe(esmLogic.gravityLevel(level, modes));
+      });
+    });
+    expect(cjsLogic.modeTag(undefined)).toBe(esmLogic.modeTag(undefined));
   });
 
   it("rend le même résultat sur les fonctions de plateau", () => {

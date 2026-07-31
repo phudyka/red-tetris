@@ -15,6 +15,21 @@ const MAX_MOVE_RESETS = 15;
 const LINES_PER_LEVEL = 10;
 const MAX_LEVEL = 20;
 
+// Modificateurs de manche — trois axes orthogonaux, donc cumulables.
+const MODE_KEYS = ["invisible", "gravity", "sprint"];
+const DEFAULT_MODES = {
+  invisible: false,
+  gravity: false,
+  sprint: false,
+};
+const MODE_TAGS = {
+  invisible: "INV",
+  gravity: "G+",
+  sprint: "SPR",
+};
+const GRAVITY_BOOST = 9;
+const SPRINT_TARGET = 40;
+
 // Boîtes SRS : 4×4 pour I, 2×2 pour O, 3×3 pour les cinq autres.
 const PIECES = {
   I: {
@@ -94,6 +109,11 @@ module.exports = {
   MAX_MOVE_RESETS,
   LINES_PER_LEVEL,
   MAX_LEVEL,
+  MODE_KEYS,
+  DEFAULT_MODES,
+  MODE_TAGS,
+  GRAVITY_BOOST,
+  SPRINT_TARGET,
   PIECES,
   PIECE_TYPES,
   COLOR_INDEX,

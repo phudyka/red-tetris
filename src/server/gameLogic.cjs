@@ -7,8 +7,11 @@
 const {
   BOARD_WIDTH,
   BOARD_HEIGHT,
+  GRAVITY_BOOST,
   LINES_PER_LEVEL,
   MAX_LEVEL,
+  MODE_KEYS,
+  MODE_TAGS,
   PIECE_TYPES,
   getKicks,
 } = require("./constants.cjs");
@@ -171,6 +174,19 @@ const gravityMs = (level) => {
   return Math.max(16, Math.round((0.8 - (l - 1) * 0.007) ** (l - 1) * 1000));
 };
 
+// Niveau de gravité effectif : GRAVITY+ décale la chute sans toucher au niveau
+// affiché ni au multiplicateur de score.
+const gravityLevel = (level, modes) =>
+  modes && modes.gravity ? level + GRAVITY_BOOST : level;
+
+// Étiquette compacte des modificateurs actifs, dans l'ordre canonique.
+const modeTag = (modes) => {
+  const active = MODE_KEYS.filter((k) => modes && modes[k] === true);
+  return active.length === 0
+    ? "CLASSIC"
+    : active.map((k) => MODE_TAGS[k]).join("·");
+};
+
 const generatePieceSequence = (n) => {
   const sequence = [];
   while (sequence.length < n) {
@@ -187,6 +203,8 @@ const generatePieceSequence = (n) => {
 };
 
 module.exports = {
+  gravityLevel,
+  modeTag,
   createEmptyBoard,
   isValidPosition,
   placePiece,

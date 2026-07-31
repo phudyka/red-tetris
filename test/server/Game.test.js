@@ -162,6 +162,98 @@ describe("Game Class", () => {
     expect(removed).toBe(null);
   });
 
+  // ── Modificateurs ─────────────────────────────────────────────────────────
+  describe("modificateurs", () => {
+    it("démarre sans aucun modificateur", () => {
+      const game = new Game("m1");
+      expect(game.modes).toEqual({
+        invisible: false,
+        gravity: false,
+        sprint: false,
+      });
+      expect(game.getModeTag()).toBe("CLASSIC");
+    });
+
+    it("arme les modificateurs tant que la manche n'est pas lancée", () => {
+      const game = new Game("m2");
+      expect(game.setModes({ invisible: true, sprint: true })).toBe(true);
+      expect(game.modes.invisible).toBe(true);
+      expect(game.modes.gravity).toBe(false);
+      expect(game.getModeTag()).toBe("INV·SPR");
+    });
+
+    it("refuse de changer les règles sous les joueurs déjà engagés", () => {
+      const game = new Game("m3");
+      game.addPlayer(new Player("1", "P1", "m3"));
+      game.start();
+
+      expect(game.setModes({ gravity: true })).toBe(false);
+      expect(game.modes.gravity).toBe(false);
+    });
+
+    it("réarme une fois la manche terminée", () => {
+      const game = new Game("m4");
+      game.addPlayer(new Player("1", "P1", "m4"));
+      game.start();
+      game.over = true;
+
+      expect(game.setModes({ gravity: true })).toBe(true);
+      expect(game.getModeTag()).toBe("G+");
+    });
+
+    it("garde les modificateurs d'une manche à l'autre", () => {
+      const game = new Game("m5");
+      game.addPlayer(new Player("1", "P1", "m5"));
+      game.setModes({ invisible: true });
+      game.reset();
+      expect(game.modes.invisible).toBe(true);
+    });
+  });
+
+  // ── Sprint ────────────────────────────────────────────────────────────────
+  describe("checkSprintWinner", () => {
+    const buildSprint = () => {
+      const game = new Game("s1");
+      const p1 = new Player("1", "P1", "s1");
+      const p2 = new Player("2", "P2", "s1");
+      game.addPlayer(p1);
+      game.addPlayer(p2);
+      game.setModes({ sprint: true });
+      game.start();
+      return { game, p1, p2 };
+    };
+
+    it("ne rend personne hors mode sprint, même à 100 lignes", () => {
+      const game = new Game("s0");
+      const p = new Player("1", "P1", "s0");
+      game.addPlayer(p);
+      game.start();
+      p.lines = 100;
+      expect(game.checkSprintWinner()).toBe(null);
+    });
+
+    it("ne rend personne tant que l'objectif n'est pas atteint", () => {
+      const { game, p1 } = buildSprint();
+      p1.lines = 39;
+      expect(game.checkSprintWinner()).toBe(null);
+    });
+
+    it("rend le premier joueur à atteindre l'objectif", () => {
+      const { game, p1, p2 } = buildSprint();
+      p2.lines = 40;
+      expect(game.checkSprintWinner()).toBe(p2);
+      // La course prime sur la survie : l'autre est encore vivant.
+      expect(p1.isAlive).toBe(true);
+    });
+
+    it("ignore un joueur mort qui aurait franchi l'objectif", () => {
+      const { game, p1 } = buildSprint();
+      p1.lines = 45;
+      p1.isAlive = false;
+      expect(game.checkSprintWinner()).toBe(null);
+    });
+  });
+
   it("should guarantee sequence generation is identical for all players in room", () => {
     const game = new Game("roomSeq");
     const p1 = new Player("1", "P1", "roomSeq");

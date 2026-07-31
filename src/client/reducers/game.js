@@ -9,9 +9,11 @@ import {
   GAME_OVER,
   GAME_RESET,
   GAME_STARTED,
+  MODES_CHANGED,
   PLAYER_JOINED,
   PLAYER_LEFT,
 } from "../actions/game";
+import { DEFAULT_MODES } from "../../shared/constants";
 
 const initialState = {
   room: null,
@@ -21,6 +23,8 @@ const initialState = {
   players: [], // [{ name, isHost }] — liste de la room (lobby)
   error: null, // message serveur (nom pris, partie déjà lancée…)
   connected: true, // socket vivante — false pendant une coupure réseau
+  modes: DEFAULT_MODES, // modificateurs armés par le host
+  modeTag: "CLASSIC", // étiquette de la manche terminée (posée par GAME_OVER)
 };
 
 const gameReducer = (state = initialState, action) => {
@@ -31,8 +35,12 @@ const gameReducer = (state = initialState, action) => {
         room: action.payload.room,
         players: action.payload.players,
         started: action.payload.started || false,
+        modes: action.payload.modes || state.modes,
         error: null,
       };
+
+    case MODES_CHANGED:
+      return { ...state, modes: action.payload.modes };
 
     case GAME_ERROR:
       return { ...state, error: action.payload.message };
@@ -69,14 +77,29 @@ const gameReducer = (state = initialState, action) => {
         started: true,
         over: false,
         winner: null,
+        modes: action.payload && action.payload.modes
+          ? action.payload.modes
+          : state.modes,
         error: null,
       };
 
     case GAME_OVER:
-      return { ...state, over: true, winner: action.payload.winner };
+      return {
+        ...state,
+        over: true,
+        winner: action.payload.winner,
+        modeTag: action.payload.mode || "CLASSIC",
+      };
 
+    // Les modificateurs appartiennent à la room, pas à la manche : ils survivent
+    // au reset, sinon le host devrait les rearmer entre chaque partie.
     case GAME_RESET:
-      return { ...initialState, room: state.room, players: state.players };
+      return {
+        ...initialState,
+        room: state.room,
+        players: state.players,
+        modes: state.modes,
+      };
 
     default:
       return state;

@@ -21,19 +21,35 @@ describe("Server Score Logic", () => {
   it("should update leaderboard only if score is higher", () => {
     const lb = new Map();
     updateLeaderboard(lb, "Alice", 1000);
-    expect(lb.get("Alice")).toBe(1000);
+    expect(lb.get("Alice").score).toBe(1000);
 
     updateLeaderboard(lb, "Alice", 500);
-    expect(lb.get("Alice")).toBe(1000); // Unchanged
+    expect(lb.get("Alice").score).toBe(1000); // Unchanged
 
     updateLeaderboard(lb, "Alice", 1500);
-    expect(lb.get("Alice")).toBe(1500); // Updated
+    expect(lb.get("Alice").score).toBe(1500); // Updated
+  });
+
+  it("garde le mode du record, pas celui de la dernière partie", () => {
+    const lb = new Map();
+    updateLeaderboard(lb, "Alice", 1000, "INV");
+    updateLeaderboard(lb, "Alice", 400, "CLASSIC");
+    expect(lb.get("Alice")).toEqual({ score: 1000, mode: "INV" });
+
+    updateLeaderboard(lb, "Alice", 2000, "SPR");
+    expect(lb.get("Alice")).toEqual({ score: 2000, mode: "SPR" });
+  });
+
+  it("étiquette CLASSIC par défaut", () => {
+    const lb = new Map();
+    updateLeaderboard(lb, "Bob", 100);
+    expect(getLeaderboardArray(lb)[0].mode).toBe("CLASSIC");
   });
 
   it("should return sorted array limited to 10", () => {
     const lb = new Map();
     for (let i = 1; i <= 15; i++) {
-      lb.set(`Player${i}`, i * 100);
+      lb.set(`Player${i}`, { score: i * 100, mode: "CLASSIC" });
     }
     const arr = getLeaderboardArray(lb);
     expect(arr.length).toBe(10);

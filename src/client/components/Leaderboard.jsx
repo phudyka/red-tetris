@@ -81,6 +81,12 @@ const Leaderboard = ({ onClose }) => {
                   <div className="lb-row__name" title={entry.playerName}>
                     {entry.playerName}
                   </div>
+                  {
+                    /* Le mode où le record a été établi : un score en pièces
+                      invisibles et un score en partie classique ne se comparent
+                      pas, la ligne doit dire lequel elle raconte. */
+                  }
+                  <div className="lb-row__mode">{entry.mode || "CLASSIC"}</div>
                   <div className="lb-row__score">
                     {entry.score.toLocaleString()} pts
                   </div>

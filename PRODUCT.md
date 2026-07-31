@@ -59,9 +59,10 @@ Ce qu'un projet Red Tetris voisin ne peut pas reprendre tel quel :
 - Cycle développeur : `npm ci` → `npm run dev` (nodemon + webpack watch) ;
   `npm run build` avant commit car `public/bundle.js` est versionné et servi en
   statique ; `npm test` doit rester au-dessus des seuils de couverture.
-- Aucune persistance : tout l'état (parties, scores, leaderboard) vit en mémoire
-  dans le processus serveur et disparaît au redémarrage. C'est explicitement
-  autorisé par le sujet.
+- Les parties vivent en mémoire dans le processus serveur et disparaissent au
+  redémarrage — le sujet l'autorise explicitement. Seul le leaderboard persiste,
+  au titre du bonus « persist player scores » : `leaderboard.json` à la racine,
+  gitignoré, relu au boot et réécrit à chaque fin de partie.
 
 ## Capabilities and Constraints
 
@@ -73,7 +74,12 @@ Acquis, à préserver :
 - Contrôles clavier exclusivement : ←/→ déplacer, ↑ rotation, ↓ soft drop,
   Espace hard drop, C hold.
 - **Score et leaderboard global** : barème Tetris classique (100/300/500/800),
-  meilleur score par nom, top 10, en mémoire.
+  meilleur score par nom, top 10, persisté sur disque et qualifié par le mode
+  dans lequel le record a été établi.
+- **Trois modificateurs de manche cumulables**, armés par le host dans le lobby
+  : `INVISIBLE` (le tas s'éteint après le lock), `GRAVITY+` (chute accélérée de
+  neuf paliers, sans bonus de score), `SPRINT 40` (premier à 40 lignes, arbitré
+  serveur).
 - **Hold + aperçu de la pièce suivante.**
 - **DAS (167 ms puis 33 ms) et lock delay (500 ms, 15 resets max).**
 - **Vue live des adversaires** : spectrum + mini-board temps réel.
@@ -90,9 +96,8 @@ Contraintes techniques imposées par le sujet, non négociables :
 - Couverture de tests ≥ 70 % statements/functions/lines et ≥ 50 % branches,
   appliquée par `coverageThreshold` dans `package.json`.
 
-Non implémenté — ne pas laisser croire le contraire : modes de jeu alternatifs
-(pièces invisibles, gravité accrue), persistance des scores, comptes
-utilisateurs, support tactile ou manette.
+Non implémenté — ne pas laisser croire le contraire : comptes utilisateurs,
+historique des parties, support tactile ou manette.
 
 ## Brand Commitments
 

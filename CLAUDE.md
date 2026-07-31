@@ -73,11 +73,16 @@ silencieusement.
 
 ### Protocole socket.io
 
-Client → serveur : `joinGame`, `startGame`, `playerDead`, `pieceLocked`,
-`requestNextPiece`, `updateSpectrum`, `leaveGame`. Serveur → client :
-`gameJoined`, `playerJoined`, `playerLeft`, `gameStarted`, `newPiece`,
-`addPenalty`, `updateSpectrum`, `opponentDead`, `score:update`,
-`leaderboard:update`, `gameOver`, `error`.
+Client → serveur : `joinGame`, `startGame`, `setMode`, `playerDead`,
+`pieceLocked`, `requestNextPiece`, `updateSpectrum`, `leaveGame`. Serveur →
+client : `gameJoined`, `playerJoined`, `playerLeft`, `modesChanged`,
+`gameStarted`, `newPiece`, `addPenalty`, `updateSpectrum`, `opponentDead`,
+`score:update`, `leaderboard:update`, `gameOver`, `error`.
+
+`setMode` porte **un seul** modificateur (`{room, mode, on}`) et le serveur
+fusionne : envoyer les trois d'un coup ferait qu'un second clic parti avant
+l'écho du premier le rembobinerait. Le client ne bascule rien localement — il
+attend `modesChanged`.
 
 Tous les émetteurs sont centralisés dans `src/client/socket.js` (`emitXxx`) ;
 chaque listener y dispatch une action Redux — `error` compris (`GAME_ERROR`,
@@ -99,6 +104,35 @@ currentPiece, next/hold, isAlive), `opponents` (tableau
 en constante locale dans `reducers/player.js` — contournement d'import
 circulaire, ne pas « corriger » en important depuis `actions/player.js` sans
 vérifier le cycle.
+
+### Modificateurs de manche (bonus du sujet)
+
+Trois axes **orthogonaux, donc cumulables** — d'où trois interrupteurs et non un
+choix exclusif. Armés par le host dans le Lobby, gelés dès `game.start()`
+(`Game.setModes` renvoie `false` en cours de manche), conservés d'une manche à
+l'autre (`GAME_RESET` les préserve côté client, `Game.reset()` côté serveur).
+
+- **`invisible`** — purement CSS (`.board--invisible`, `global.css`). Le tas
+  s'éteint en 900 ms après le lock, le ghost disparaît (sinon il redessinerait
+  le sommet de chaque colonne et viderait le mode de son sens), les lignes de
+  pénalité restent visibles. Aucune logique JS : les 200 cellules restent dans
+  le DOM, seule leur opacité tombe. En `prefers-reduced-motion`, l'extinction
+  est immédiate — c'est une règle de jeu, pas un effet.
+- **`gravity`** — `gravityLevel(level, modes)` ajoute `GRAVITY_BOOST` (9) à la
+  **gravité seule**. Le niveau affiché et le multiplicateur de score restent
+  ceux des lignes : le mode rend la manche plus dure, pas plus payante.
+- **`sprint`** — `Game.checkSprintWinner()`, appelé dans `pieceLocked` après
+  l'incrément des lignes. Premier à `SPRINT_TARGET` (40) : la course prime sur
+  la survie, on gagne avec des adversaires encore vivants — ce que
+  `checkWinCondition` ne sait pas voir.
+
+`modeTag(modes)` (partagé, donc **dupliqué dans `gameLogic.cjs`**) rend
+`CLASSIC` ou `INV·G+·SPR` dans l'ordre canonique. Le serveur l'écrit au
+classement, le client l'affiche dans le bandeau de partie et sur l'écran de fin.
+
+Les trois clôtures de manche (dernier survivant, dernier mort, objectif sprint)
+passent par le même `finishGame()` d'`index.js` : elles doivent produire
+exactement le même état.
 
 ### Règles de jeu (Tetris Guideline)
 
@@ -164,9 +198,16 @@ condition de victoire) → `Player`. `Piece.js` n'est utilisé que par ses tests
 il existe pour satisfaire l'exigence OOP du sujet (classes `Player`, `Piece`,
 `Game`).
 
-Le leaderboard est une `Map` en mémoire dans `index.js`, hors des parties
-(meilleur score par nom, top 10) — perdu au redémarrage, c'est voulu (« no data
-persistence necessary »).
+Le leaderboard est une `Map` dans `index.js`, hors des parties (meilleur score
+par nom, top 10). Il **survit au redémarrage** via `leaderboardStore.js`
+(`leaderboard.json` à la racine, gitignoré) : relu au boot, réécrit à chaque fin
+de partie. Un fichier absent, illisible ou raboté ne fait pas tomber le serveur
+— `loadLeaderboard` renvoie une Map vide et écarte les entrées bancales. Les
+scores nuls n'y entrent pas : depuis qu'ils survivent au redémarrage, ils
+s'accumuleraient.
+
+La valeur stockée est `{score, mode}` — un record en pièces invisibles et un
+record classique ne se comparent pas, la ligne doit dire lequel elle raconte.
 
 Routing : `/:room/:playerName` (BrowserRouter) ; `app.get('*')` renvoie
 `index.html` pour le fallback SPA.

@@ -65,29 +65,42 @@ const applyBackToBack = (score, active) =>
   active ? Math.round(score * 1.5) : score;
 
 /**
- * Met à jour le leaderboard en mémoire (Map<string, number>).
+ * Met à jour le leaderboard (Map<string, {score, mode}>).
  * Ne met à jour que si le nouveau score est supérieur au précédent.
- * @param {Map<string, number>} leaderboardMap
+ * @param {Map<string, {score: number, mode: string}>} leaderboardMap
  * @param {string} playerName
  * @param {number} newScore
- * @returns {Map<string, number>}
+ * @param {string} [mode]  étiquette des modificateurs de la manche
+ * @returns {Map<string, {score: number, mode: string}>}
  */
-const updateLeaderboard = (leaderboardMap, playerName, newScore) => {
-  const prev = leaderboardMap.get(playerName) || 0;
-  if (newScore > prev) {
-    leaderboardMap.set(playerName, newScore);
+const updateLeaderboard = (
+  leaderboardMap,
+  playerName,
+  newScore,
+  mode = "CLASSIC",
+) => {
+  const prev = leaderboardMap.get(playerName);
+  if (!prev || newScore > prev.score) {
+    // Le mode voyage avec le score : un record établi en pièces invisibles et
+    // un record en partie classique ne se comparent pas, la ligne doit dire
+    // lequel des deux elle raconte.
+    leaderboardMap.set(playerName, { score: newScore, mode });
   }
   return leaderboardMap;
 };
 
 /**
  * Convertit la Map leaderboard en tableau trié desc, limité à 10 entrées.
- * @param {Map<string, number>} leaderboardMap
- * @returns {{ playerName: string, score: number }[]}
+ * @param {Map<string, {score: number, mode: string}>} leaderboardMap
+ * @returns {{ playerName: string, score: number, mode: string }[]}
  */
 const getLeaderboardArray = (leaderboardMap) => {
   return Array.from(leaderboardMap.entries())
-    .map(([playerName, score]) => ({ playerName, score }))
+    .map(([playerName, entry]) => ({
+      playerName,
+      score: entry.score,
+      mode: entry.mode || "CLASSIC",
+    }))
     .sort((a, b) => b.score - a.score)
     .slice(0, 10);
 };

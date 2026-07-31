@@ -26,14 +26,18 @@ const {
   clampDropCells,
   clampLinesCleared,
   isValidLabel,
+  isValidModeKey,
   MAX_LABEL_LENGTH,
 } = require("./validation");
+const { loadLeaderboard, saveLeaderboard } = require("./leaderboardStore");
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "localhost";
 
-// ── Leaderboard global (survit aux parties) ───────────────────────────────────
-const leaderboardMap = new Map();
+// ── Leaderboard global (survit aux parties ET au redémarrage) ─────────────────
+// Relu du disque au démarrage : un classement vide à chaque `npm start` ne
+// récompense rien. Réécrit à chaque fin de partie, jamais entre-temps.
+const leaderboardMap = loadLeaderboard();
 
 const app = express();
 const server = http.createServer(app);
@@ -93,6 +97,7 @@ io.on("connection", (socket) => {
       playerName,
       isHost: player.isHost,
       started: game.started,
+      modes: game.modes,
       players: game.players.map((p) => ({
         name: p.name,
         isHost: p.isHost,
@@ -108,8 +113,34 @@ io.on("connection", (socket) => {
     });
   });
 
+  // ── setMode ───────────────────────────────────────────────────────────────
+  // Un interrupteur à la fois : le client n'envoie que celui qu'il bascule, le
+  // serveur fusionne. Envoyer les trois ferait qu'un second clic parti avant
+  // l'écho du premier le rembobinerait.
+  socket.on("setMode", ({ room, mode, on } = {}) => {
+    const game = manager.get(room);
+    if (!game) return;
+
+    const player = game.getPlayer(socket.id);
+    if (!player || !player.isHost) {
+      socket.emit("error", { message: "Only the host can change modes" });
+      return;
+    }
+
+    if (!isValidModeKey(mode)) return;
+
+    if (!game.setModes({ [mode]: on === true })) {
+      socket.emit("error", {
+        message: "Modes are locked once the round starts",
+      });
+      return;
+    }
+
+    io.to(room).emit("modesChanged", { modes: game.modes });
+  });
+
   // ── startGame ─────────────────────────────────────────────────────────────
-  socket.on("startGame", ({ room }) => {
+  socket.on("startGame", ({ room } = {}) => {
     const game = manager.get(room);
     if (!game) return;
 
@@ -140,12 +171,13 @@ io.on("connection", (socket) => {
         pieceIndex: typeIndex,
         piece: { type, spawnX, spawnY: SPAWN_Y },
         nextPiece: { type: nextType },
+        modes: game.modes,
       });
     });
   });
 
   // ── playerDead ────────────────────────────────────────────────────────────
-  socket.on("playerDead", ({ room }) => {
+  socket.on("playerDead", ({ room } = {}) => {
     const game = manager.get(room);
     if (!game) return;
 
@@ -159,22 +191,12 @@ io.on("connection", (socket) => {
 
     const winner = game.checkWinCondition();
     if (winner !== null || game.getAlivePlayers().length === 0) {
-      game.over = true;
-
-      // Update leaderboard for all players in this game
-      game.players.forEach((p) => {
-        updateLeaderboard(leaderboardMap, p.name, p.score);
-      });
-      io.emit("leaderboard:update", getLeaderboardArray(leaderboardMap));
-
-      io.to(room).emit("gameOver", {
-        winner: winner ? winner.name : null,
-      });
+      finishGame(game, winner);
     }
   });
 
   // ── updateSpectrum (client → serveur → autres joueurs) ────────────────────
-  socket.on("updateSpectrum", ({ room, spectrum }) => {
+  socket.on("updateSpectrum", ({ room, spectrum } = {}) => {
     const game = manager.get(room);
     if (!game) return;
     const player = game.getPlayer(socket.id);
@@ -229,6 +251,15 @@ io.on("connection", (socket) => {
         });
       }
 
+      // Sprint : la course prime sur la survie. Le compte de lignes est déjà
+      // borné au-dessus, et c'est le serveur qui déclare la victoire — le
+      // client ne fait que déclarer ses effacements.
+      const sprintWinner = game.checkSprintWinner();
+      if (sprintWinner) {
+        finishGame(game, sprintWinner);
+        return;
+      }
+
       const penaltyLines = cleared - 1;
       if (penaltyLines <= 0) return;
 
@@ -242,7 +273,7 @@ io.on("connection", (socket) => {
   );
 
   // ── requestNextPiece ─────────────────────────────────────────────────────
-  socket.on("requestNextPiece", ({ room }) => {
+  socket.on("requestNextPiece", ({ room } = {}) => {
     const game = manager.get(room);
     if (!game || !game.started) return;
 
@@ -265,7 +296,7 @@ io.on("connection", (socket) => {
   });
 
   // ── leaveGame ─────────────────────────────────────────────────────────────
-  socket.on("leaveGame", ({ room }) => {
+  socket.on("leaveGame", ({ room } = {}) => {
     handlePlayerLeave(socket, room);
   });
 
@@ -282,6 +313,33 @@ io.on("connection", (socket) => {
 });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Clôt une manche : classement mis à jour, écrit sur disque, puis annoncé.
+ * Trois chemins y mènent (dernier survivant, dernier mort, objectif sprint
+ * atteint) et ils doivent tous produire exactement le même état.
+ * @param {Game} game
+ * @param {Player|null} winner
+ */
+function finishGame(game, winner) {
+  game.over = true;
+
+  const mode = game.getModeTag();
+  // Un zéro n'est pas un résultat, et depuis qu'il survit au redémarrage il
+  // s'accumulerait : un classement vide dit la vérité, un mur de zéros non.
+  game.players
+    .filter((p) => p.score > 0)
+    .forEach((p) => {
+      updateLeaderboard(leaderboardMap, p.name, p.score, mode);
+    });
+  saveLeaderboard(leaderboardMap);
+  io.emit("leaderboard:update", getLeaderboardArray(leaderboardMap));
+
+  io.to(game.name).emit("gameOver", {
+    winner: winner ? winner.name : null,
+    mode,
+  });
+}
 
 function handlePlayerLeave(socket, room) {
   const game = manager.get(room);
@@ -309,17 +367,7 @@ function handlePlayerLeave(socket, room) {
   if (game.started && !game.over) {
     const winner = game.checkWinCondition();
     if (winner !== null || game.getAlivePlayers().length === 0) {
-      game.over = true;
-
-      // Update leaderboard
-      game.players.forEach((p) => {
-        updateLeaderboard(leaderboardMap, p.name, p.score);
-      });
-      io.emit("leaderboard:update", getLeaderboardArray(leaderboardMap));
-
-      io.to(room).emit("gameOver", {
-        winner: winner ? winner.name : null,
-      });
+      finishGame(game, winner);
     }
   }
 }

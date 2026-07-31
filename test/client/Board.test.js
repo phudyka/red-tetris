@@ -196,4 +196,42 @@ describe("Board Component", () => {
 
     expect(container.querySelector(".board")).toHaveClass("board--dead");
   });
+
+  // ── Mode invisible ───────────────────────────────────────────────────────
+  // Le puits ne perd pas ses cellules : c'est une classe qui les éteint, et le
+  // libellé du lecteur d'écran dit la règle plutôt que de la subir.
+  it("marque le puits quand le mode invisible est armé", () => {
+    const store = mockStore({
+      player: { board: createEmptyBoard(), currentPiece: null, isAlive: true },
+      game: { modes: { invisible: true, gravity: false, sprint: false } },
+    });
+
+    const { container } = render(
+      <Provider store={store}>
+        <Board />
+      </Provider>,
+    );
+
+    const board = container.querySelector(".board");
+    expect(board).toHaveClass("board--invisible");
+    expect(board.getAttribute("aria-label")).toMatch(/invisible mode/i);
+    expect(container.querySelectorAll(".cell").length).toBe(200);
+  });
+
+  it("ne marque rien hors mode invisible", () => {
+    const store = mockStore({
+      player: { board: createEmptyBoard(), currentPiece: null, isAlive: true },
+      game: { modes: { invisible: false, gravity: true, sprint: true } },
+    });
+
+    const { container } = render(
+      <Provider store={store}>
+        <Board />
+      </Provider>,
+    );
+
+    expect(container.querySelector(".board")).not.toHaveClass(
+      "board--invisible",
+    );
+  });
 });

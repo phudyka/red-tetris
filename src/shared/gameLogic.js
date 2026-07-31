@@ -8,8 +8,11 @@ import {
   BOARD_HEIGHT,
   BOARD_WIDTH,
   getKicks,
+  GRAVITY_BOOST,
   LINES_PER_LEVEL,
   MAX_LEVEL,
+  MODE_KEYS,
+  MODE_TAGS,
   PIECE_TYPES,
 } from "./constants.js";
 
@@ -286,6 +289,32 @@ export const levelForLines = (lines) =>
 export const gravityMs = (level) => {
   const l = Math.min(MAX_LEVEL, Math.max(1, level || 1));
   return Math.max(16, Math.round((0.8 - (l - 1) * 0.007) ** (l - 1) * 1000));
+};
+
+// ─── Modificateurs ───────────────────────────────────────────────────────────
+
+/**
+ * Niveau de gravité effectif. GRAVITY+ décale la chute de plusieurs paliers
+ * sans toucher au niveau affiché ni au multiplicateur de score : le mode rend
+ * la manche plus dure, il ne la rend pas plus payante.
+ * @param {number} level
+ * @param {object} [modes]
+ * @returns {number}
+ */
+export const gravityLevel = (level, modes) =>
+  modes && modes.gravity ? level + GRAVITY_BOOST : level;
+
+/**
+ * Étiquette compacte des modificateurs actifs, dans l'ordre canonique.
+ * Sert au classement (où le mode qualifie un record) et au bandeau de partie.
+ * @param {object} [modes]
+ * @returns {string}  'CLASSIC' quand aucun n'est actif
+ */
+export const modeTag = (modes) => {
+  const active = MODE_KEYS.filter((k) => modes && modes[k] === true);
+  return active.length === 0
+    ? "CLASSIC"
+    : active.map((k) => MODE_TAGS[k]).join("·");
 };
 
 // ─── Séquence de pièces ──────────────────────────────────────────────────────

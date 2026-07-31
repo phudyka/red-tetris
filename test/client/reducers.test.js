@@ -9,6 +9,7 @@ import {
   gameOver,
   gameReset,
   gameStarted,
+  modesChanged,
   playerJoined,
   playerLeft,
 } from "../../src/client/actions/game";
@@ -41,6 +42,8 @@ describe("Redux Reducers", () => {
       players: [],
       error: null,
       connected: true,
+      modes: { invisible: false, gravity: false, sprint: false },
+      modeTag: "CLASSIC",
     };
 
     it("should return initial state", () => {
@@ -122,6 +125,54 @@ describe("Redux Reducers", () => {
       );
       state = gameReducer(state, gameStarted());
       expect(state.error).toBeNull();
+    });
+
+    // ── Modificateurs ──────────────────────────────────────────────────────
+    it("should adopt the modes carried by GAME_JOINED", () => {
+      const state = gameReducer(
+        initGame,
+        gameJoined({
+          room: "r",
+          players: [],
+          modes: { invisible: true, gravity: false, sprint: true },
+        }),
+      );
+      expect(state.modes).toEqual({
+        invisible: true,
+        gravity: false,
+        sprint: true,
+      });
+    });
+
+    it("should handle MODES_CHANGED", () => {
+      const state = gameReducer(
+        initGame,
+        modesChanged({ invisible: false, gravity: true, sprint: false }),
+      );
+      expect(state.modes.gravity).toBe(true);
+    });
+
+    it("should keep the modes across GAME_RESET — they belong to the room", () => {
+      let state = gameReducer(
+        initGame,
+        modesChanged({ invisible: true, gravity: false, sprint: false }),
+      );
+      state = gameReducer(state, gameReset());
+      expect(state.modes.invisible).toBe(true);
+      expect(state.started).toBe(false);
+    });
+
+    it("should record the mode tag of the round that just ended", () => {
+      const state = gameReducer(
+        initGame,
+        gameOver({ winner: "Alice", mode: "INV·SPR" }),
+      );
+      expect(state.modeTag).toBe("INV·SPR");
+    });
+
+    it("should fall back to CLASSIC when gameOver carries no mode", () => {
+      const state = gameReducer(initGame, gameOver({ winner: null }));
+      expect(state.modeTag).toBe("CLASSIC");
     });
 
     it("should track connection loss", () => {

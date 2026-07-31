@@ -22,20 +22,24 @@ import {
   clearLines,
   computeSpectrum,
   getHardDropPosition,
+  gravityLevel,
   gravityMs,
   isTSpin,
   isValidPosition,
   levelForLines,
+  modeTag,
   placePiece,
   rotatePiece,
 } from "../../shared/gameLogic";
 
 import {
+  DEFAULT_MODES,
   LOCK_DELAY,
   MAX_MOVE_RESETS,
   PIECES,
   SPAWN_X,
   SPAWN_Y,
+  SPRINT_TARGET,
   TYPE_TO_COLOR_INDEX,
 } from "../../shared/constants";
 
@@ -107,6 +111,8 @@ const Game = () => {
   const holdPieceType = useSelector((s) => s.player.holdPieceType);
   const canHold = useSelector((s) => s.player.canHold);
   const lines = useSelector((s) => s.player.lines);
+
+  const modes = useSelector((s) => s.game.modes) || DEFAULT_MODES;
 
   const isPlaying = started && !over && isAlive;
   const level = levelForLines(lines);
@@ -405,7 +411,14 @@ const Game = () => {
     }
   }, [dispatch, requestLock, clearLockTimeout]);
 
-  useGameLoop(isPlaying, gravityMs(level), onTick, spawnSeq);
+  // GRAVITY+ agit ici et nulle part ailleurs : le niveau affiché et le
+  // multiplicateur de score restent ceux des lignes effacées.
+  useGameLoop(
+    isPlaying,
+    gravityMs(gravityLevel(level, modes)),
+    onTick,
+    spawnSeq,
+  );
 
   // ── Handlers clavier ─────────────────────────────────────────────────────
   const move = useCallback((dx) => {
@@ -629,7 +642,11 @@ const Game = () => {
           écran étroit commencent par ce qui porte la partie. */
       }
       <section className="game-stage">
-        <ScorePanel level={level} lines={lines} />
+        <ScorePanel
+          level={level}
+          lines={lines}
+          goal={modes.sprint ? SPRINT_TARGET : 0}
+        />
         <Board
           clearingRows={clearingRows}
           lockingCells={lockingCells}
@@ -695,12 +712,16 @@ const Game = () => {
             <dt className="game-meta__key">Room</dt>
             <dd className="game-meta__value">{room}</dd>
           </div>
-          {opponents.length === 0 && (
-            <div className="game-meta__fact">
-              <dt className="game-meta__key">Mode</dt>
-              <dd className="game-meta__value">Solo</dd>
-            </div>
-          )}
+          <div className="game-meta__fact">
+            <dt className="game-meta__key">Mode</dt>
+            <dd className="game-meta__value">{modeTag(modes)}</dd>
+          </div>
+          <div className="game-meta__fact">
+            <dt className="game-meta__key">Players</dt>
+            <dd className="game-meta__value">
+              {opponents.length === 0 ? "Solo" : opponents.length + 1}
+            </dd>
+          </div>
         </dl>
       </div>
     </div>

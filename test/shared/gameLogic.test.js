@@ -5,9 +5,13 @@ import {
   createEmptyBoard,
   getHardDropPosition,
   getRotations,
+  gravityLevel,
+  gravityMs,
   isValidPosition,
+  modeTag,
   placePiece,
 } from "../../src/shared/gameLogic";
+import { GRAVITY_BOOST } from "../../src/shared/constants";
 
 describe("Game Logic (Pure Functions)", () => {
   let emptyBoard;
@@ -151,6 +155,39 @@ describe("Game Logic (Pure Functions)", () => {
       board[18][4] = 1;
       const blockedY = getHardDropPosition(board, shape, 4, 0);
       expect(blockedY).toBe(16); // Touches the block
+    });
+  });
+
+  describe("modificateurs", () => {
+    it("modeTag rend CLASSIC quand rien n'est armé", () => {
+      expect(modeTag()).toBe("CLASSIC");
+      expect(modeTag({})).toBe("CLASSIC");
+      expect(modeTag({ invisible: false, gravity: false, sprint: false }))
+        .toBe("CLASSIC");
+    });
+
+    it("modeTag garde l'ordre canonique, pas celui des clés reçues", () => {
+      expect(modeTag({ sprint: true, invisible: true })).toBe("INV·SPR");
+      expect(modeTag({ invisible: true, sprint: true })).toBe("INV·SPR");
+      expect(modeTag({ invisible: true, gravity: true, sprint: true }))
+        .toBe("INV·G+·SPR");
+    });
+
+    it("modeTag n'accepte que le booléen vrai", () => {
+      expect(modeTag({ sprint: 1, gravity: "yes" })).toBe("CLASSIC");
+    });
+
+    it("gravityLevel ne bouge pas hors mode gravité", () => {
+      expect(gravityLevel(7)).toBe(7);
+      expect(gravityLevel(7, { gravity: false })).toBe(7);
+    });
+
+    it("gravityLevel décale la chute sans toucher au niveau reçu", () => {
+      expect(gravityLevel(1, { gravity: true })).toBe(1 + GRAVITY_BOOST);
+      // Le décalage doit se sentir : une manche en GRAVITY+ tombe plus vite
+      // qu'une manche classique au même niveau.
+      expect(gravityMs(gravityLevel(1, { gravity: true })))
+        .toBeLessThan(gravityMs(1));
     });
   });
 

@@ -5,6 +5,8 @@
 // autres sont vérifiés ici avant d'entrer dans l'état du serveur.
 // ─────────────────────────────────────────────────────────────────────────────
 
+const { MODE_KEYS } = require("./constants.cjs");
+
 const MAX_LABEL_LENGTH = 24;
 const MAX_LINES_CLEARED = 4;
 // Une pièce ne peut pas descendre de plus de rangées qu'en compte le plateau.
@@ -44,9 +46,20 @@ const clampDropCells = (value) => {
   return Math.min(n, MAX_DROP_CELLS);
 };
 
+/**
+ * Un mode est une ressource partagée — il s'applique à toute la room — donc
+ * seules les clés du sujet entrent dans l'état. Le client bascule un
+ * interrupteur à la fois : envoyer l'ensemble ferait qu'un second clic parti
+ * avant l'écho du premier annulerait celui-ci.
+ * @param {*} value
+ * @returns {boolean}
+ */
+const isValidModeKey = (value) => MODE_KEYS.includes(value);
+
 module.exports = {
   isValidLabel,
   clampLinesCleared,
   clampDropCells,
+  isValidModeKey,
   MAX_LABEL_LENGTH,
 };

@@ -2,7 +2,8 @@
 // src/server/Game.js — Classe OOP
 // ─────────────────────────────────────────────────────────────────────────────
 
-const { generatePieceSequence } = require("./gameLogic.cjs");
+const { generatePieceSequence, modeTag } = require("./gameLogic.cjs");
+const { DEFAULT_MODES, SPRINT_TARGET } = require("./constants.cjs");
 
 // Longueur d'un segment de séquence. La séquence n'est jamais bouclée ni
 // tronquée : elle s'allonge par segments quand le joueur le plus avancé
@@ -21,6 +22,8 @@ class Game {
     // solo d'un duel dont l'adversaire a fermé son onglet : dans les deux cas il
     // ne reste qu'un joueur, mais seul le second a un vainqueur.
     this.startedWith = 0;
+    // Modificateurs de la room, choisis par le host avant le départ.
+    this.modes = { ...DEFAULT_MODES };
   }
 
   // ── Joueurs ────────────────────────────────────────────────────────────────
@@ -52,6 +55,27 @@ class Game {
 
   getPlayer(socketId) {
     return this.players.find((p) => p.id === socketId) || null;
+  }
+
+  // ── Modificateurs ──────────────────────────────────────────────────────────
+
+  /**
+   * Arme les modificateurs de la prochaine manche. Refusé pendant une partie :
+   * changer la gravité ou la condition de victoire en cours de route
+   * réécrirait les règles sous les joueurs déjà engagés.
+   * @param {{invisible: boolean, gravity: boolean, sprint: boolean}} modes
+   *   déjà assaini par validation.sanitizeModes
+   * @returns {boolean}  false si la manche est en cours
+   */
+  setModes(modes) {
+    if (this.started && !this.over) return false;
+    this.modes = { ...this.modes, ...modes };
+    return true;
+  }
+
+  /** @returns {string}  étiquette des modificateurs — 'CLASSIC' si aucun */
+  getModeTag() {
+    return modeTag(this.modes);
   }
 
   // ── Partie ─────────────────────────────────────────────────────────────────
@@ -105,6 +129,19 @@ class Game {
       return alive[0];
     }
     return null;
+  }
+
+  /**
+   * Vainqueur du sprint : le premier à atteindre l'objectif de lignes.
+   * En sprint, la course prime sur la survie — on peut gagner avec des
+   * adversaires encore vivants, ce que checkWinCondition ne sait pas voir.
+   * @returns {Player|null}  null hors mode sprint ou si personne n'y est
+   */
+  checkSprintWinner() {
+    if (!this.modes.sprint) return null;
+    return this.players.find(
+      (p) => p.isAlive && p.lines >= SPRINT_TARGET,
+    ) || null;
   }
 
   reset() {

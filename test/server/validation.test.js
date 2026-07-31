@@ -2,6 +2,7 @@ const {
   isValidLabel,
   clampLinesCleared,
   clampDropCells,
+  isValidModeKey,
   MAX_LABEL_LENGTH,
 } = require("../../src/server/validation");
 
@@ -46,6 +47,24 @@ describe("validation", () => {
       // nombre de lignes du tout, ils ne rapportent rien et ne punissent personne.
       expect(clampLinesCleared(Infinity)).toBe(0);
       expect(clampLinesCleared(NaN)).toBe(0);
+    });
+  });
+
+  describe("isValidModeKey", () => {
+    it("accepte les trois modes du sujet", () => {
+      expect(isValidModeKey("invisible")).toBe(true);
+      expect(isValidModeKey("gravity")).toBe(true);
+      expect(isValidModeKey("sprint")).toBe(true);
+    });
+
+    it("refuse tout le reste, y compris ce qui traîne sur Object.prototype", () => {
+      expect(isValidModeKey("godmode")).toBe(false);
+      expect(isValidModeKey("__proto__")).toBe(false);
+      expect(isValidModeKey("constructor")).toBe(false);
+      expect(isValidModeKey(undefined)).toBe(false);
+      expect(isValidModeKey(null)).toBe(false);
+      expect(isValidModeKey(0)).toBe(false);
+      expect(isValidModeKey({ sprint: true })).toBe(false);
     });
   });
 

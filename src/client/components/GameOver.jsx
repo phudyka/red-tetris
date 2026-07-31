@@ -19,6 +19,9 @@ const GameOver = () => {
   const opponents = useSelector((s) => s.opponents);
   const scores = useSelector((s) => s.scores);
   const myName = useSelector((s) => s.player.name);
+  // Étiquette de la manche qui vient de finir, pas des modes armés pour la
+  // suivante : le score affiché appartient à celle-là.
+  const modeTag = useSelector((s) => s.game.modeTag) || "CLASSIC";
 
   const error = useSelector((s) => s.game.error);
   const [restarting, setRestarting] = useState(false);
@@ -62,7 +65,7 @@ const GameOver = () => {
           </p>
 
           <div className="gameover__scoreblock">
-            <p className="eyebrow">YOUR FINAL SCORE</p>
+            <p className="eyebrow">YOUR FINAL SCORE — {modeTag}</p>
             <p
               className={`gameover__score ${
                 isWinner ? "gameover__score--winner" : "gameover__score--loser"
